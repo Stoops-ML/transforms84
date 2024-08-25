@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Simple coordinate transformations with helper functions"
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.10"
 license = {text = "MIT"}
 classifiers = [
     "Intended Audience :: Education",
