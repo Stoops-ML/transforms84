@@ -141,12 +141,12 @@ ignore_missing_imports = true
 [tool.tox]
 legacy_tox_ini = """
     [tox]
-    envlist = quality, test, py{310,311,312}
+    envlist = quality, py{310,311,312}
 
     [gh-actions]
     python =
         3.10: py310
-        3.11: py311, quality, test
+        3.11: py311, quality
         3.12: py312
 
     [testenv]
@@ -154,7 +154,7 @@ legacy_tox_ini = """
         py310: {env:PYTHON:python3.10}
         py311: {env:PYTHON:python3.11}
         py312: {env:PYTHON:python3.12}
-        {quality,test}: {env:PYTHON:python3}
+        {quality}: {env:PYTHON:python3}
     setenv =
         PYTHONUNBUFFERED = yes
     extras = tests
