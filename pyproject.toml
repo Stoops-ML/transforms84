@@ -98,7 +98,6 @@ extend-include = ["*.ipynb"]
 src = ["src", "tests"]
 
 [tool.ruff.lint]
-ignore = ["E203", "E501"]
 select = ["E", "F", "UP", "B", "SIM", "I"]
 
 [tool.pytest.ini_options]
