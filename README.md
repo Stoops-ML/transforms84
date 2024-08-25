@@ -1,7 +1,8 @@
 # transforms84
-![Version](https://img.shields.io/pypi/v/transforms84)
+![PyPI - Version](https://img.shields.io/pypi/v/transforms84)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/transforms84)
 ![Codecov](https://img.shields.io/codecov/c/gh/Stoops-ML/transforms84)
-![License](https://img.shields.io/pypi/l/transforms84)
+![PyPI - License](https://img.shields.io/pypi/l/transforms84)
 
 Small geographic coordinate systems Python library with a few additional helper functions.
 
