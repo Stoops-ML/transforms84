@@ -1,9 +1,0 @@
-flag_management:
-  individual_flags:
-    - name: coverage
-      statuses:
-        - type: project
-          target: 100%
-          threshold: 100%
-# ignore:
-#   - ""
