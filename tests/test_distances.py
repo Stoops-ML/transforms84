@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+
 from transforms84.distances import Haversine
 from transforms84.systems import WGS84
 

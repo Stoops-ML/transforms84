@@ -95,6 +95,7 @@ exclude = [
     "venv",
 ]
 extend-include = ["*.ipynb"]
+src = ["src", "tests"]
 
 [tool.ruff.lint]
 ignore = ["E203", "E501"]
