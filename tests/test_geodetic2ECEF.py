@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from transforms84.geodetic_systems import WGS84
+from transforms84.systems import WGS84
 from transforms84.transforms import geodetic2ECEF
 
 
