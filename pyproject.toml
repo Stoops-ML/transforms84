@@ -56,10 +56,9 @@ examples = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/poliastro/czml3"
-Repository = "https://github.com/poliastro/czml3"
-Issues = "https://github.com/poliastro/czml3/issues"
-Changelog = "https://github.com/poliastro/czml3/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/Stoops-ML/transforms84"
+Repository = "https://github.com/Stoops-ML/transforms84"
+Issues = "https://github.com/Stoops-ML/transforms84/issues"
 
 [tool.setuptools.dynamic]
 version = {attr = "transforms84.__version__"}
