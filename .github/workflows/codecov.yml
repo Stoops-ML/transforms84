@@ -4,6 +4,6 @@ flag_management:
       statuses:
         - type: project
           target: 100%
-          threshold: 92%
+          threshold: 100%
 # ignore:
 #   - ""

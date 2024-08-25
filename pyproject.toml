@@ -98,10 +98,9 @@ select = ["E", "F", "UP", "B", "SIM", "I"]
 testpaths = ["tests"]
 addopts = [
     "--cov=transforms84",
-    "--cov-fail-under=92",
+    "--cov-fail-under=100",
     # "--cov-report=term-missing",
     # "--cov-report=term",
-    # "--cov-report="
 ]
 
 [tool.mypy]
