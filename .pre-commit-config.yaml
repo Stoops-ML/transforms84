@@ -30,7 +30,7 @@ repos:
   hooks:
       - id: pytest-check
         name: pytest
-        entry: pytest
+        entry: pytest --cov
         language: system
         pass_filenames: false
         always_run: true
