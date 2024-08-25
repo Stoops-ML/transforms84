@@ -48,6 +48,7 @@ dev = [
     "wheel>=0.44.0",
     "setuptools>=72.2.0",
     "pre-commit>=3.8.0",
+    "build>=1.2.1",
 ]
 examples = [
     "jupyterlab>=4.2.4",
