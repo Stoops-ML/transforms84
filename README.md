@@ -1,10 +1,11 @@
 # transforms84
 Small geographic coordinate systems Python library with a few additional helper functions.
 
-See the Jupyter notebooks in [examples](examples) to see how to use the transform84.
-
 ## Installation
 `pip install transforms84`
+
+## Examples
+See the Jupyter notebooks in [examples](examples) to see how to use the transform84. Run `pip install transforms84[examples]` to run the examples locally.
 
 ## Operations
 ### Transformations

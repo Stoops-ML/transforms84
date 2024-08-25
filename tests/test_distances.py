@@ -1,7 +1,8 @@
 import numpy as np
 import pytest
+
 from transforms84.distances import Haversine
-from transforms84.geodetic_systems import WGS84
+from transforms84.systems import WGS84
 
 # https://calculator.academy/haversine-distance-calculator/
 

@@ -23,10 +23,8 @@ class WGS:
         """second eccentricity squared"""
         return self.e**2 / (1 - self.e**2)
 
-
-class _WGS84(WGS):
-    def __init__(self):
-        super().__init__(6378137.0, 6356752.314245)
+    def __eq__(self, other):
+        return isinstance(other, WGS) and self.a == other.a and self.b == other.b
 
 
-WGS84 = _WGS84()
+WGS84 = WGS(6378137.0, 6356752.314245)

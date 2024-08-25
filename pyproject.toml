@@ -19,9 +19,6 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -33,9 +30,19 @@ dependencies = ["numpy"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
+tests = [
+    "ruff>=0.5.7",
+    "pytest>=8.3.2",
+    "pytest-cov>=5.0.0",
+    "mypy>=1.11.1",
+    "tox>=4.17.1",
+    "wheel>=0.44.0",
+    "setuptools>=72.2.0",
+]
 dev = [
     "ruff>=0.5.7",
     "pytest>=8.3.2",
+    "pytest-cov>=5.0.0",
     "mypy>=1.11.1",
     "tox>=4.17.1",
     "wheel>=0.44.0",
@@ -88,10 +95,19 @@ exclude = [
     "venv",
 ]
 extend-include = ["*.ipynb"]
+src = ["src", "tests"]
 
 [tool.ruff.lint]
-ignore = ["E203", "E501"]
 select = ["E", "F", "UP", "B", "SIM", "I"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = [
+    "--cov=transforms84",
+    "--cov-fail-under=100",
+    # "--cov-report=term-missing",
+    # "--cov-report=term",
+]
 
 [tool.mypy]
 files = [
@@ -125,29 +141,23 @@ ignore_missing_imports = true
 [tool.tox]
 legacy_tox_ini = """
     [tox]
-    envlist = quality, test, py{37,38,39,310,311,312}
+    envlist = quality, py{310,311,312}
 
     [gh-actions]
     python =
-        3.7: py37
-        3.8: py38
-        3.9: py39
         3.10: py310
-        3.11: py311, quality, test
+        3.11: py311, quality
         3.12: py312
 
     [testenv]
     basepython =
-        py37: {env:PYTHON:python3.7}
-        py38: {env:PYTHON:python3.8}
-        py39: {env:PYTHON:python3.9}
         py310: {env:PYTHON:python3.10}
         py311: {env:PYTHON:python3.11}
         py312: {env:PYTHON:python3.12}
-        {quality,test}: {env:PYTHON:python3}
+        {quality}: {env:PYTHON:python3}
     setenv =
         PYTHONUNBUFFERED = yes
-    extras = dev
+    extras = tests
     commands =
         pytest
         mypy
