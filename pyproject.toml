@@ -41,6 +41,13 @@ tests = [
     "setuptools>=72.2.0",
 ]
 dev = [
+    "ruff>=0.5.7",
+    "pytest>=8.3.2",
+    "pytest-cov>=5.0.0",
+    "mypy>=1.11.1",
+    "tox>=4.17.1",
+    "wheel>=0.44.0",
+    "setuptools>=72.2.0",
     "pre-commit>=3.8.0",
 ]
 examples = [
