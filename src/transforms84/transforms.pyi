@@ -1,6 +1,6 @@
 import numpy.typing as npt
 
-from .definitions import DTYPES_SUPPORTED
+from . import DTYPES_SUPPORTED
 
 def geodetic2ECEF(
     rrmLLA: npt.NDArray[DTYPES_SUPPORTED],

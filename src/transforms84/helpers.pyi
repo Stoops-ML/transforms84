@@ -1,6 +1,6 @@
 import numpy.typing as npt
 
-from .definitions import DTYPES_SUPPORTED
+from . import DTYPES_SUPPORTED
 
 def deg_angular_differences(
     angle1: npt.NDArray[DTYPES_SUPPORTED],
