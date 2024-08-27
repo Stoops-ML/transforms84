@@ -1,6 +1,9 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
 #include <math.h>
+
+#define NCOORDSINPOINT 3
+#define DEGCIRCLE 360.0
 #define PI 3.14159265358979323846
 
 /*
@@ -96,7 +99,7 @@ void XXM2YYMDouble(const double *rrmPoint, int nPoints, const double transform, 
     int iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint)
     {
-        i = iPoint * 3;
+        i = iPoint * NCOORDSINPOINT;
         ddmPoint[i + 0] = rrmPoint[i + 0] * transform;
         ddmPoint[i + 1] = rrmPoint[i + 1] * transform;
         ddmPoint[i + 2] = rrmPoint[i + 2];
@@ -115,7 +118,7 @@ void XXM2YYMFloat(const float *rrmPoint, int nPoints, const float transform, flo
     int iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint)
     {
-        i = iPoint * 3;
+        i = iPoint * NCOORDSINPOINT;
         ddmPoint[i + 0] = rrmPoint[i + 0] * transform;
         ddmPoint[i + 1] = rrmPoint[i + 1] * transform;
         ddmPoint[i + 2] = rrmPoint[i + 2];
@@ -139,13 +142,13 @@ static PyObject *DegAngularDifferenceWrapper(PyObject *self, PyObject *args)
 
     if (sizeof(degAngleEnd) == sizeof(double))
     {
-        double maxValue = 360.0;
+        double maxValue = DEGCIRCLE;
         double result_data = AngularDifferenceDouble(degAngleStart, degAngleEnd, maxValue, smallestAngle);
         return Py_BuildValue("d", result_data); // Convert double to PyObject*
     }
     else if (sizeof(degAngleEnd) == sizeof(float))
     {
-        float maxValue = 360.0;
+        float maxValue = DEGCIRCLE;
         float result_data = AngularDifferenceFloat(degAngleStart, degAngleEnd, maxValue, smallestAngle);
         return Py_BuildValue("f", result_data); // Convert float to PyObject*
     }
@@ -238,14 +241,14 @@ static PyObject *DegAngularDifferencesWrapper(PyObject *self, PyObject *args)
         double *data1 = (double *)PyArray_DATA(degAngleStart);
         double *data2 = (double *)PyArray_DATA(degAngleEnd);
         double *result_data = (double *)PyArray_DATA((PyArrayObject *)result_array);
-        AngularDifferencesDouble(data1, data2, 360.0, nPoints, smallestAngle, result_data);
+        AngularDifferencesDouble(data1, data2, DEGCIRCLE, nPoints, smallestAngle, result_data);
     }
     else if (PyArray_TYPE(degAngleEnd) == NPY_FLOAT)
     {
         float *data1 = (float *)PyArray_DATA(degAngleStart);
         float *data2 = (float *)PyArray_DATA(degAngleEnd);
         float *result_data = (float *)PyArray_DATA((PyArrayObject *)result_array);
-        AngularDifferencesFloat(data1, data2, 360.0, nPoints, smallestAngle, result_data);
+        AngularDifferencesFloat(data1, data2, DEGCIRCLE, nPoints, smallestAngle, result_data);
     }
     else
     {
@@ -345,13 +348,13 @@ static PyObject *RRM2DDMWrapper(PyObject *self, PyObject *args)
     {
         double *data1 = (double *)PyArray_DATA(rrmPoint);
         double *result_data = (double *)PyArray_DATA((PyArrayObject *)result_array);
-        XXM2YYMDouble(data1, PyArray_SIZE(rrmPoint) / 3, 180.0 / PI, result_data);
+        XXM2YYMDouble(data1, PyArray_SIZE(rrmPoint) / NCOORDSINPOINT, 180.0 / PI, result_data);
     }
     else if (PyArray_TYPE(rrmPoint) == NPY_FLOAT)
     {
         float *data1 = (float *)PyArray_DATA(rrmPoint);
         float *result_data = (float *)PyArray_DATA((PyArrayObject *)result_array);
-        XXM2YYMFloat(data1, PyArray_SIZE(rrmPoint) / 3, 180.0 / PI, result_data);
+        XXM2YYMFloat(data1, PyArray_SIZE(rrmPoint) / NCOORDSINPOINT, 180.0 / PI, result_data);
     }
     else
     {
@@ -386,13 +389,13 @@ static PyObject *DDM2RRMWrapper(PyObject *self, PyObject *args)
     {
         double *data1 = (double *)PyArray_DATA(ddmPoint);
         double *result_data = (double *)PyArray_DATA((PyArrayObject *)result_array);
-        XXM2YYMDouble(data1, PyArray_SIZE(ddmPoint) / 3, PI / 180.0, result_data);
+        XXM2YYMDouble(data1, PyArray_SIZE(ddmPoint) / NCOORDSINPOINT, PI / 180.0, result_data);
     }
     else if (PyArray_TYPE(ddmPoint) == NPY_FLOAT)
     {
         float *data1 = (float *)PyArray_DATA(ddmPoint);
         float *result_data = (float *)PyArray_DATA((PyArrayObject *)result_array);
-        XXM2YYMFloat(data1, PyArray_SIZE(ddmPoint) / 3, PI / 180.0, result_data);
+        XXM2YYMFloat(data1, PyArray_SIZE(ddmPoint) / NCOORDSINPOINT, PI / 180.0, result_data);
     }
     else
     {

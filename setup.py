@@ -5,18 +5,18 @@ setup(
     ext_modules=[
         Extension(
             "transforms84.transforms",
-            sources=["transforms.c"],
-            include_dirs=[np.get_include(), "."],
+            sources=["include/transforms.c"],
+            include_dirs=[np.get_include()],
         ),
         Extension(
             "transforms84.distances",
-            sources=["distances.c"],
-            include_dirs=[np.get_include(), "."],
+            sources=["include/distances.c"],
+            include_dirs=[np.get_include()],
         ),
         Extension(
             "transforms84.helpers",
-            sources=["helpers.c"],
-            include_dirs=[np.get_include(), "."],
+            sources=["include/helpers.c"],
+            include_dirs=[np.get_include()],
         ),
     ],
 )

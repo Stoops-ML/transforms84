@@ -1,6 +1,6 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
-#include <transforms84.h>
+#define NCOORDSINPOINT 3
 
 /*
 Geodetic to ECEF transformation of float precision.

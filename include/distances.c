@@ -1,6 +1,6 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
-#include <transforms84.h>
+#define NCOORDSINPOINT 3
 
 /*
 Calculate the Haversine distance between two points in double precision.
