@@ -19,7 +19,7 @@ void geodetic2ECEFFloat(const float *rrmLLA, size_t nPoints, double a, double b,
     float N;
     for (iPoint = 0; iPoint < nPoints; ++iPoint)
     {
-        i = iPoint * 3;
+        i = iPoint * NCOORDSINPOINT;
         N = a / sqrt(1 - e2 * (sin(rrmLLA[i + 0]) * sin(rrmLLA[i + 0])));
         mmmXYZ[i + 0] = (N + rrmLLA[i + 2]) * cos(rrmLLA[i + 0]) * cos(rrmLLA[i + 1]);
         mmmXYZ[i + 1] = (N + rrmLLA[i + 2]) * cos(rrmLLA[i + 0]) * sin(rrmLLA[i + 1]);
@@ -44,7 +44,7 @@ void geodetic2ECEFDouble(const double *rrmLLA, size_t nPoints, double a, double 
     double N;
     for (iPoint = 0; iPoint < nPoints; ++iPoint)
     {
-        i = iPoint * 3;
+        i = iPoint * NCOORDSINPOINT;
         N = a / sqrt(1 - e2 * sin(rrmLLA[i + 0]) * sin(rrmLLA[i + 0]));
         mmmXYZ[i + 0] = (N + rrmLLA[i + 2]) * cos(rrmLLA[i + 0]) * cos(rrmLLA[i + 1]);
         mmmXYZ[i + 1] = (N + rrmLLA[i + 2]) * cos(rrmLLA[i + 0]) * sin(rrmLLA[i + 1]);
@@ -69,7 +69,7 @@ void ECEF2geodeticFloat(const float *mmmXYZ, size_t nPoints, double a, double b,
     size_t iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint)
     {
-        i = iPoint * 3;
+        i = iPoint * NCOORDSINPOINT;
         float p = sqrt(mmmXYZ[i + 0] * mmmXYZ[i + 0] + mmmXYZ[i + 1] * mmmXYZ[i + 1]);
         float F = 54 * b * b * mmmXYZ[i + 2] * mmmXYZ[i + 2];
         float G = p * p + (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2] - e2 * (a * a - b * b);
@@ -106,7 +106,7 @@ void ECEF2geodeticDouble(const double *mmmXYZ, size_t nPoints, double a, double 
     size_t iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint)
     {
-        i = iPoint * 3;
+        i = iPoint * NCOORDSINPOINT;
         double p = sqrt(mmmXYZ[i + 0] * mmmXYZ[i + 0] + mmmXYZ[i + 1] * mmmXYZ[i + 1]);
         double F = 54 * b * b * mmmXYZ[i + 2] * mmmXYZ[i + 2];
         double G = p * p + (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2] - e2 * (a * a - b * b);
@@ -261,7 +261,7 @@ void ENU2AERFloat(const float *mmmENU, size_t nPoints, float *rrmAER)
     size_t iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint)
     {
-        i = iPoint * 3;
+        i = iPoint * NCOORDSINPOINT;
         rrmAER[i + 0] = atan2(mmmENU[i + 0], mmmENU[i + 1]);
         rrmAER[i + 2] = sqrt(mmmENU[i + 0] * mmmENU[i + 0] + mmmENU[i + 1] * mmmENU[i + 1] + mmmENU[i + 2] * mmmENU[i + 2]);
         rrmAER[i + 1] = asin(mmmENU[i + 2] / rrmAER[i + 2]);
@@ -282,7 +282,7 @@ void ENU2AERDouble(const double *mmmENU, size_t nPoints, double *rrmAER)
     size_t iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint)
     {
-        i = iPoint * 3;
+        i = iPoint * NCOORDSINPOINT;
         rrmAER[i + 0] = atan2(mmmENU[i + 0], mmmENU[i + 1]);
         rrmAER[i + 2] = sqrt(mmmENU[i + 0] * mmmENU[i + 0] + mmmENU[i + 1] * mmmENU[i + 1] + mmmENU[i + 2] * mmmENU[i + 2]);
         rrmAER[i + 1] = asin(mmmENU[i + 2] / rrmAER[i + 2]);
@@ -302,7 +302,7 @@ void AER2ENUFloat(const float *rrmAER, size_t nPoints, float *mmmENU)
     size_t iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint)
     {
-        i = iPoint * 3;
+        i = iPoint * NCOORDSINPOINT;
         mmmENU[i + 0] = cos(rrmAER[i + 1]) * sin(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmENU[i + 1] = cos(rrmAER[i + 1]) * cos(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmENU[i + 2] = sin(rrmAER[i + 1]) * rrmAER[i + 2];
@@ -322,7 +322,7 @@ void AER2ENUDouble(const double *rrmAER, size_t nPoints, double *mmmENU)
     size_t iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint)
     {
-        i = iPoint * 3;
+        i = iPoint * NCOORDSINPOINT;
         mmmENU[i + 0] = cos(rrmAER[i + 1]) * sin(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmENU[i + 1] = cos(rrmAER[i + 1]) * cos(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmENU[i + 2] = sin(rrmAER[i + 1]) * rrmAER[i + 2];
@@ -334,17 +334,15 @@ static PyObject *geodetic2ECEFWrapper(PyObject *self, PyObject *args)
     PyArrayObject *rrmLLA;
     double a, b;
 
-    // Parse the input tuple
+    // checks
     if (!PyArg_ParseTuple(args, "O!dd", &PyArray_Type, &rrmLLA, &a, &b))
         return NULL;
-
-    // checks
     if (!(PyArray_ISCONTIGUOUS(rrmLLA)))
     {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if ((PyArray_SIZE(rrmLLA) % 3) != 0)
+    if ((PyArray_SIZE(rrmLLA) % NCOORDSINPOINT) != 0)
     {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
@@ -353,7 +351,7 @@ static PyObject *geodetic2ECEFWrapper(PyObject *self, PyObject *args)
     PyObject *result_array = PyArray_SimpleNew(PyArray_NDIM(rrmLLA), PyArray_SHAPE(rrmLLA), PyArray_TYPE(rrmLLA));
     if (result_array == NULL)
         return NULL;
-    npy_intp nPoints = PyArray_SIZE(rrmLLA) / 3;
+    size_t nPoints = PyArray_SIZE(rrmLLA) / NCOORDSINPOINT;
     if (PyArray_TYPE(rrmLLA) == NPY_DOUBLE)
     {
         double *data1 = (double *)PyArray_DATA(rrmLLA);
@@ -379,17 +377,15 @@ static PyObject *ECEF2geodeticWrapper(PyObject *self, PyObject *args)
     PyArrayObject *mmmXYZ;
     double a, b;
 
-    // Parse the input tuple
+    // checks
     if (!PyArg_ParseTuple(args, "O!dd", &PyArray_Type, &mmmXYZ, &a, &b))
         return NULL;
-
-    // checks
     if (!(PyArray_ISCONTIGUOUS(mmmXYZ)))
     {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if ((PyArray_SIZE(mmmXYZ) % 3) != 0)
+    if ((PyArray_SIZE(mmmXYZ) % NCOORDSINPOINT) != 0)
     {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
@@ -398,7 +394,7 @@ static PyObject *ECEF2geodeticWrapper(PyObject *self, PyObject *args)
     PyObject *result_array = PyArray_SimpleNew(PyArray_NDIM(mmmXYZ), PyArray_SHAPE(mmmXYZ), PyArray_TYPE(mmmXYZ));
     if (result_array == NULL)
         return NULL;
-    npy_intp nPoints = PyArray_SIZE(mmmXYZ) / 3;
+    size_t nPoints = PyArray_SIZE(mmmXYZ) / NCOORDSINPOINT;
     if (PyArray_TYPE(mmmXYZ) == NPY_DOUBLE)
     {
         double *data1 = (double *)PyArray_DATA(mmmXYZ);
@@ -535,17 +531,15 @@ static PyObject *ENU2AERWrapper(PyObject *self, PyObject *args)
 {
     PyArrayObject *mmmENU;
 
-    // Parse the input tuple
+    // checks
     if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &mmmENU))
         return NULL;
-
-    // checks
     if (!(PyArray_ISCONTIGUOUS(mmmENU)))
     {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if ((PyArray_SIZE(mmmENU) % 3) != 0)
+    if ((PyArray_SIZE(mmmENU) % NCOORDSINPOINT) != 0)
     {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
@@ -554,7 +548,7 @@ static PyObject *ENU2AERWrapper(PyObject *self, PyObject *args)
     PyObject *result_array = PyArray_SimpleNew(PyArray_NDIM(mmmENU), PyArray_SHAPE(mmmENU), PyArray_TYPE(mmmENU));
     if (result_array == NULL)
         return NULL;
-    npy_intp nPoints = PyArray_SIZE(mmmENU) / 3;
+    size_t nPoints = PyArray_SIZE(mmmENU) / NCOORDSINPOINT;
     if (PyArray_TYPE(mmmENU) == NPY_DOUBLE)
     {
         double *data1 = (double *)PyArray_DATA(mmmENU);
@@ -579,17 +573,15 @@ static PyObject *AER2ENUWrapper(PyObject *self, PyObject *args)
 {
     PyArrayObject *rrmAER;
 
-    // Parse the input tuple
+    // checks
     if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &rrmAER))
         return NULL;
-
-    // checks
     if (!(PyArray_ISCONTIGUOUS(rrmAER)))
     {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if ((PyArray_SIZE(rrmAER) % 3) != 0)
+    if ((PyArray_SIZE(rrmAER) % NCOORDSINPOINT) != 0)
     {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
@@ -598,7 +590,7 @@ static PyObject *AER2ENUWrapper(PyObject *self, PyObject *args)
     PyObject *result_array = PyArray_SimpleNew(PyArray_NDIM(rrmAER), PyArray_SHAPE(rrmAER), PyArray_TYPE(rrmAER));
     if (result_array == NULL)
         return NULL;
-    npy_intp nPoints = PyArray_SIZE(rrmAER) / 3;
+    size_t nPoints = PyArray_SIZE(rrmAER) / NCOORDSINPOINT;
     if (PyArray_TYPE(rrmAER) == NPY_DOUBLE)
     {
         double *data1 = (double *)PyArray_DATA(rrmAER);
