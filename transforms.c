@@ -201,18 +201,21 @@ https://www.lddgo.net/en/coordinate/ecef-enu
 @param double b semi-minor axis
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void ENU2ECEFFloat(const float *rrmLLALocalOrigin, const float *mmmLocal, size_t nPoints, double a, double b, float *mmmXYZTarget)
+void ENU2ECEFFloat(const float *rrmLLALocalOrigin, const float *mmmTargetLocal, size_t nTargets, int isOriginSizeOfTargets, double a, double b, float *mmmXYZTarget)
 {
-    float mmmXYZLocalOrigin[3] = {0, 0, 0};
-    geodetic2ECEFFloat(rrmLLALocalOrigin, 1, a, b, mmmXYZLocalOrigin);
-    size_t iPoint, i;
-    for (iPoint = 0; iPoint < nPoints; ++iPoint)
+    int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
+    float *mmmXYZLocalOrigin = (float *)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(float));
+    geodetic2ECEFFloat(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
+    size_t iPoint, iTarget, iOrigin;
+    for (iPoint = 0; iPoint < nTargets; ++iPoint)
     {
-        i = iPoint * 3;
-        mmmXYZTarget[i + 0] = -sin(rrmLLALocalOrigin[i + 1]) * mmmLocal[i + 0] + -sin(rrmLLALocalOrigin[i + 0]) * cos(rrmLLALocalOrigin[i + 1]) * mmmLocal[i + 1] + cos(rrmLLALocalOrigin[i + 0]) * cos(rrmLLALocalOrigin[i + 1]) * mmmLocal[i + 2] + mmmXYZLocalOrigin[0];
-        mmmXYZTarget[i + 1] = cos(rrmLLALocalOrigin[i + 1]) * mmmLocal[i + 0] + -sin(rrmLLALocalOrigin[i + 0]) * sin(rrmLLALocalOrigin[i + 1]) * mmmLocal[i + 1] + cos(rrmLLALocalOrigin[i + 0]) * sin(rrmLLALocalOrigin[i + 1]) * mmmLocal[2] + mmmXYZLocalOrigin[1];
-        mmmXYZTarget[i + 2] = cos(rrmLLALocalOrigin[i + 0]) * mmmLocal[i + 1] + sin(rrmLLALocalOrigin[i + 0]) * mmmLocal[2] + mmmXYZLocalOrigin[2];
+        iTarget = iPoint * NCOORDSINPOINT;
+        iOrigin = iTarget * isOriginSizeOfTargets;
+        mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 0];
+        mmmXYZTarget[iTarget + 1] = cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[2] + mmmXYZLocalOrigin[iOrigin + 1];
+        mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[2] + mmmXYZLocalOrigin[iOrigin + 2];
     }
+    free(mmmXYZLocalOrigin);
 }
 
 /*
@@ -227,18 +230,21 @@ https://www.lddgo.net/en/coordinate/ecef-enu
 @param double b semi-minor axis
 @param double *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
 */
-void ENU2ECEFDouble(const double *rrmLLALocalOrigin, const double *mmmLocal, size_t nPoints, double a, double b, double *mmmXYZTarget)
+void ENU2ECEFDouble(const double *rrmLLALocalOrigin, const double *mmmTargetLocal, size_t nTargets, int isOriginSizeOfTargets, double a, double b, double *mmmXYZTarget)
 {
-    double mmmXYZLocalOrigin[3] = {0, 0, 0};
-    geodetic2ECEFDouble(rrmLLALocalOrigin, 1, a, b, mmmXYZLocalOrigin);
-    size_t iPoint, i;
-    for (iPoint = 0; iPoint < nPoints; ++iPoint)
+    int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
+    double *mmmXYZLocalOrigin = (double *)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(double));
+    geodetic2ECEFDouble(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
+    size_t iPoint, iTarget, iOrigin;
+    for (iPoint = 0; iPoint < nTargets; ++iPoint)
     {
-        i = iPoint * 3;
-        mmmXYZTarget[i + 0] = -sin(rrmLLALocalOrigin[i + 1]) * mmmLocal[i + 0] + -sin(rrmLLALocalOrigin[i + 0]) * cos(rrmLLALocalOrigin[i + 1]) * mmmLocal[i + 1] + cos(rrmLLALocalOrigin[i + 0]) * cos(rrmLLALocalOrigin[i + 1]) * mmmLocal[i + 2] + mmmXYZLocalOrigin[0];
-        mmmXYZTarget[i + 1] = cos(rrmLLALocalOrigin[i + 1]) * mmmLocal[i + 0] + -sin(rrmLLALocalOrigin[i + 0]) * sin(rrmLLALocalOrigin[i + 1]) * mmmLocal[i + 1] + cos(rrmLLALocalOrigin[i + 0]) * sin(rrmLLALocalOrigin[i + 1]) * mmmLocal[2] + mmmXYZLocalOrigin[1];
-        mmmXYZTarget[i + 2] = cos(rrmLLALocalOrigin[i + 0]) * mmmLocal[i + 1] + sin(rrmLLALocalOrigin[i + 0]) * mmmLocal[i + 2] + mmmXYZLocalOrigin[2];
+        iTarget = iPoint * NCOORDSINPOINT;
+        iOrigin = iTarget * isOriginSizeOfTargets;
+        mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 0];
+        mmmXYZTarget[iTarget + 1] = cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[2] + mmmXYZLocalOrigin[iOrigin + 1];
+        mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 2];
     }
+    free(mmmXYZLocalOrigin);
 }
 
 /*
@@ -474,27 +480,20 @@ static PyObject *ENU2ECEFWrapper(PyObject *self, PyObject *args)
     PyArrayObject *rrmLLALocalOrigin, *mmmLocal;
     double a, b;
 
-    // Parse the input tuple
+    // checks
     if (!PyArg_ParseTuple(args, "O!O!dd", &PyArray_Type, &rrmLLALocalOrigin, &PyArray_Type, &mmmLocal, &a, &b))
         return NULL;
-
-    // checks
     if (!(PyArray_ISCONTIGUOUS(rrmLLALocalOrigin)) || !(PyArray_ISCONTIGUOUS(mmmLocal)))
     {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (PyArray_NDIM(rrmLLALocalOrigin) != PyArray_NDIM(mmmLocal))
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size(rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal)))))
     {
-        PyErr_SetString(PyExc_ValueError, "Input arrays have non-matching dimensions.");
+        PyErr_SetString(PyExc_ValueError, "Input arrays must have matching size and dimensions or the origin must be of size three.");
         return NULL;
     }
-    if (PyArray_SIZE(rrmLLALocalOrigin) != PyArray_SIZE(mmmLocal))
-    {
-        PyErr_SetString(PyExc_ValueError, "Input arrays are of unequal size.");
-        return NULL;
-    }
-    if ((PyArray_SIZE(rrmLLALocalOrigin) % 3) != 0 || (PyArray_SIZE(mmmLocal) % 3) != 0)
+    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSINPOINT) != 0 || (PyArray_SIZE(mmmLocal) % NCOORDSINPOINT) != 0)
     {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
@@ -505,23 +504,24 @@ static PyObject *ENU2ECEFWrapper(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    PyObject *result_array = PyArray_SimpleNew(PyArray_NDIM(rrmLLALocalOrigin), PyArray_SHAPE(rrmLLALocalOrigin), PyArray_TYPE(rrmLLALocalOrigin));
+    PyObject *result_array = PyArray_SimpleNew(PyArray_NDIM(mmmLocal), PyArray_SHAPE(mmmLocal), PyArray_TYPE(mmmLocal));
     if (result_array == NULL)
         return NULL;
-    npy_intp nPoints = PyArray_SIZE(rrmLLALocalOrigin) / 3;
+    size_t nPoints = PyArray_SIZE(mmmLocal) / NCOORDSINPOINT;
+    int isOriginSizeOfTargets = (PyArray_Size(rrmLLALocalOrigin) == PyArray_Size(mmmLocal));
     if (PyArray_TYPE(rrmLLALocalOrigin) == NPY_DOUBLE)
     {
         double *data1 = (double *)PyArray_DATA(rrmLLALocalOrigin);
         double *data2 = (double *)PyArray_DATA(mmmLocal);
         double *result_data = (double *)PyArray_DATA((PyArrayObject *)result_array);
-        ENU2ECEFDouble(data1, data2, nPoints, a, b, result_data);
+        ENU2ECEFDouble(data1, data2, nPoints, isOriginSizeOfTargets, a, b, result_data);
     }
     else if (PyArray_TYPE(rrmLLALocalOrigin) == NPY_FLOAT)
     {
         float *data1 = (float *)PyArray_DATA(rrmLLALocalOrigin);
         float *data2 = (float *)PyArray_DATA(mmmLocal);
         float *result_data = (float *)PyArray_DATA((PyArrayObject *)result_array);
-        ENU2ECEFFloat(data1, data2, nPoints, a, b, result_data);
+        ENU2ECEFFloat(data1, data2, nPoints, isOriginSizeOfTargets, a, b, result_data);
     }
     else
     {
