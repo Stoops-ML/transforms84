@@ -1,0 +1,1 @@
+#define NCOORDSINPOINT 3
