@@ -24,7 +24,6 @@ jobs:
         python3 -m pip install numpy
         python3 -m pip install setuptools
         python3 -m pip install setuptools-scm
-        python3 -m pip install numpy
         python3 setup.py sdist
     - name: Store the distribution packages
       uses: actions/upload-artifact@v3
