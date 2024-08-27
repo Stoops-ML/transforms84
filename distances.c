@@ -1,5 +1,6 @@
 #include <Python.h>
 #include <numpy/arrayobject.h>
+#include <transforms84.h>
 
 /*
 Calculate the Haversine distance between two points in double precision.
@@ -11,13 +12,14 @@ https://en.wikipedia.org/wiki/Haversine_formula#Formulation
 @param double mRadiusSphere Radius of sphere in metres
 @param float *mRadiusSphere array of size nx3 of distance between start and end points
 */
-void HaversineDouble(const double *rrmStart, const double *rrmEnd, int nPoints, double mRadiusSphere, double *mDistance)
+void HaversineDouble(const double *rrmStart, const double *rrmEnd, int nPoints, int isArraysSizeEqual, double mRadiusSphere, double *mDistance)
 {
-    int i;
+    int iPointEnd, iPointStart;
     for (int iPoint = 0; iPoint < nPoints; ++iPoint)
     {
-        i = iPoint * 3;
-        mDistance[iPoint] = 2 * mRadiusSphere * asin(sqrt((1 - cos(rrmEnd[i + 0] - rrmStart[i + 0]) + cos(rrmStart[i + 0]) * cos(rrmEnd[i + 0]) * (1 - cos(rrmEnd[i + 1] - rrmStart[i + 1]))) / 2));
+        iPointEnd = iPoint * NCOORDSINPOINT;
+        iPointStart = iPointEnd * isArraysSizeEqual;
+        mDistance[iPoint] = 2.0 * mRadiusSphere * asin(sqrt((1.0 - cos(rrmEnd[iPointEnd] - rrmStart[iPointStart]) + cos(rrmStart[iPointStart]) * cos(rrmEnd[iPointEnd]) * (1.0 - cos(rrmEnd[iPointEnd + 1] - rrmStart[iPointStart + 1]))) / 2.0));
     }
 }
 
@@ -31,13 +33,14 @@ https://en.wikipedia.org/wiki/Haversine_formula#Formulation
 @param double mRadiusSphere Radius of sphere in metres
 @param float *mRadiusSphere array of size nx3 of distance between start and end points
 */
-void HaversineFloat(const float *rrmStart, const float *rrmEnd, int nPoints, float mRadiusSphere, float *mDistance)
+void HaversineFloat(const float *rrmStart, const float *rrmEnd, int nPoints, int isArraysSizeEqual, float mRadiusSphere, float *mDistance)
 {
-    int i;
+    int iPointEnd, iPointStart;
     for (int iPoint = 0; iPoint < nPoints; ++iPoint)
     {
-        i = iPoint * 3;
-        mDistance[iPoint] = 2 * mRadiusSphere * asin(sqrt((1 - cos(rrmEnd[i + 0] - rrmStart[i + 0]) + cos(rrmStart[i + 0]) * cos(rrmEnd[i + 0]) * (1 - cos(rrmEnd[i + 1] - rrmStart[i + 1]))) / 2));
+        iPointEnd = iPoint * NCOORDSINPOINT;
+        iPointStart = iPointEnd * isArraysSizeEqual;
+        mDistance[iPoint] = 2.0 * mRadiusSphere * asin(sqrt((1.0 - cos(rrmEnd[iPointEnd] - rrmStart[iPointStart]) + cos(rrmStart[iPointStart]) * cos(rrmEnd[iPointEnd]) * (1.0 - cos(rrmEnd[iPointEnd + 1] - rrmStart[iPointStart + 1]))) / 2.0));
     }
 }
 
@@ -46,30 +49,22 @@ static PyObject *HaversineWrapper(PyObject *self, PyObject *args)
     PyArrayObject *rrmStart, *rrmEnd;
     double mRadiusSphere;
 
-    // Parse the input tuple
+    // checks
     if (!PyArg_ParseTuple(args, "O!O!d", &PyArray_Type, &rrmStart, &PyArray_Type, &rrmEnd, &mRadiusSphere))
         return NULL;
-
-
-    // checks
     if (!(PyArray_ISCONTIGUOUS(rrmStart)) || !(PyArray_ISCONTIGUOUS(rrmEnd)))
     {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (PyArray_NDIM(rrmStart) != PyArray_NDIM(rrmEnd))
+    if (!((PyArray_NDIM(rrmStart) == PyArray_NDIM(rrmEnd)) && (PyArray_SIZE(rrmStart) == PyArray_SIZE(rrmEnd)) || ((PyArray_Size(rrmStart) == NCOORDSINPOINT) && (PyArray_SIZE(rrmStart) < PyArray_SIZE(rrmEnd)))))
     {
-        PyErr_SetString(PyExc_ValueError, "Input arrays have non-matching dimensions.");
+        PyErr_SetString(PyExc_ValueError, "Input arrays must have matching size and dimensions or the start point must be of size three.");
         return NULL;
     }
-    if (PyArray_SIZE(rrmStart) != PyArray_SIZE(rrmEnd))
+    if ((PyArray_SIZE(rrmStart) % NCOORDSINPOINT) != 0 || (PyArray_SIZE(rrmEnd) % NCOORDSINPOINT) != 0)
     {
-        PyErr_SetString(PyExc_ValueError, "Input arrays are of unequal size.");
-        return NULL;
-    }
-    if ((PyArray_SIZE(rrmStart) % 3) != 0 || (PyArray_SIZE(rrmEnd) % 3) != 0)
-    {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of three.");
         return NULL;
     }
     if (PyArray_TYPE(rrmStart) != PyArray_TYPE(rrmEnd))
@@ -78,8 +73,9 @@ static PyObject *HaversineWrapper(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    npy_intp nPoints = PyArray_SIZE(rrmStart) / 3;
+    npy_intp nPoints = PyArray_SIZE(rrmEnd) / NCOORDSINPOINT;
     PyObject *result_array = PyArray_SimpleNew(1, &nPoints, PyArray_TYPE(rrmEnd));
+    int isArraysSizeEqual = (PyArray_Size(rrmStart) == PyArray_Size(rrmEnd));
     if (result_array == NULL)
         return NULL;
     if (PyArray_TYPE(rrmEnd) == NPY_DOUBLE)
@@ -87,14 +83,14 @@ static PyObject *HaversineWrapper(PyObject *self, PyObject *args)
         double *data1 = (double *)PyArray_DATA(rrmStart);
         double *data2 = (double *)PyArray_DATA(rrmEnd);
         double *result_data = (double *)PyArray_DATA((PyArrayObject *)result_array);
-        HaversineDouble(data1, data2, nPoints, mRadiusSphere, result_data);
+        HaversineDouble(data1, data2, nPoints, isArraysSizeEqual, mRadiusSphere, result_data);
     }
     else if (PyArray_TYPE(rrmEnd) == NPY_FLOAT)
     {
         float *data1 = (float *)PyArray_DATA(rrmStart);
         float *data2 = (float *)PyArray_DATA(rrmEnd);
         float *result_data = (float *)PyArray_DATA((PyArrayObject *)result_array);
-        HaversineFloat(data1, data2, nPoints, mRadiusSphere, result_data);
+        HaversineFloat(data1, data2, nPoints, isArraysSizeEqual, mRadiusSphere, result_data);
     }
     else
     {

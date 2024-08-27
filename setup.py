@@ -6,17 +6,17 @@ setup(
         Extension(
             "transforms84.transforms",
             sources=["transforms.c"],
-            include_dirs=[np.get_include()],
+            include_dirs=[np.get_include(), "."],
         ),
         Extension(
             "transforms84.distances",
             sources=["distances.c"],
-            include_dirs=[np.get_include()],
+            include_dirs=[np.get_include(), "."],
         ),
         Extension(
             "transforms84.helpers",
             sources=["helpers.c"],
-            include_dirs=[np.get_include()],
+            include_dirs=[np.get_include(), "."],
         ),
     ],
 )
