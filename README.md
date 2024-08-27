@@ -6,6 +6,13 @@
 
 Small geographic coordinate systems Python library with a few additional helper functions.
 
+This package focuses on performance, correct matrix shapes, single to many point functions and many to many point functions
+
+This package focuses on:
+1. Performance
+2. Input and output coordinates of ideal mathematical shapes. Ideally, all coordinates should be of shapes (3,1) or (nPoints,3,1), but shapes (3,) and (nPoints,3) are supported too.
+3. Functions that adapt to differing input matrices shapes: one-to-one, many-to-many and one-to-many points. See [here](examples/example1.ipynb) for an example.
+
 ## Installation
 `pip install transforms84`
 
