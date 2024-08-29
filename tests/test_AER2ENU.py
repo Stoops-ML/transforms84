@@ -1,52 +1,39 @@
 import numpy as np
 import pytest
 
+from transforms84.helpers import DDM2RRM
 from transforms84.transforms import AER2ENU
 
-# https://www.lddgo.net/en/coordinate/ecef-enu
 
-
-def test_ENU2AER_raise_wrong_dtype():
-    AER = np.array([[3906.67536618], [2732.16708], [1519.47079847]], dtype=np.float16)
+def test_AER2ENU_raise_wrong_dtype():
+    AER = np.array([[34.1160], [4.1931], [15.1070]], dtype=np.float16)
     with pytest.raises(ValueError):
         AER2ENU(AER)  # type: ignore
 
 
-@pytest.mark.skip(reason="To be implemented")
-def test_ENU2AER_float32_point(tolerance_float_atol):
-    AER = np.array([[3906.67536618], [2732.16708], [1519.47079847]], dtype=np.float32)
-    _ = AER2ENU(AER)
-    ...
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_AER2ENU_point(dtype):
+    AER = np.array([[34.1160], [4.1931], [15.1070]], dtype=dtype)
+    assert np.all(
+        np.isclose(
+            AER2ENU(DDM2RRM(AER)),
+            np.array([[8.4504], [12.4737], [1.1046]], dtype=dtype),
+        ),
+    )
 
 
-@pytest.mark.skip(reason="To be implemented")
-def test_ENU2AER_float64_point():
-    AER = np.array([[3906.67536618], [2732.16708], [1519.47079847]], dtype=np.float64)
-    _ = AER2ENU(AER)
-    ...
-
-
-@pytest.mark.skip(reason="To be implemented")
-def test_ENU2AER_float32_points(tolerance_float_atol):
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_AER2ENU_float64_points(dtype):
     AER = np.array(
         [
-            [[3906.67536618], [2732.16708], [1519.47079847]],
-            [[3906.67536618], [2732.16708], [1519.47079847]],
+            [[34.1160], [4.1931], [15.1070]],
+            [[34.1160], [4.1931], [15.1070]],
         ],
-        dtype=np.float32,
+        dtype=dtype,
     )
-    _ = AER2ENU(AER)
-    ...
-
-
-@pytest.mark.skip(reason="To be implemented")
-def test_ENU2AER_float64_points():
-    AER = np.array(
-        [
-            [[3906.67536618], [2732.16708], [1519.47079847]],
-            [[3906.67536618], [2732.16708], [1519.47079847]],
-        ],
-        dtype=np.float64,
+    assert np.all(
+        np.isclose(
+            AER2ENU(DDM2RRM(AER)),
+            np.array([[8.4504], [12.4737], [1.1046]], dtype=dtype),
+        ),
     )
-    _ = AER2ENU(AER)
-    ...
