@@ -18,11 +18,41 @@ def ECEF2ENU(
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
 ) -> npt.NDArray[DTYPES_SUPPORTED]: ...
+def ECEF2NED(
+    rrmLLA_local_origin: npt.NDArray[DTYPES_SUPPORTED],
+    mmmXYZ_target: npt.NDArray[DTYPES_SUPPORTED],
+    m_semi_major_axis: float,
+    m_semi_minor_axis: float,
+) -> npt.NDArray[DTYPES_SUPPORTED]: ...
+def ECEF2ENUv(
+    rrmLLA_local_origin: npt.NDArray[DTYPES_SUPPORTED],
+    mmmXYZ_target: npt.NDArray[DTYPES_SUPPORTED],
+) -> npt.NDArray[DTYPES_SUPPORTED]: ...
+def ECEF2NEDv(
+    rrmLLA_local_origin: npt.NDArray[DTYPES_SUPPORTED],
+    mmmXYZ_target: npt.NDArray[DTYPES_SUPPORTED],
+) -> npt.NDArray[DTYPES_SUPPORTED]: ...
 def ENU2ECEF(
     rrmLLA_local_origin: npt.NDArray[DTYPES_SUPPORTED],
     mmmXYZ_local: npt.NDArray[DTYPES_SUPPORTED],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
 ) -> npt.NDArray[DTYPES_SUPPORTED]: ...
+def NED2ECEF(
+    rrmLLA_local_origin: npt.NDArray[DTYPES_SUPPORTED],
+    mmmXYZ_local: npt.NDArray[DTYPES_SUPPORTED],
+    m_semi_major_axis: float,
+    m_semi_minor_axis: float,
+) -> npt.NDArray[DTYPES_SUPPORTED]: ...
+def ENU2ECEFv(
+    rrmLLA_local_origin: npt.NDArray[DTYPES_SUPPORTED],
+    mmmXYZ_local: npt.NDArray[DTYPES_SUPPORTED],
+) -> npt.NDArray[DTYPES_SUPPORTED]: ...
+def NED2ECEFv(
+    rrmLLA_local_origin: npt.NDArray[DTYPES_SUPPORTED],
+    mmmXYZ_local: npt.NDArray[DTYPES_SUPPORTED],
+) -> npt.NDArray[DTYPES_SUPPORTED]: ...
 def ENU2AER(mmmENU: npt.NDArray[DTYPES_SUPPORTED]) -> npt.NDArray[DTYPES_SUPPORTED]: ...
 def AER2ENU(rrmAER: npt.NDArray[DTYPES_SUPPORTED]) -> npt.NDArray[DTYPES_SUPPORTED]: ...
+def NED2AER(mmmNED: npt.NDArray[DTYPES_SUPPORTED]) -> npt.NDArray[DTYPES_SUPPORTED]: ...
+def AER2NED(rrmAER: npt.NDArray[DTYPES_SUPPORTED]) -> npt.NDArray[DTYPES_SUPPORTED]: ...
