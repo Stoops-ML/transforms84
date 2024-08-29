@@ -4,7 +4,7 @@
 ![Codecov](https://img.shields.io/codecov/c/gh/Stoops-ML/transforms84)
 ![PyPI - License](https://img.shields.io/pypi/l/transforms84)
 
-Small geographic coordinate systems Python library with a few additional helper functions.
+Python library for geographic coordinate system transformations with a few additional helper functions.
 
 This package focuses on:
 1. Performance
@@ -15,18 +15,29 @@ This package focuses on:
 `pip install transforms84`
 
 ## Operations
-### Transformations
-The following transformations have been implemented:
-- geodetic &rarr; ECEF
-- ECEF &rarr; geodetic
-- ECEF &rarr; ENU
+### Coordinate Transformations
+The following coordinate transformations have been implemented:
+- geodetic &rarr; ECEF [🔗](https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_geodetic_to_ECEF_coordinates)
+- ECEF &rarr; geodetic [🔗](https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ECEF_to_geodetic_coordinates)
+- ECEF &rarr; ENU [🔗](https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ECEF_to_ENU)
+- ENU &rarr; ECEF [🔗](https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ENU_to_ECEF)
+- ENU &rarr; AER [🔗](https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf)
+- AER &rarr; ENU [🔗](https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf)
+- ECEF &rarr; NED
+- NED &rarr; ECEF
+- NED &rarr; AER
+- AER &rarr; NED
+
+### Velocity Transformations
+The following velocity transformations have been implemented:
+- ECEF &rarr; NED
+- NED &rarr; ECEF
 - ENU &rarr; ECEF
-- ENU &rarr; AER
-- AER &rarr; ENU
+- ECEF &rarr; ENU
 
 ### Distances
 The following distance formulae have been implemented:
-- Haversine
+- Haversine [🔗](https://en.wikipedia.org/wiki/Haversine_formula#Formulation)
 
 ### Helpers
 The following functions have been implemented:
@@ -38,45 +49,64 @@ The following functions have been implemented:
 See the Jupyter notebooks in [examples](examples) to see how to use the transform84. Run `pip install transforms84[examples]` to run the examples locally.
 
 ### Many-to-many & one-to-many
-The `transforms.ECEF2ENU` transformation accepts same and differing matrix shape sizes. Below showcases the many-to-many method where three target points, `rrm_target`, in the geodetic coordinate system ([WGS84](https://en.wikipedia.org/wiki/World_Geodetic_System)) are transformed to the local ENU coordinate system about the point `rrm_local`, where both matrices are of shape (3, 3, 1):
+The `transforms.ECEF2ENU` transformation accepts same and differing matrix shape sizes. Below showcases the many-to-many method where three target points, ****`rrm_target`****, in the geodetic coordinate system are transformed to the local ENU coordinate system about the point `rrm_local`, where both matrices are of shape (3, 3, 1):
 ```
 >> import numpy as np
 >> from transforms84.systems import WGS84
 >> from transforms84.helpers import DDM2RRM
 >> from transforms84.transforms import ECEF2ENU, geodetic2ECEF
-
->> rrm_local = DDM2RRM(np.array([[[30], [31], [0]], [[30], [31], [0]], [[30], [31], [0]]], dtype=np.float64))  # convert each point from [deg, deg, X] to [rad, rad, X]
->> rrm_target = DDM2RRM(np.array([[[31], [32], [0]], [[31], [32], [0]], [[31], [32], [0]]], dtype=np.float64))
->> ECEF2ENU(rrm_local, geodetic2ECEF(rrm_target, WGS84.a, WGS84.b), WGS84.a, WGS84.b)  # geodetic2ECEF -> ECEF2ENU
-array([[[ 4.06379074e+01],
-        [-6.60007585e-01],
-        [ 1.46643956e+05]],
-
-       [[ 4.06379074e+01],
-        [-6.60007585e-01],
-        [ 1.46643956e+05]],
-
-       [[ 4.06379074e+01],
-        [-6.60007585e-01],
-        [ 1.46643956e+05]]])
+>>
+>> rrm_local = DDM2RRM(
+>>     np.array(
+>>         [[[30], [31], [0]], [[30], [31], [0]], [[30], [31], [0]]], dtype=np.float64
+>>     )
+>> )  # convert each point from [deg, deg, X] to [rad, rad, X]
+>> rrm_target = DDM2RRM(
+>>     np.array(
+>>         [[[31], [32], [0]], [[31], [32], [0]], [[31], [32], [0]]], dtype=np.float64
+>>     )
+>> )
+>> ECEF2ENU(
+>>     rrm_local, geodetic2ECEF(rrm_target, WGS84.a, WGS84.b), WGS84.a, WGS84.b
+>> )  # geodetic2ECEF -> ECEF2ENU
+array(
+    [
+        [[4.06379074e01], [-6.60007585e-01], [1.46643956e05]],
+        [[4.06379074e01], [-6.60007585e-01], [1.46643956e05]],
+        [[4.06379074e01], [-6.60007585e-01], [1.46643956e05]],
+    ]
+)
 ```
 
 We can achieve the same result using the one-to-many method with a single local point of shape (3, 1):
 ```
 >> rrm_local = DDM2RRM(np.array([[30], [31], [0]], dtype=np.float64))
 >> ECEF2ENU(rrm_local, geodetic2ECEF(rrm_target, WGS84.a, WGS84.b), WGS84.a, WGS84.b)
-array([[[ 4.06379074e+01],
-        [-6.60007585e-01],
-        [ 1.46643956e+05]],
-
-       [[ 4.06379074e+01],
-        [-6.60007585e-01],
-        [ 1.46643956e+05]],
-
-       [[ 4.06379074e+01],
-        [-6.60007585e-01],
-        [ 1.46643956e+05]]])
+array(
+    [
+        [[4.06379074e01], [-6.60007585e-01], [1.46643956e05]],
+        [[4.06379074e01], [-6.60007585e-01], [1.46643956e05]],
+        [[4.06379074e01], [-6.60007585e-01], [1.46643956e05]],
+    ]
+)
 ```
+
+### World Geodetic Systems Standards
+`transforms84.systems` includes the `WGS84` class, which is the [WGS 84](https://en.wikipedia.org/wiki/World_Geodetic_System#WGS_84) version of the standard. Other standards can be created:
+```
+>> from transforms84.systems import WGS, WGS72
+>> WGS72 == WGS(6378135.0, 6356750.520016094)
+True
+```
+
+## Helpful Resources
+...in no particular order:
+- [Geographic coordinate conversion](https://en.wikipedia.org/wiki/Geographic_coordinate_conversion)
+- [Local tangent plane coordinates](https://en.wikipedia.org/wiki/Local_tangent_plane_coordinates)
+- [Coordinate systems for navigation](https://www.mathworks.com/help/aerotbx/ug/coordinate-systems-for-navigation.html)
+- [Fundamental coordinate system concepts](https://www.mathworks.com/help/aerotbx/ug/fundamental-coordinate-system-concepts.html)
+- [Coordinate systems for modeling](https://www.mathworks.com/help/aerotbx/ug/coordinate-systems-for-modeling.html)
+- [Coordinate systems for display](https://www.mathworks.com/help/aerotbx/ug/coordinate-systems-for-display.html)
 
 ## Contributing
 PRs are always welcome and appreciated! Please install the pre-commit hooks before making commits.
