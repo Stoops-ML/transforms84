@@ -31,89 +31,42 @@ def test_ENU2ECEF_raise_wrong_size():
         ENU2ECEF(XYZ, ref_point, WGS84.a, WGS84.b)
 
 
-def test_ENU2ECEF_float32_point(tolerance_float_atol):
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_ENU2ECEF_point(tolerance_float_atol, dtype):
     XYZ = np.array(
-        [[1901.5690521235], [5316.9485968901], [-6378422.76482545]], dtype=np.float32
+        [[1901.5690521235], [5316.9485968901], [-6378422.76482545]], dtype=dtype
     )
-    ref_point = np.array([[0.1], [0.2], [5000]], dtype=np.float32)
+    ref_point = np.array([[0.1], [0.2], [5000]], dtype=dtype)
     out = ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
     assert np.isclose(out[0, 0], 3906.67536618, atol=tolerance_float_atol)
     assert np.isclose(out[1, 0], 2732.16708, atol=tolerance_float_atol)
     assert np.isclose(out[2, 0], 1519.47079847, atol=tolerance_float_atol)
 
 
-def test_ENU2ECEF_float64_point():
-    XYZ = np.array(
-        [[1901.5690521235], [5316.9485968901], [-6378422.76482545]], dtype=np.float64
-    )
-    ref_point = np.array([[0.1], [0.2], [5000]], dtype=np.float64)
-    out = ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
-    assert np.isclose(out[0, 0], 3906.67536618)
-    assert np.isclose(out[1, 0], 2732.16708)
-    assert np.isclose(out[2, 0], 1519.47079847)
-
-
-def test_ENU2ECEF_float32_points(tolerance_float_atol):
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_ENU2ECEF_points(tolerance_float_atol, dtype):
     XYZ = np.array(
         [
             [[1901.5690521235], [5316.9485968901], [-6378422.76482545]],
             [[1901.5690521235], [5316.9485968901], [-6378422.76482545]],
         ],
-        dtype=np.float32,
+        dtype=dtype,
     )
-    ref_point = np.array(
-        [[[0.1], [0.2], [5000]], [[0.1], [0.2], [5000]]], dtype=np.float32
-    )
+    ref_point = np.array([[[0.1], [0.2], [5000]], [[0.1], [0.2], [5000]]], dtype=dtype)
     out = ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
     assert np.all(np.isclose(out[:, 0, 0], 3906.67536618, atol=tolerance_float_atol))
     assert np.all(np.isclose(out[:, 1, 0], 2732.16708, atol=tolerance_float_atol))
     assert np.all(np.isclose(out[:, 2, 0], 1519.47079847, atol=tolerance_float_atol))
 
 
-def test_ENU2ECEF_float64_points():
-    XYZ = np.array(
-        [
-            [[1901.5690521235], [5316.9485968901], [-6378422.76482545]],
-            [[1901.5690521235], [5316.9485968901], [-6378422.76482545]],
-        ],
-        dtype=np.float64,
-    )
-    ref_point = np.array(
-        [[[0.1], [0.2], [5000]], [[0.1], [0.2], [5000]]], dtype=np.float64
-    )
-    out = ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
-    assert np.all(np.isclose(out[:, 0, 0], 3906.67536618))
-    assert np.all(np.isclose(out[:, 1, 0], 2732.16708))
-    assert np.all(np.isclose(out[:, 2, 0], 1519.47079847))
-
-
-def test_ENU2ECEF_one2many_double():
-    rrm_target = DDM2RRM(np.array([[31], [32], [0]], dtype=np.float64))
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_ENU2ECEF_one2many(dtype):
+    rrm_target = DDM2RRM(np.array([[31], [32], [0]], dtype=dtype))
     num_repeats = 3
     rrm_targets = np.ascontiguousarray(
         np.tile(rrm_target, num_repeats).T.reshape((-1, 3, 1))
     )
-    rrm_local = DDM2RRM(np.array([[30], [31], [0]], dtype=np.float64))
-    rrm_locals = np.ascontiguousarray(
-        np.tile(rrm_local, rrm_targets.shape[0]).T.reshape((-1, 3, 1))
-    )
-    assert np.all(
-        ENU2ECEF(
-            rrm_locals, geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b), WGS84.a, WGS84.b
-        )
-        == ENU2ECEF(
-            rrm_local, geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b), WGS84.a, WGS84.b
-        )
-    )
-
-
-def test_ENU2ECEF_one2many_float():
-    rrm_target = DDM2RRM(np.array([[31], [32], [0]], dtype=np.float32))
-    num_repeats = 3
-    rrm_targets = np.ascontiguousarray(
-        np.tile(rrm_target, num_repeats).T.reshape((-1, 3, 1))
-    )
-    rrm_local = DDM2RRM(np.array([[30], [31], [0]], dtype=np.float32))
+    rrm_local = DDM2RRM(np.array([[30], [31], [0]], dtype=dtype))
     rrm_locals = np.ascontiguousarray(
         np.tile(rrm_local, rrm_targets.shape[0]).T.reshape((-1, 3, 1))
     )

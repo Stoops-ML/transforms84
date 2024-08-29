@@ -12,6 +12,21 @@ class WGS:
         return (2 * self.a + self.b) / 3
 
     @property
+    def f(self) -> float:
+        """(first) flattening"""
+        return (self.a - self.b) / self.a
+
+    @property
+    def f_second(self) -> float:
+        """Second flattening"""
+        return (self.a - self.b) / self.b
+
+    @property
+    def n(self) -> float:
+        """Third flattening"""
+        return (self.a - self.b) / (self.a + self.b)
+
+    @property
     def e(self) -> float:
         """eccentricity (indicates the elongation of an ellipse away from a circle)"""
         out = np.sqrt(1 - (self.b**2 / self.a**2))
@@ -26,5 +41,20 @@ class WGS:
     def __eq__(self, other):
         return isinstance(other, WGS) and self.a == other.a and self.b == other.b
 
+    def __str__(self):
+        return f"""World geodetic system properties:
+\tSemi-major axis = {self.a}
+\tSemi-minor axis = {self.b}
+\tFlattening = {self.f}
+\tEccentricity = {self.e}"""
 
+    def __repr__(self):
+        return f"""World geodetic system properties:
+\tSemi-major axis = {self.a}
+\tSemi-minor axis = {self.b}
+\tFlattening = {self.f}
+\tEccentricity = {self.e}"""
+
+
+WGS72 = WGS(6378135.0, 6356750.520016094)
 WGS84 = WGS(6378137.0, 6356752.314245)
