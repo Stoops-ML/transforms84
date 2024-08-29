@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from transforms84.helpers import (
     DDM2RRM,
@@ -10,29 +11,17 @@ from transforms84.helpers import (
 )
 
 
-def test_XXM2YYM_one_point_64():
-    rrm_point = np.array([[30], [31], [0]], dtype=np.float64)
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_XXM2YYM_one_point(dtype):
+    rrm_point = np.array([[30], [31], [0]], dtype=dtype)
     out = DDM2RRM(RRM2DDM(rrm_point))
     assert np.all(np.isclose(rrm_point, out))
     assert rrm_point.dtype == out.dtype
 
 
-def test_XXM2YYM_one_point_32():
-    rrm_point = np.array([[30], [31], [0]], dtype=np.float32)
-    out = DDM2RRM(RRM2DDM(rrm_point))
-    assert np.all(np.isclose(rrm_point, out))
-    assert rrm_point.dtype == out.dtype
-
-
-def test_XXM2YYM_multiple_points_64():
-    rrm_point = np.array([[[30], [31], [0]], [[30], [31], [0]]], dtype=np.float64)
-    out = DDM2RRM(RRM2DDM(rrm_point))
-    assert np.all(np.isclose(rrm_point, out))
-    assert rrm_point.dtype == out.dtype
-
-
-def test_XXM2YYM_multiple_points_32():
-    rrm_point = np.array([[[30], [31], [0]], [[30], [31], [0]]], dtype=np.float32)
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_XXM2YYM_multiple_points(dtype):
+    rrm_point = np.array([[[30], [31], [0]], [[30], [31], [0]]], dtype=dtype)
     out = DDM2RRM(RRM2DDM(rrm_point))
     assert np.all(np.isclose(rrm_point, out))
     assert rrm_point.dtype == out.dtype
