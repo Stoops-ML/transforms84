@@ -4,11 +4,11 @@
 ![Codecov](https://img.shields.io/codecov/c/gh/Stoops-ML/transforms84)
 ![PyPI - License](https://img.shields.io/pypi/l/transforms84)
 
-Python library for geographic coordinate system transformations with a few additional helper functions.
+Python library for geographic system transformations with additional helper functions.
 
 This package focuses on:
 1. Performance
-2. Input and output coordinates of ideal mathematical shapes. Ideally, all coordinates should be of shapes (3,1) or (nPoints,3,1), but shapes (3,) and (nPoints,3) are supported too.
+2. Ideal mathematical shapes of (NumPy) matrices: `(3,1)` or `(nPoints,3,1)`. Shapes `(3,)` and `(nPoints,3)` are also supported.
 3. Functions that adapt to differing input matrices shapes: one-to-one, many-to-many and one-to-many points. See [below](#many-to-many--one-to-many) for an example.
 
 ## Installation
@@ -39,7 +39,7 @@ The following velocity transformations have been implemented:
 The following distance formulae have been implemented:
 - Haversine [🔗](https://en.wikipedia.org/wiki/Haversine_formula#Formulation)
 
-### Helpers
+### Additional Functions
 The following functions have been implemented:
 - Angular difference (smallest and largest)
 - [rad, rad, X] &rarr; [deg, deg, X]
@@ -49,7 +49,7 @@ The following functions have been implemented:
 See the Jupyter notebooks in [examples](examples) to see how to use the transform84. Run `pip install transforms84[examples]` to run the examples locally.
 
 ### Many-to-many & one-to-many
-The `transforms.ECEF2ENU` transformation accepts same and differing matrix shape sizes. Below showcases the many-to-many method where three target points, ****`rrm_target`****, in the geodetic coordinate system are transformed to the local ENU coordinate system about the point `rrm_local`, where both matrices are of shape (3, 3, 1):
+The `transforms.ECEF2ENU` transformation accepts same and differing matrix shape sizes. Below showcases the many-to-many method where three target points, `rrm_target`, in the geodetic coordinate system are transformed to the local ENU coordinate system about the point `rrm_local`, where both matrices are of shape (3, 3, 1):
 ```
 >> import numpy as np
 >> from transforms84.systems import WGS84
