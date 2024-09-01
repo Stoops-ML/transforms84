@@ -156,203 +156,217 @@ void XXM2YYMFloat(const float* rrmPoint,
 }
 
 static PyObject*
-DegAngularDifferenceWrapper(PyObject* self, PyObject* args)
-{
-    double degAngleStart, degAngleEnd;
-    int smallestAngle;
-
-    // Parse the input tuple
-    if (!PyArg_ParseTuple(
-            args, "ddi", &degAngleStart, &degAngleEnd, &smallestAngle))
-        return NULL;
-
-    if (!((smallestAngle == 0) || (smallestAngle == 1))) {
-        PyErr_SetString(PyExc_ValueError, "smallestAngle must be True or False");
-        return NULL;
-    }
-
-    if (sizeof(degAngleEnd) == sizeof(double)) {
-        double maxValue = DEGCIRCLE;
-        double result_data = AngularDifferenceDouble(
-            degAngleStart, degAngleEnd, maxValue, smallestAngle);
-        return Py_BuildValue("d", result_data); // Convert double to PyObject*
-    } else if (sizeof(degAngleEnd) == sizeof(float)) {
-        float maxValue = DEGCIRCLE;
-        float result_data = AngularDifferenceFloat(
-            degAngleStart, degAngleEnd, maxValue, smallestAngle);
-        return Py_BuildValue("f", result_data); // Convert float to PyObject*
-    } else {
-        PyErr_SetString(PyExc_ValueError,
-            "Only 32 and 64 bit float types accepted.");
-        return NULL;
-    }
-}
-
-static PyObject*
 RadAngularDifferenceWrapper(PyObject* self, PyObject* args)
 {
-    double degAngleStart, degAngleEnd;
+    PyObject *arg1, *arg2;
     int smallestAngle;
 
     // Parse the input tuple
-    if (!PyArg_ParseTuple(
-            args, "ddi", &degAngleStart, &degAngleEnd, &smallestAngle))
+    if (!PyArg_ParseTuple(args, "OOi", &arg1, &arg2, &smallestAngle))
         return NULL;
 
+    // Check if smallestAngle is valid
     if (!((smallestAngle == 0) || (smallestAngle == 1))) {
-        PyErr_SetString(PyExc_ValueError, "smallestAngle must be True or False");
+        PyErr_SetString(PyExc_ValueError, "Smallest angle must be True or False");
         return NULL;
     }
 
-    if (sizeof(degAngleEnd) == sizeof(double)) {
-        double maxValue = 2.0 * PI;
-        double result_data = AngularDifferenceDouble(
-            degAngleStart, degAngleEnd, maxValue, smallestAngle);
-        return Py_BuildValue("d", result_data); // Convert double to PyObject*
-    } else if (sizeof(degAngleEnd) == sizeof(float)) {
-        float maxValue = 2.0 * PI;
-        float result_data = AngularDifferenceFloat(
-            degAngleStart, degAngleEnd, maxValue, smallestAngle);
-        return Py_BuildValue("f", result_data); // Convert float to PyObject*
+    // Check if inputs are arrays
+    if (PyArray_Check(arg1) && PyArray_Check(arg2)) {
+        PyArrayObject* radAngleStart = (PyArrayObject*)arg1;
+        PyArrayObject* radAngleEnd = (PyArrayObject*)arg2;
+
+        // Validate arrays
+        if (!(PyArray_ISCONTIGUOUS(radAngleStart)) || !(PyArray_ISCONTIGUOUS(radAngleEnd))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+            return NULL;
+        }
+        if (PyArray_NDIM(radAngleStart) != PyArray_NDIM(radAngleEnd)) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays have non-matching dimensions.");
+            return NULL;
+        }
+        if (PyArray_SIZE(radAngleStart) != PyArray_SIZE(radAngleEnd)) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays are of unequal size.");
+            return NULL;
+        }
+        if (PyArray_TYPE(radAngleStart) != PyArray_TYPE(radAngleEnd)) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
+            return NULL;
+        }
+
+        // Create result array
+        PyObject* result_array = PyArray_SimpleNew(PyArray_NDIM(radAngleEnd),
+            PyArray_SHAPE(radAngleEnd),
+            PyArray_TYPE(radAngleEnd));
+        if (result_array == NULL) {
+            PyErr_SetString(PyExc_ValueError, "Could not create output array.");
+            return NULL;
+        }
+
+        npy_intp nPoints = PyArray_SIZE(radAngleStart);
+        if (PyArray_TYPE(radAngleEnd) == NPY_DOUBLE) {
+            double* data1 = (double*)PyArray_DATA(radAngleStart);
+            double* data2 = (double*)PyArray_DATA(radAngleEnd);
+            double* result_data = (double*)PyArray_DATA((PyArrayObject*)result_array);
+            AngularDifferencesDouble(data1, data2, 2.0 * PI, nPoints, smallestAngle, result_data);
+        } else if (PyArray_TYPE(radAngleEnd) == NPY_FLOAT) {
+            float* data1 = (float*)PyArray_DATA(radAngleStart);
+            float* data2 = (float*)PyArray_DATA(radAngleEnd);
+            float* result_data = (float*)PyArray_DATA((PyArrayObject*)result_array);
+            AngularDifferencesFloat(data1, data2, 2.0 * PI, nPoints, smallestAngle, result_data);
+        } else {
+            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
+            return NULL;
+        }
+        return result_array;
+    }
+    // Check if inputs are float scalars
+    else if (PyFloat_Check(arg1) && PyFloat_Check(arg2)) {
+        double radAngleStart = PyFloat_AsDouble(arg1);
+        double radAngleEnd = PyFloat_AsDouble(arg2);
+
+        double result_data;
+        if (sizeof(radAngleEnd) == sizeof(double)) {
+            double maxValue = 2.0 * PI;
+            result_data = AngularDifferenceDouble(radAngleStart, radAngleEnd, maxValue, smallestAngle);
+            return Py_BuildValue("d", result_data);
+        } else if (sizeof(radAngleEnd) == sizeof(float)) {
+            float maxValue = 2.0 * PI;
+            result_data = AngularDifferenceFloat((float)radAngleStart, (float)radAngleEnd, maxValue, smallestAngle);
+            return Py_BuildValue("f", result_data);
+        } else {
+            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
+            return NULL;
+        }
+    } // Check if inputs are int scalars
+    else if (PyLong_Check(arg1) && PyLong_Check(arg2)) {
+        double radAngleStart = PyLong_AsDouble(arg1);
+        double radAngleEnd = PyLong_AsDouble(arg2);
+
+        double result_data;
+        if (sizeof(radAngleEnd) == sizeof(double)) {
+            double maxValue = 2.0 * PI;
+            result_data = AngularDifferenceDouble(radAngleStart, radAngleEnd, maxValue, smallestAngle);
+            return Py_BuildValue("d", result_data);
+        } else if (sizeof(radAngleEnd) == sizeof(float)) {
+            float maxValue = 2.0 * PI;
+            result_data = AngularDifferenceFloat((float)radAngleStart, (float)radAngleEnd, maxValue, smallestAngle);
+            return Py_BuildValue("f", result_data);
+        } else {
+            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
+            return NULL;
+        }
     } else {
-        PyErr_SetString(PyExc_ValueError,
-            "Only 32 and 64 bit float types accepted.");
+        PyErr_SetString(PyExc_TypeError, "Inputs must be either two arrays or two floats.");
         return NULL;
     }
 }
 
 static PyObject*
-DegAngularDifferencesWrapper(PyObject* self, PyObject* args)
+DegAngularDifferenceWrapper(PyObject* self, PyObject* args)
 {
-    PyArrayObject *degAngleStart, *degAngleEnd;
+    PyObject *arg1, *arg2;
     int smallestAngle;
 
     // Parse the input tuple
-    if (!PyArg_ParseTuple(args,
-            "O!O!i",
-            &PyArray_Type,
-            &degAngleStart,
-            &PyArray_Type,
-            &degAngleEnd,
-            &smallestAngle))
+    if (!PyArg_ParseTuple(args, "OOi", &arg1, &arg2, &smallestAngle))
         return NULL;
 
-    // checks
+    // Check if smallestAngle is valid
     if (!((smallestAngle == 0) || (smallestAngle == 1))) {
-        PyErr_SetString(PyExc_ValueError, "smallestAngle must be True or False");
-        return NULL;
-    }
-    if (!(PyArray_ISCONTIGUOUS(degAngleStart)) || !(PyArray_ISCONTIGUOUS(degAngleEnd))) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
-        return NULL;
-    }
-    if (PyArray_NDIM(degAngleStart) != PyArray_NDIM(degAngleEnd)) {
-        PyErr_SetString(PyExc_ValueError,
-            "Input arrays have non-matching dimensions.");
-        return NULL;
-    }
-    if (PyArray_SIZE(degAngleStart) != PyArray_SIZE(degAngleEnd)) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays are of unequal size.");
-        return NULL;
-    }
-    if (PyArray_TYPE(degAngleStart) != PyArray_TYPE(degAngleEnd)) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
+        PyErr_SetString(PyExc_ValueError, "Smallest angle must be True or False");
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(PyArray_NDIM(degAngleEnd),
-        PyArray_SHAPE(degAngleEnd),
-        PyArray_TYPE(degAngleEnd));
-    if (result_array == NULL) {
-        PyErr_SetString(PyExc_ValueError, "Could not create output array.");
-        return NULL;
+    // Check if inputs are arrays
+    if (PyArray_Check(arg1) && PyArray_Check(arg2)) {
+        PyArrayObject* degAngleStart = (PyArrayObject*)arg1;
+        PyArrayObject* degAngleEnd = (PyArrayObject*)arg2;
+
+        // Validate arrays
+        if (!(PyArray_ISCONTIGUOUS(degAngleStart)) || !(PyArray_ISCONTIGUOUS(degAngleEnd))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+            return NULL;
+        }
+        if (PyArray_NDIM(degAngleStart) != PyArray_NDIM(degAngleEnd)) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays have non-matching dimensions.");
+            return NULL;
+        }
+        if (PyArray_SIZE(degAngleStart) != PyArray_SIZE(degAngleEnd)) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays are of unequal size.");
+            return NULL;
+        }
+        if (PyArray_TYPE(degAngleStart) != PyArray_TYPE(degAngleEnd)) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
+            return NULL;
+        }
+
+        // Create result array
+        PyObject* result_array = PyArray_SimpleNew(PyArray_NDIM(degAngleEnd),
+            PyArray_SHAPE(degAngleEnd),
+            PyArray_TYPE(degAngleEnd));
+        if (result_array == NULL) {
+            PyErr_SetString(PyExc_ValueError, "Could not create output array.");
+            return NULL;
+        }
+
+        npy_intp nPoints = PyArray_SIZE(degAngleStart);
+        if (PyArray_TYPE(degAngleEnd) == NPY_DOUBLE) {
+            double* data1 = (double*)PyArray_DATA(degAngleStart);
+            double* data2 = (double*)PyArray_DATA(degAngleEnd);
+            double* result_data = (double*)PyArray_DATA((PyArrayObject*)result_array);
+            AngularDifferencesDouble(data1, data2, DEGCIRCLE, nPoints, smallestAngle, result_data);
+        } else if (PyArray_TYPE(degAngleEnd) == NPY_FLOAT) {
+            float* data1 = (float*)PyArray_DATA(degAngleStart);
+            float* data2 = (float*)PyArray_DATA(degAngleEnd);
+            float* result_data = (float*)PyArray_DATA((PyArrayObject*)result_array);
+            AngularDifferencesFloat(data1, data2, DEGCIRCLE, nPoints, smallestAngle, result_data);
+        } else {
+            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
+            return NULL;
+        }
+        return result_array;
     }
-    npy_intp nPoints = PyArray_SIZE(degAngleStart);
-    if (PyArray_TYPE(degAngleEnd) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(degAngleStart);
-        double* data2 = (double*)PyArray_DATA(degAngleEnd);
-        double* result_data = (double*)PyArray_DATA((PyArrayObject*)result_array);
-        AngularDifferencesDouble(
-            data1, data2, DEGCIRCLE, nPoints, smallestAngle, result_data);
-    } else if (PyArray_TYPE(degAngleEnd) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(degAngleStart);
-        float* data2 = (float*)PyArray_DATA(degAngleEnd);
-        float* result_data = (float*)PyArray_DATA((PyArrayObject*)result_array);
-        AngularDifferencesFloat(
-            data1, data2, DEGCIRCLE, nPoints, smallestAngle, result_data);
+    // Check if inputs are float scalars
+    else if (PyFloat_Check(arg1) && PyFloat_Check(arg2)) {
+        double degAngleStart = PyFloat_AsDouble(arg1);
+        double degAngleEnd = PyFloat_AsDouble(arg2);
+
+        double result_data;
+        if (sizeof(degAngleEnd) == sizeof(double)) {
+            double maxValue = DEGCIRCLE;
+            result_data = AngularDifferenceDouble(degAngleStart, degAngleEnd, maxValue, smallestAngle);
+            return Py_BuildValue("d", result_data);
+        } else if (sizeof(degAngleEnd) == sizeof(float)) {
+            float maxValue = DEGCIRCLE;
+            result_data = AngularDifferenceFloat((float)degAngleStart, (float)degAngleEnd, maxValue, smallestAngle);
+            return Py_BuildValue("f", result_data);
+        } else {
+            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
+            return NULL;
+        }
+    } // Check if inputs are int scalars
+    else if (PyLong_Check(arg1) && PyLong_Check(arg2)) {
+        double degAngleStart = PyLong_AsDouble(arg1);
+        double degAngleEnd = PyLong_AsDouble(arg2);
+
+        double result_data;
+        if (sizeof(degAngleEnd) == sizeof(double)) {
+            double maxValue = DEGCIRCLE;
+            result_data = AngularDifferenceDouble(degAngleStart, degAngleEnd, maxValue, smallestAngle);
+            return Py_BuildValue("d", result_data);
+        } else if (sizeof(degAngleEnd) == sizeof(float)) {
+            float maxValue = DEGCIRCLE;
+            result_data = AngularDifferenceFloat((float)degAngleStart, (float)degAngleEnd, maxValue, smallestAngle);
+            return Py_BuildValue("f", result_data);
+        } else {
+            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
+            return NULL;
+        }
     } else {
-        PyErr_SetString(PyExc_ValueError,
-            "Only 32 and 64 bit float types accepted.");
+        PyErr_SetString(PyExc_TypeError, "Inputs must be either two arrays or two floats.");
         return NULL;
     }
-    return result_array;
-}
-
-static PyObject*
-RadAngularDifferencesWrapper(PyObject* self, PyObject* args)
-{
-    PyArrayObject *radAngleStart, *radAngleEnd;
-    int smallestAngle;
-
-    // Parse the input tuple
-    if (!PyArg_ParseTuple(args,
-            "O!O!i",
-            &PyArray_Type,
-            &radAngleStart,
-            &PyArray_Type,
-            &radAngleEnd,
-            &smallestAngle))
-        return NULL;
-
-    // checks
-    if (!((smallestAngle == 0) || (smallestAngle == 1))) {
-        PyErr_SetString(PyExc_ValueError, "smallestAngle must be True or False");
-        return NULL;
-    }
-    if (!(PyArray_ISCONTIGUOUS(radAngleStart)) || !(PyArray_ISCONTIGUOUS(radAngleEnd))) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
-        return NULL;
-    }
-    if (PyArray_NDIM(radAngleStart) != PyArray_NDIM(radAngleEnd)) {
-        PyErr_SetString(PyExc_ValueError,
-            "Input arrays have non-matching dimensions.");
-        return NULL;
-    }
-    if (PyArray_SIZE(radAngleStart) != PyArray_SIZE(radAngleEnd)) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays are of unequal size.");
-        return NULL;
-    }
-    if (PyArray_TYPE(radAngleStart) != PyArray_TYPE(radAngleEnd)) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
-        return NULL;
-    }
-
-    PyObject* result_array = PyArray_SimpleNew(PyArray_NDIM(radAngleEnd),
-        PyArray_SHAPE(radAngleStart),
-        PyArray_TYPE(radAngleEnd));
-    if (result_array == NULL) {
-        PyErr_SetString(PyExc_ValueError, "Could not create output array.");
-        return NULL;
-    }
-    npy_intp nPoints = PyArray_SIZE(radAngleStart);
-    if (PyArray_TYPE(radAngleEnd) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(radAngleStart);
-        double* data2 = (double*)PyArray_DATA(radAngleEnd);
-        double* result_data = (double*)PyArray_DATA((PyArrayObject*)result_array);
-        AngularDifferencesDouble(
-            data1, data2, 2.0 * PI, nPoints, smallestAngle, result_data);
-    } else if (PyArray_TYPE(radAngleEnd) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(radAngleStart);
-        float* data2 = (float*)PyArray_DATA(radAngleEnd);
-        float* result_data = (float*)PyArray_DATA((PyArrayObject*)result_array);
-        AngularDifferencesFloat(
-            data1, data2, 2.0 * PI, nPoints, smallestAngle, result_data);
-    } else {
-        PyErr_SetString(PyExc_ValueError,
-            "Only 32 and 64 bit float types accepted.");
-        return NULL;
-    }
-    return result_array;
 }
 
 static PyObject*
@@ -441,20 +455,12 @@ DDM2RRMWrapper(PyObject* self, PyObject* args)
 //           method, or being a static method of a class.
 // ml_doc:  The docstring for the method
 static PyMethodDef MyMethods[] = {
-    { "deg_angular_differences",
-        DegAngularDifferencesWrapper,
-        METH_VARARGS,
-        "Angular difference between two angles in degrees" },
-    { "rad_angular_differences",
-        RadAngularDifferencesWrapper,
+    { "rad_angular_difference",
+        RadAngularDifferenceWrapper,
         METH_VARARGS,
         "Angular difference between two angles in radians" },
     { "deg_angular_difference",
         DegAngularDifferenceWrapper,
-        METH_VARARGS,
-        "Angular difference between two angles in radians" },
-    { "rad_angular_difference",
-        RadAngularDifferenceWrapper,
         METH_VARARGS,
         "Angular difference between two angles in radians" },
     { "RRM2DDM",

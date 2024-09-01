@@ -5,9 +5,7 @@ from transforms84.helpers import (
     DDM2RRM,
     RRM2DDM,
     deg_angular_difference,
-    deg_angular_differences,
     rad_angular_difference,
-    rad_angular_differences,
 )
 
 
@@ -27,27 +25,43 @@ def test_XXM2YYM_multiple_points(dtype):
     assert rrm_point.dtype == out.dtype
 
 
-def test_deg_angular_differences_smallest_angle():
+def test_deg_angular_difference_smallest_angle1():
     for diff_v in range(0, 179):
         diff = np.ones((1000,), dtype=np.float32) * diff_v
-        assert np.all(diff == deg_angular_differences(diff, diff + diff_v, True))
+        assert np.all(diff == deg_angular_difference(diff, diff + diff_v, True))
 
 
-def test_deg_angular_differences_largest_angle():
+def test_deg_angular_difference_largest_angle1():
     for diff_v in range(0, 1000):
         diff = np.ones((1000,), dtype=np.float32) * diff_v
         assert np.all(
-            diff % 360.0 == deg_angular_differences(diff, diff + diff_v, False)
+            diff % 360.0 == deg_angular_difference(diff, diff + diff_v, False)
         )
 
 
-def test_deg_angular_difference_smallest_angle():
+def test_deg_angular_difference_smallest_angle_floats():
+    for diff in range(0, 179):
+        for i in range(1000):
+            assert diff == deg_angular_difference(
+                float(diff * i), float(diff * (i + 1)), True
+            )
+
+
+def test_deg_angular_difference_largest_angle_floats():
+    for diff in range(0, 1000):
+        for i in range(1000):
+            assert diff % 360.0 == deg_angular_difference(
+                float(diff * i), float(diff * (i + 1)), False
+            )
+
+
+def test_deg_angular_difference_smallest_angle_ints():
     for diff in range(0, 179):
         for i in range(1000):
             assert diff == deg_angular_difference(diff * i, diff * (i + 1), True)
 
 
-def test_deg_angular_difference_largest_angle():
+def test_deg_angular_difference_largest_angle_ints():
     for diff in range(0, 1000):
         for i in range(1000):
             assert diff % 360.0 == deg_angular_difference(
@@ -55,23 +69,23 @@ def test_deg_angular_difference_largest_angle():
             )
 
 
-def test_rad_angular_differences_smallest_angle():
+def test_rad_angular_difference_smallest_angle():
     for diff_v in range(0, 179):
         diff_v = np.deg2rad(diff_v)
         diff = np.ones((1000,), dtype=np.float32) * diff_v
-        assert np.all(diff == rad_angular_differences(diff, diff + diff_v, True))
+        assert np.all(diff == rad_angular_difference(diff, diff + diff_v, True))
 
 
-def test_rad_angular_differences_largest_angle():
+def test_rad_angular_difference_largest_angle():
     for diff_v in range(0, 1000):
         diff_v = np.deg2rad(diff_v)
         diff = np.ones((1000,), dtype=np.float32) * diff_v
         assert np.all(
-            diff % (2 * np.pi) == rad_angular_differences(diff, diff + diff_v, False)
+            diff % (2 * np.pi) == rad_angular_difference(diff, diff + diff_v, False)
         )
 
 
-def test_rad_angular_difference_smallest_angle():
+def test_rad_angular_difference_smallest_angle_1():
     for diff in range(0, 179):
         for i in range(1000):
             diff_v = np.deg2rad(diff)
@@ -80,7 +94,7 @@ def test_rad_angular_difference_smallest_angle():
             )
 
 
-def test_rad_angular_difference_largest_angle():
+def test_rad_angular_difference_largest_angle_1():
     for diff in range(0, 1000):
         for i in range(1000):
             diff_v = np.deg2rad(diff) % (2 * np.pi)
