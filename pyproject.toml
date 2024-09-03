@@ -165,6 +165,9 @@ legacy_tox_ini = """
     description = checks code quality
     deps =
         ruff
+        numpy
+        setuptools-scm
+        setuptools
     skip_install = true
     commands =
         ruff check
