@@ -77,7 +77,7 @@ HaversineWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmStart) == PyArray_NDIM(rrmEnd)) && (PyArray_SIZE(rrmStart) == PyArray_SIZE(rrmEnd)) || ((PyArray_Size(rrmStart) == NCOORDSINPOINT) && (PyArray_SIZE(rrmStart) < PyArray_SIZE(rrmEnd))))) {
+    if (!((PyArray_NDIM(rrmStart) == PyArray_NDIM(rrmEnd)) && (PyArray_SIZE(rrmStart) == PyArray_SIZE(rrmEnd)) || ((PyArray_SIZE(rrmStart) == NCOORDSINPOINT) && (PyArray_SIZE(rrmStart) < PyArray_SIZE(rrmEnd))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the start point must be of size three.");
@@ -95,7 +95,7 @@ HaversineWrapper(PyObject* self, PyObject* args)
 
     npy_intp nPoints = PyArray_SIZE(rrmEnd) / NCOORDSINPOINT;
     PyObject* result_array = PyArray_SimpleNew(1, &nPoints, PyArray_TYPE(rrmEnd));
-    int isArraysSizeEqual = (PyArray_Size(rrmStart) == PyArray_Size(rrmEnd));
+    int isArraysSizeEqual = (PyArray_Size((PyObject*)rrmStart) == PyArray_Size((PyObject*)rrmEnd));
     if (result_array == NULL)
         return NULL;
     if (PyArray_TYPE(rrmEnd) == NPY_DOUBLE) {
@@ -103,13 +103,13 @@ HaversineWrapper(PyObject* self, PyObject* args)
         double* data2 = (double*)PyArray_DATA(rrmEnd);
         double* result_data = (double*)PyArray_DATA((PyArrayObject*)result_array);
         HaversineDouble(
-            data1, data2, nPoints, isArraysSizeEqual, mRadiusSphere, result_data);
+            data1, data2, (int)nPoints, isArraysSizeEqual, mRadiusSphere, result_data);
     } else if (PyArray_TYPE(rrmEnd) == NPY_FLOAT) {
         float* data1 = (float*)PyArray_DATA(rrmStart);
         float* data2 = (float*)PyArray_DATA(rrmEnd);
         float* result_data = (float*)PyArray_DATA((PyArrayObject*)result_array);
         HaversineFloat(
-            data1, data2, nPoints, isArraysSizeEqual, mRadiusSphere, result_data);
+            data1, data2, (int)nPoints, isArraysSizeEqual, mRadiusSphere, result_data);
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types accepted.");

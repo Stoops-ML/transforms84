@@ -1,11 +1,4 @@
-import pytest
-
-
-@pytest.fixture
-def tolerance_float_atol() -> float:
-    return 0.2
-
-
-@pytest.fixture
-def tolerance_double_atol() -> float:
-    return 0.01
+tol_float_atol = 0.3
+tol_double_atol = 0.01
+tol_double_rtol = 0.001
+tol_float_rtol = 0.001
