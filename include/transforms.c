@@ -8,26 +8,26 @@ https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_geodetic_to_
 
 @param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
 height (h) [rad, rad, m]
-@param size_t nPoints Number of LLA points
+@param int nPoints Number of LLA points
 @param double a semi-major axis
 @param double b semi-minor axis
 @param double *mmmXYZ array of size nx3 X, Y, Z [rad, rad, m]
 */
 void geodetic2ECEFFloat(const float* rrmLLA,
-    size_t nPoints,
-    double a,
-    double b,
+    int nPoints,
+    float a,
+    float b,
     float* mmmXYZ)
 {
     float e2 = 1 - (b * b) / (a * a);
-    size_t iPoint, i;
+    int iPoint, i;
     float N;
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         i = iPoint * NCOORDSINPOINT;
-        N = a / sqrt(1 - e2 * (sin(rrmLLA[i + 0]) * sin(rrmLLA[i + 0])));
-        mmmXYZ[i + 0] = (N + rrmLLA[i + 2]) * cos(rrmLLA[i + 0]) * cos(rrmLLA[i + 1]);
-        mmmXYZ[i + 1] = (N + rrmLLA[i + 2]) * cos(rrmLLA[i + 0]) * sin(rrmLLA[i + 1]);
-        mmmXYZ[i + 2] = ((1 - e2) * N + rrmLLA[i + 2]) * sin(rrmLLA[i + 0]);
+        N = a / sqrtf(1 - e2 * (sinf(rrmLLA[i + 0]) * sinf(rrmLLA[i + 0])));
+        mmmXYZ[i + 0] = (N + rrmLLA[i + 2]) * cosf(rrmLLA[i + 0]) * cosf(rrmLLA[i + 1]);
+        mmmXYZ[i + 1] = (N + rrmLLA[i + 2]) * cosf(rrmLLA[i + 0]) * sinf(rrmLLA[i + 1]);
+        mmmXYZ[i + 2] = ((1 - e2) * N + rrmLLA[i + 2]) * sinf(rrmLLA[i + 0]);
     }
 }
 
@@ -37,19 +37,19 @@ https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_geodetic_to_
 
 @param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
 height (h) [rad, rad, m]
-@param size_t nPoints Number of LLA points
+@param int nPoints Number of LLA points
 @param double a semi-major axis
 @param double b semi-minor axis
 @param double *mmmXYZ array of size nx3 X, Y, Z [m, m, m]
 */
 void geodetic2ECEFDouble(const double* rrmLLA,
-    size_t nPoints,
+    int nPoints,
     double a,
     double b,
     double* mmmXYZ)
 {
     double e2 = 1 - (b * b) / (a * a);
-    size_t iPoint, i;
+    int iPoint, i;
     double N;
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         i = iPoint * NCOORDSINPOINT;
@@ -65,37 +65,39 @@ ECEF to geodetic transformation of float precision.
 https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#The_application_of_Ferrari's_solution
 
 @param double *mmmXYZ array of size nx3 X, Y, Z [m, m, m]
-@param size_t nPoints Number of ECEF points
+@param int nPoints Number of ECEF points
 @param double a semi-major axis
 @param double b semi-minor axis
 @param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
 height (h) [rad, rad, m]
 */
 void ECEF2geodeticFloat(const float* mmmXYZ,
-    size_t nPoints,
-    double a,
-    double b,
+    int nPoints,
+    float a,
+    float b,
     float* rrmLLA)
 {
-    float e2 = ((a * a) - (b * b)) / (a * a);
-    float ed2 = ((a * a) - (b * b)) / (b * b);
-    size_t iPoint, i;
+    int iPoint, i;
+    float p, F, G, c, s, k, P, Q, r0, U, V, z0, e2, ed2, half;
+    half = 0.5;
+    e2 = ((a * a) - (b * b)) / (a * a);
+    ed2 = ((a * a) - (b * b)) / (b * b);
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         i = iPoint * NCOORDSINPOINT;
-        float p = sqrt(mmmXYZ[i + 0] * mmmXYZ[i + 0] + mmmXYZ[i + 1] * mmmXYZ[i + 1]);
-        float F = 54 * b * b * mmmXYZ[i + 2] * mmmXYZ[i + 2];
-        float G = p * p + (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2] - e2 * (a * a - b * b);
-        float c = e2 * e2 * F * p * p / (G * G * G);
-        float s = cbrt(1 + c + sqrt(c * c + 2 * c));
-        float k = s + 1 + 1 / s;
-        float P = F / (3 * k * k * G * G);
-        float Q = sqrt(1 + 2 * e2 * e2 * P);
-        float r0 = -P * e2 * p / (1 + Q) + sqrt(0.5 * a * a * (1 + 1 / Q) - P * (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2] / (Q * (1 + Q)) - 0.5 * P * p * p);
-        float U = sqrt((p - e2 * r0) * (p - e2 * r0) + mmmXYZ[i + 2] * mmmXYZ[i + 2]);
-        float V = sqrt((p - e2 * r0) * (p - e2 * r0) + (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2]);
-        float z0 = b * b * mmmXYZ[i + 2] / (a * V);
-        rrmLLA[i + 0] = atan((mmmXYZ[i + 2] + ed2 * z0) / p);
-        rrmLLA[i + 1] = atan2(mmmXYZ[i + 1], mmmXYZ[i + 0]);
+        p = sqrtf(mmmXYZ[i + 0] * mmmXYZ[i + 0] + mmmXYZ[i + 1] * mmmXYZ[i + 1]);
+        F = 54 * b * b * mmmXYZ[i + 2] * mmmXYZ[i + 2];
+        G = p * p + (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2] - e2 * (a * a - b * b);
+        c = e2 * e2 * F * p * p / (G * G * G);
+        s = cbrtf(1 + c + sqrtf(c * c + 2 * c));
+        k = s + 1 + 1 / s;
+        P = F / (3 * k * k * G * G);
+        Q = sqrtf(1 + 2 * e2 * e2 * P);
+        r0 = -P * e2 * p / (1 + Q) + sqrtf(half * a * a * (1 + 1 / Q) - P * (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2] / (Q * (1 + Q)) - half * P * p * p);
+        U = sqrtf((p - e2 * r0) * (p - e2 * r0) + mmmXYZ[i + 2] * mmmXYZ[i + 2]);
+        V = sqrtf((p - e2 * r0) * (p - e2 * r0) + (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2]);
+        z0 = b * b * mmmXYZ[i + 2] / (a * V);
+        rrmLLA[i + 0] = atanf((mmmXYZ[i + 2] + ed2 * z0) / p);
+        rrmLLA[i + 1] = atan2f(mmmXYZ[i + 1], mmmXYZ[i + 0]);
         rrmLLA[i + 2] = U * (1 - b * b / (a * V));
     }
 }
@@ -105,21 +107,21 @@ ECEF to geodetic transformation of double precision.
 https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#The_application_of_Ferrari's_solution
 
 @param double *mmmXYZ array of size nx3 X, Y, Z [m, m, m]
-@param size_t nPoints Number of ECEF points
+@param int nPoints Number of ECEF points
 @param double a semi-major axis
 @param double b semi-minor axis
 @param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
 height (h) [rad, rad, m]
 */
 void ECEF2geodeticDouble(const double* mmmXYZ,
-    size_t nPoints,
+    int nPoints,
     double a,
     double b,
     double* rrmLLA)
 {
     double e2 = ((a * a) - (b * b)) / (a * a);
     double ed2 = ((a * a) - (b * b)) / (b * b);
-    size_t iPoint, i;
+    int iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         i = iPoint * NCOORDSINPOINT;
         double p = sqrt(mmmXYZ[i + 0] * mmmXYZ[i + 0] + mmmXYZ[i + 1] * mmmXYZ[i + 1]);
@@ -147,33 +149,33 @@ https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ECEF_to_ENU
 @param double *rrmLLALocalOrigin array of size nx3 of local reference point X,
 Y, Z [m, m, m]
 @param double *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
-@param size_t nPoints Number of target points
+@param int nPoints Number of target points
 @param double a semi-major axis
 @param double b semi-minor axis
 @param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
 void ECEF2ENUFloat(const float* rrmLLALocalOrigin,
     const float* mmmXYZTarget,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
-    double a,
-    double b,
+    float a,
+    float b,
     float* mmmLocal)
 {
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(float));
-    geodetic2ECEFFloat(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
+    geodetic2ECEFFloat(rrmLLALocalOrigin, nOriginPoints, (float)(a), (float)(b), mmmXYZLocalOrigin);
     float DeltaX, DeltaY, DeltaZ;
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
         DeltaX = mmmXYZTarget[iTarget + 0] - mmmXYZLocalOrigin[iOrigin + 0];
         DeltaY = mmmXYZTarget[iTarget + 1] - mmmXYZLocalOrigin[iOrigin + 1];
         DeltaZ = mmmXYZTarget[iTarget + 2] - mmmXYZLocalOrigin[iOrigin + 2];
-        mmmLocal[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + cos(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY;
-        mmmLocal[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + cos(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
-        mmmLocal[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + sin(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
+        mmmLocal[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + cosf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY;
+        mmmLocal[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + cosf(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
+        mmmLocal[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + sinf(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
     }
     free(mmmXYZLocalOrigin);
 }
@@ -185,14 +187,14 @@ https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ECEF_to_ENU
 @param double *rrmLLALocalOrigin array of size nx3 of local reference point X,
 Y, Z [m, m, m]
 @param double *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
-@param size_t nPoints Number of target points
+@param int nPoints Number of target points
 @param double a semi-major axis
 @param double b semi-minor axis
 @param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
 void ECEF2ENUDouble(const double* rrmLLALocalOrigin,
     const double* mmmXYZTarget,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
     double a,
     double b,
@@ -203,7 +205,7 @@ void ECEF2ENUDouble(const double* rrmLLALocalOrigin,
     geodetic2ECEFDouble(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     double DeltaX, DeltaY, DeltaZ;
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
@@ -219,10 +221,10 @@ void ECEF2ENUDouble(const double* rrmLLALocalOrigin,
 
 void ECEF2NEDFloat(const float* rrmLLALocalOrigin,
     const float* mmmXYZTarget,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
-    double a,
-    double b,
+    float a,
+    float b,
     float* mmmLocal)
 {
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
@@ -230,23 +232,23 @@ void ECEF2NEDFloat(const float* rrmLLALocalOrigin,
     geodetic2ECEFFloat(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     float DeltaX, DeltaY, DeltaZ;
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
         DeltaX = mmmXYZTarget[iTarget + 0] - mmmXYZLocalOrigin[iOrigin + 0];
         DeltaY = mmmXYZTarget[iTarget + 1] - mmmXYZLocalOrigin[iOrigin + 1];
         DeltaZ = mmmXYZTarget[iTarget + 2] - mmmXYZLocalOrigin[iOrigin + 2];
-        mmmLocal[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + cos(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
-        mmmLocal[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + cos(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY;
-        mmmLocal[iTarget + 2] = -cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + -cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + -sin(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
+        mmmLocal[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + cosf(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
+        mmmLocal[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + cosf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY;
+        mmmLocal[iTarget + 2] = -cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
     }
     free(mmmXYZLocalOrigin);
 }
 
 void ECEF2NEDDouble(const double* rrmLLALocalOrigin,
     const double* mmmXYZTarget,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
     double a,
     double b,
@@ -257,7 +259,7 @@ void ECEF2NEDDouble(const double* rrmLLALocalOrigin,
     geodetic2ECEFDouble(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     double DeltaX, DeltaY, DeltaZ;
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
@@ -273,27 +275,27 @@ void ECEF2NEDDouble(const double* rrmLLALocalOrigin,
 
 void ECEF2NEDvFloat(const float* rrmLLALocalOrigin,
     const float* mmmXYZTarget,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
     float* mmmLocal)
 {
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
-        mmmLocal[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
-        mmmLocal[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1];
-        mmmLocal[iTarget + 2] = -cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
+        mmmLocal[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
+        mmmLocal[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1];
+        mmmLocal[iTarget + 2] = -cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
     }
 }
 
 void ECEF2NEDvDouble(const double* rrmLLALocalOrigin,
     const double* mmmXYZTarget,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
     double* mmmLocal)
 {
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
@@ -305,27 +307,27 @@ void ECEF2NEDvDouble(const double* rrmLLALocalOrigin,
 
 void ECEF2ENUvFloat(const float* rrmLLALocalOrigin,
     const float* mmmXYZTarget,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
     float* mmmLocal)
 {
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
-        mmmLocal[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1];
-        mmmLocal[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
-        mmmLocal[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
+        mmmLocal[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1];
+        mmmLocal[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
+        mmmLocal[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
     }
 }
 
 void ECEF2ENUvDouble(const double* rrmLLALocalOrigin,
     const double* mmmXYZTarget,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
     double* mmmLocal)
 {
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
@@ -337,43 +339,43 @@ void ECEF2ENUvDouble(const double* rrmLLALocalOrigin,
 
 void ENU2ECEFvFloat(const float* rrmLLALocalOrigin,
     const float* mmmTargetLocal,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
     float* mmmXYZTarget)
 {
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
-        mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
-        mmmXYZTarget[iTarget + 1] = cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[2];
-        mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[2];
+        mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
+        mmmXYZTarget[iTarget + 1] = cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[2];
+        mmmXYZTarget[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[2];
     }
 }
 
 void NED2ECEFvFloat(const float* rrmLLALocalOrigin,
     const float* mmmTargetLocal,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
     float* mmmXYZTarget)
 {
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
-        mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
-        mmmXYZTarget[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
-        mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2];
+        mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
+        mmmXYZTarget[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
+        mmmXYZTarget[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2];
     }
 }
 
 void NED2ECEFvDouble(const double* rrmLLALocalOrigin,
     const double* mmmTargetLocal,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
     double* mmmXYZTarget)
 {
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
@@ -385,11 +387,11 @@ void NED2ECEFvDouble(const double* rrmLLALocalOrigin,
 
 void ENU2ECEFvDouble(const double* rrmLLALocalOrigin,
     const double* mmmTargetLocal,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
     double* mmmXYZTarget)
 {
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
@@ -407,29 +409,29 @@ https://www.lddgo.net/en/coordinate/ecef-enu
 @param double *rrmLLALocalOrigin array of size nx3 of local reference point
 latitude, longitude, height [rad, rad, m]
 @param float *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
-@param size_t nPoints Number of target points
+@param int nPoints Number of target points
 @param double a semi-major axis
 @param double b semi-minor axis
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
 void NED2ECEFFloat(const float* rrmLLALocalOrigin,
     const float* mmmTargetLocal,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
-    double a,
-    double b,
+    float a,
+    float b,
     float* mmmXYZTarget)
 {
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(float));
     geodetic2ECEFFloat(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
-        mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 0];
-        mmmXYZTarget[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 1];
-        mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 2];
+        mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 0];
+        mmmXYZTarget[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 1];
+        mmmXYZTarget[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 2];
     }
     free(mmmXYZLocalOrigin);
 }
@@ -442,14 +444,14 @@ https://www.lddgo.net/en/coordinate/ecef-enu
 @param double *rrmLLALocalOrigin array of size nx3 of local reference point
 latitude, longitude, height [rad, rad, m]
 @param float *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
-@param size_t nPoints Number of target points
+@param int nPoints Number of target points
 @param double a semi-major axis
 @param double b semi-minor axis
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
 void NED2ECEFDouble(const double* rrmLLALocalOrigin,
     const double* mmmTargetLocal,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
     double a,
     double b,
@@ -458,7 +460,7 @@ void NED2ECEFDouble(const double* rrmLLALocalOrigin,
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(double));
     geodetic2ECEFDouble(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
@@ -477,29 +479,29 @@ https://www.lddgo.net/en/coordinate/ecef-enu
 @param double *rrmLLALocalOrigin array of size nx3 of local reference point
 latitude, longitude, height [rad, rad, m]
 @param float *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
-@param size_t nPoints Number of target points
+@param int nPoints Number of target points
 @param double a semi-major axis
 @param double b semi-minor axis
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
 void ENU2ECEFFloat(const float* rrmLLALocalOrigin,
     const float* mmmTargetLocal,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
-    double a,
-    double b,
+    float a,
+    float b,
     float* mmmXYZTarget)
 {
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(float));
     geodetic2ECEFFloat(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
-        mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 0];
-        mmmXYZTarget[iTarget + 1] = cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[2] + mmmXYZLocalOrigin[iOrigin + 1];
-        mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[2] + mmmXYZLocalOrigin[iOrigin + 2];
+        mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 0];
+        mmmXYZTarget[iTarget + 1] = cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[2] + mmmXYZLocalOrigin[iOrigin + 1];
+        mmmXYZTarget[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[2] + mmmXYZLocalOrigin[iOrigin + 2];
     }
     free(mmmXYZLocalOrigin);
 }
@@ -512,14 +514,14 @@ https://www.lddgo.net/en/coordinate/ecef-enu
 @param double *rrmLLALocalOrigin array of size nx3 of local reference point
 latitude, longitude, height [rad, rad, m]
 @param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
-@param size_t nPoints Number of target points
+@param int nPoints Number of target points
 @param double a semi-major axis
 @param double b semi-minor axis
 @param double *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
 */
 void ENU2ECEFDouble(const double* rrmLLALocalOrigin,
     const double* mmmTargetLocal,
-    size_t nTargets,
+    int nTargets,
     int isOriginSizeOfTargets,
     double a,
     double b,
@@ -529,7 +531,7 @@ void ENU2ECEFDouble(const double* rrmLLALocalOrigin,
     double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(double));
     geodetic2ECEFDouble(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
-    size_t iPoint, iTarget, iOrigin;
+    int iPoint, iTarget, iOrigin;
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
@@ -547,18 +549,18 @@ includes additional errors and factors that could be implemented
 https://www.lddgo.net/en/coordinate/ecef-enu
 
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
-@param size_t nPoints Number of target points
+@param int nPoints Number of target points
 @param float *rrmAER array of size nx3 of target point azimuth, elevation,
 range [rad, rad, m]
 */
-void NED2AERFloat(const float* mmmENU, size_t nPoints, float* rrmAER)
+void NED2AERFloat(const float* mmmENU, int nPoints, float* rrmAER)
 {
-    size_t iPoint, i;
+    int iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         i = iPoint * NCOORDSINPOINT;
-        rrmAER[i + 0] = atan2(mmmENU[i + 1], mmmENU[i + 0]);
-        rrmAER[i + 2] = sqrt(mmmENU[i + 0] * mmmENU[i + 0] + mmmENU[i + 1] * mmmENU[i + 1] + mmmENU[i + 2] * mmmENU[i + 2]);
-        rrmAER[i + 1] = asin(-mmmENU[i + 2] / rrmAER[i + 2]);
+        rrmAER[i + 0] = atan2f(mmmENU[i + 1], mmmENU[i + 0]);
+        rrmAER[i + 2] = sqrtf(mmmENU[i + 0] * mmmENU[i + 0] + mmmENU[i + 1] * mmmENU[i + 1] + mmmENU[i + 2] * mmmENU[i + 2]);
+        rrmAER[i + 1] = asinf(-mmmENU[i + 2] / rrmAER[i + 2]);
     }
 }
 
@@ -569,13 +571,13 @@ includes additional errors and factors that could be implemented
 https://www.lddgo.net/en/coordinate/ecef-enu
 
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
-@param size_t nPoints Number of target points
+@param int nPoints Number of target points
 @param float *rrmAER array of size nx3 of target point azimuth, elevation,
 range [rad, rad, m]
 */
-void NED2AERDouble(const double* mmmNED, size_t nPoints, double* rrmAER)
+void NED2AERDouble(const double* mmmNED, int nPoints, double* rrmAER)
 {
-    size_t iPoint, i;
+    int iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         i = iPoint * NCOORDSINPOINT;
         rrmAER[i + 0] = atan2(mmmNED[i + 1], mmmNED[i + 0]);
@@ -591,18 +593,18 @@ includes additional errors and factors that could be implemented
 https://www.lddgo.net/en/coordinate/ecef-enu
 
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
-@param size_t nPoints Number of target points
+@param int nPoints Number of target points
 @param float *rrmAER array of size nx3 of target point azimuth, elevation,
 range [rad, rad, m]
 */
-void ENU2AERFloat(const float* mmmNED, size_t nPoints, float* rrmAER)
+void ENU2AERFloat(const float* mmmNED, int nPoints, float* rrmAER)
 {
-    size_t iPoint, i;
+    int iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         i = iPoint * NCOORDSINPOINT;
-        rrmAER[i + 0] = atan2(mmmNED[i + 0], mmmNED[i + 1]);
-        rrmAER[i + 2] = sqrt(mmmNED[i + 0] * mmmNED[i + 0] + mmmNED[i + 1] * mmmNED[i + 1] + mmmNED[i + 2] * mmmNED[i + 2]);
-        rrmAER[i + 1] = asin(mmmNED[i + 2] / rrmAER[i + 2]);
+        rrmAER[i + 0] = atan2f(mmmNED[i + 0], mmmNED[i + 1]);
+        rrmAER[i + 2] = sqrtf(mmmNED[i + 0] * mmmNED[i + 0] + mmmNED[i + 1] * mmmNED[i + 1] + mmmNED[i + 2] * mmmNED[i + 2]);
+        rrmAER[i + 1] = asinf(mmmNED[i + 2] / rrmAER[i + 2]);
     }
 }
 
@@ -612,13 +614,13 @@ https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf
 https://www.lddgo.net/en/coordinate/ecef-enu
 
 @param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
-@param size_t nPoints Number of target points
+@param int nPoints Number of target points
 @param double *rrmAER array of size nx3 of target point azimuth, elevation,
 range [rad, rad, m]
 */
-void ENU2AERDouble(const double* mmmENU, size_t nPoints, double* rrmAER)
+void ENU2AERDouble(const double* mmmENU, int nPoints, double* rrmAER)
 {
-    size_t iPoint, i;
+    int iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         i = iPoint * NCOORDSINPOINT;
         rrmAER[i + 0] = atan2(mmmENU[i + 0], mmmENU[i + 1]);
@@ -633,12 +635,32 @@ https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf
 
 @param float *rrmAER array of size nx3 of target point azimuth, elevation,
 range [rad, rad, m]
-@param size_t nPoints Number of target points
+@param int nPoints Number of target points
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void AER2NEDFloat(const float* rrmAER, size_t nPoints, float* mmmNED)
+void AER2NEDFloat(const float* rrmAER, int nPoints, float* mmmNED)
 {
-    size_t iPoint, i;
+    int iPoint, i;
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        i = iPoint * NCOORDSINPOINT;
+        mmmNED[i + 0] = cosf(rrmAER[i + 1]) * cosf(rrmAER[i + 0]) * rrmAER[i + 2];
+        mmmNED[i + 1] = cosf(rrmAER[i + 1]) * sinf(rrmAER[i + 0]) * rrmAER[i + 2];
+        mmmNED[i + 2] = -sinf(rrmAER[i + 1]) * rrmAER[i + 2];
+    }
+}
+
+/*
+AER to ENU transformation of float precision.
+https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf
+
+@param float *rrmAER array of size nx3 of target point azimuth, elevation,
+range [rad, rad, m]
+@param int nPoints Number of target points
+@param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+*/
+void AER2NEDDouble(const double* rrmAER, int nPoints, double* mmmNED)
+{
+    int iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         i = iPoint * NCOORDSINPOINT;
         mmmNED[i + 0] = cos(rrmAER[i + 1]) * cos(rrmAER[i + 0]) * rrmAER[i + 2];
@@ -653,37 +675,17 @@ https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf
 
 @param float *rrmAER array of size nx3 of target point azimuth, elevation,
 range [rad, rad, m]
-@param size_t nPoints Number of target points
+@param int nPoints Number of target points
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void AER2NEDDouble(const double* rrmAER, size_t nPoints, double* mmmNED)
+void AER2ENUFloat(const float* rrmAER, int nPoints, float* mmmENU)
 {
-    size_t iPoint, i;
+    int iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         i = iPoint * NCOORDSINPOINT;
-        mmmNED[i + 0] = cos(rrmAER[i + 1]) * cos(rrmAER[i + 0]) * rrmAER[i + 2];
-        mmmNED[i + 1] = cos(rrmAER[i + 1]) * sin(rrmAER[i + 0]) * rrmAER[i + 2];
-        mmmNED[i + 2] = -sin(rrmAER[i + 1]) * rrmAER[i + 2];
-    }
-}
-
-/*
-AER to ENU transformation of float precision.
-https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf
-
-@param float *rrmAER array of size nx3 of target point azimuth, elevation,
-range [rad, rad, m]
-@param size_t nPoints Number of target points
-@param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
-*/
-void AER2ENUFloat(const float* rrmAER, size_t nPoints, float* mmmENU)
-{
-    size_t iPoint, i;
-    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
-        mmmENU[i + 0] = cos(rrmAER[i + 1]) * sin(rrmAER[i + 0]) * rrmAER[i + 2];
-        mmmENU[i + 1] = cos(rrmAER[i + 1]) * cos(rrmAER[i + 0]) * rrmAER[i + 2];
-        mmmENU[i + 2] = sin(rrmAER[i + 1]) * rrmAER[i + 2];
+        mmmENU[i + 0] = cosf(rrmAER[i + 1]) * sinf(rrmAER[i + 0]) * rrmAER[i + 2];
+        mmmENU[i + 1] = cosf(rrmAER[i + 1]) * cosf(rrmAER[i + 0]) * rrmAER[i + 2];
+        mmmENU[i + 2] = sinf(rrmAER[i + 1]) * rrmAER[i + 2];
     }
 }
 
@@ -693,12 +695,12 @@ https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf
 
 @param double *rrmAER array of size nx3 of target point azimuth, elevation,
 range [rad, rad, m]
-@param size_t nPoints Number of target points
+@param int nPoints Number of target points
 @param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void AER2ENUDouble(const double* rrmAER, size_t nPoints, double* mmmENU)
+void AER2ENUDouble(const double* rrmAER, int nPoints, double* mmmENU)
 {
-    size_t iPoint, i;
+    int iPoint, i;
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         i = iPoint * NCOORDSINPOINT;
         mmmENU[i + 0] = cos(rrmAER[i + 1]) * sin(rrmAER[i + 0]) * rrmAER[i + 2];
@@ -725,11 +727,11 @@ geodetic2ECEFWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
         PyArray_NDIM(rrmLLA), PyArray_SHAPE(rrmLLA), PyArray_TYPE(rrmLLA));
     if (result_array == NULL)
         return NULL;
-    size_t nPoints = PyArray_SIZE(rrmLLA) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(rrmLLA) / NCOORDSINPOINT;
     if (PyArray_TYPE(rrmLLA) == NPY_DOUBLE) {
         double* data1 = (double*)PyArray_DATA(rrmLLA);
         double* result_data = (double*)PyArray_DATA((PyArrayObject*)result_array);
@@ -737,13 +739,13 @@ geodetic2ECEFWrapper(PyObject* self, PyObject* args)
     } else if (PyArray_TYPE(rrmLLA) == NPY_FLOAT) {
         float* data1 = (float*)PyArray_DATA(rrmLLA);
         float* result_data = (float*)PyArray_DATA((PyArrayObject*)result_array);
-        geodetic2ECEFFloat(data1, nPoints, a, b, result_data);
+        geodetic2ECEFFloat(data1, nPoints, (float)(a), (float)(b), result_data);
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types accepted.");
         return NULL;
     }
-    return result_array;
+    return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -764,11 +766,11 @@ ECEF2geodeticWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
         PyArray_NDIM(mmmXYZ), PyArray_SHAPE(mmmXYZ), PyArray_TYPE(mmmXYZ));
     if (result_array == NULL)
         return NULL;
-    size_t nPoints = PyArray_SIZE(mmmXYZ) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(mmmXYZ) / NCOORDSINPOINT;
     if (PyArray_TYPE(mmmXYZ) == NPY_DOUBLE) {
         double* data1 = (double*)PyArray_DATA(mmmXYZ);
         double* result_data = (double*)PyArray_DATA((PyArrayObject*)result_array);
@@ -776,13 +778,13 @@ ECEF2geodeticWrapper(PyObject* self, PyObject* args)
     } else if (PyArray_TYPE(mmmXYZ) == NPY_FLOAT) {
         float* data1 = (float*)PyArray_DATA(mmmXYZ);
         float* result_data = (float*)PyArray_DATA((PyArrayObject*)result_array);
-        ECEF2geodeticFloat(data1, nPoints, a, b, result_data);
+        ECEF2geodeticFloat(data1, nPoints, (float)(a), (float)(b), result_data);
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types accepted.");
         return NULL;
     }
-    return result_array;
+    return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -805,7 +807,7 @@ ECEF2ENUWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size(rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
@@ -820,13 +822,13 @@ ECEF2ENUWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(PyArray_NDIM(mmmXYZTarget),
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(mmmXYZTarget),
         PyArray_SHAPE(mmmXYZTarget),
         PyArray_TYPE(mmmXYZTarget));
     if (result_array == NULL)
         return NULL;
-    size_t nPoints = PyArray_SIZE(mmmXYZTarget) / NCOORDSINPOINT;
-    int isOriginSizeOfTargets = (PyArray_Size(rrmLLALocalOrigin) == PyArray_Size(mmmXYZTarget));
+    int nPoints = (int)PyArray_SIZE(mmmXYZTarget) / NCOORDSINPOINT;
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)rrmLLALocalOrigin) == PyArray_Size((PyObject*)mmmXYZTarget));
     if (PyArray_TYPE(rrmLLALocalOrigin) == NPY_DOUBLE) {
         double* data1 = (double*)PyArray_DATA(rrmLLALocalOrigin);
         double* data2 = (double*)PyArray_DATA(mmmXYZTarget);
@@ -838,13 +840,13 @@ ECEF2ENUWrapper(PyObject* self, PyObject* args)
         float* data2 = (float*)PyArray_DATA(mmmXYZTarget);
         float* result_data = (float*)PyArray_DATA((PyArrayObject*)result_array);
         ECEF2ENUFloat(
-            data1, data2, nPoints, isOriginSizeOfTargets, a, b, result_data);
+            data1, data2, nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), result_data);
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types accepted.");
         return NULL;
     }
-    return result_array;
+    return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -867,7 +869,7 @@ ECEF2NEDWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size(rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
@@ -882,13 +884,13 @@ ECEF2NEDWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(PyArray_NDIM(mmmXYZTarget),
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(mmmXYZTarget),
         PyArray_SHAPE(mmmXYZTarget),
         PyArray_TYPE(mmmXYZTarget));
     if (result_array == NULL)
         return NULL;
-    size_t nPoints = PyArray_SIZE(mmmXYZTarget) / NCOORDSINPOINT;
-    int isOriginSizeOfTargets = (PyArray_Size(rrmLLALocalOrigin) == PyArray_Size(mmmXYZTarget));
+    int nPoints = (int)PyArray_SIZE(mmmXYZTarget) / NCOORDSINPOINT;
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)rrmLLALocalOrigin) == PyArray_Size((PyObject*)mmmXYZTarget));
     if (PyArray_TYPE(rrmLLALocalOrigin) == NPY_DOUBLE) {
         double* data1 = (double*)PyArray_DATA(rrmLLALocalOrigin);
         double* data2 = (double*)PyArray_DATA(mmmXYZTarget);
@@ -900,13 +902,13 @@ ECEF2NEDWrapper(PyObject* self, PyObject* args)
         float* data2 = (float*)PyArray_DATA(mmmXYZTarget);
         float* result_data = (float*)PyArray_DATA((PyArrayObject*)result_array);
         ECEF2NEDFloat(
-            data1, data2, nPoints, isOriginSizeOfTargets, a, b, result_data);
+            data1, data2, nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), result_data);
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types accepted.");
         return NULL;
     }
-    return result_array;
+    return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -926,7 +928,7 @@ ECEF2NEDvWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size(rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
@@ -941,13 +943,13 @@ ECEF2NEDvWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(PyArray_NDIM(mmmXYZTarget),
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(mmmXYZTarget),
         PyArray_SHAPE(mmmXYZTarget),
         PyArray_TYPE(mmmXYZTarget));
     if (result_array == NULL)
         return NULL;
-    size_t nPoints = PyArray_SIZE(mmmXYZTarget) / NCOORDSINPOINT;
-    int isOriginSizeOfTargets = (PyArray_Size(rrmLLALocalOrigin) == PyArray_Size(mmmXYZTarget));
+    int nPoints = (int)PyArray_SIZE(mmmXYZTarget) / NCOORDSINPOINT;
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)rrmLLALocalOrigin) == PyArray_Size((PyObject*)mmmXYZTarget));
     if (PyArray_TYPE(rrmLLALocalOrigin) == NPY_DOUBLE) {
         double* data1 = (double*)PyArray_DATA(rrmLLALocalOrigin);
         double* data2 = (double*)PyArray_DATA(mmmXYZTarget);
@@ -965,7 +967,7 @@ ECEF2NEDvWrapper(PyObject* self, PyObject* args)
             "Only 32 and 64 bit float types accepted.");
         return NULL;
     }
-    return result_array;
+    return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -985,7 +987,7 @@ ECEF2ENUvWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size(rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
@@ -1000,13 +1002,13 @@ ECEF2ENUvWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(PyArray_NDIM(mmmXYZTarget),
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(mmmXYZTarget),
         PyArray_SHAPE(mmmXYZTarget),
         PyArray_TYPE(mmmXYZTarget));
     if (result_array == NULL)
         return NULL;
-    size_t nPoints = PyArray_SIZE(mmmXYZTarget) / NCOORDSINPOINT;
-    int isOriginSizeOfTargets = (PyArray_Size(rrmLLALocalOrigin) == PyArray_Size(mmmXYZTarget));
+    int nPoints = (int)PyArray_SIZE(mmmXYZTarget) / NCOORDSINPOINT;
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)rrmLLALocalOrigin) == PyArray_Size((PyObject*)mmmXYZTarget));
     if (PyArray_TYPE(rrmLLALocalOrigin) == NPY_DOUBLE) {
         double* data1 = (double*)PyArray_DATA(rrmLLALocalOrigin);
         double* data2 = (double*)PyArray_DATA(mmmXYZTarget);
@@ -1024,7 +1026,7 @@ ECEF2ENUvWrapper(PyObject* self, PyObject* args)
             "Only 32 and 64 bit float types accepted.");
         return NULL;
     }
-    return result_array;
+    return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -1047,7 +1049,7 @@ NED2ECEFWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size(rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
@@ -1062,12 +1064,12 @@ NED2ECEFWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
         PyArray_NDIM(mmmLocal), PyArray_SHAPE(mmmLocal), PyArray_TYPE(mmmLocal));
     if (result_array == NULL)
         return NULL;
-    size_t nPoints = PyArray_SIZE(mmmLocal) / NCOORDSINPOINT;
-    int isOriginSizeOfTargets = (PyArray_Size(rrmLLALocalOrigin) == PyArray_Size(mmmLocal));
+    int nPoints = (int)PyArray_SIZE(mmmLocal) / NCOORDSINPOINT;
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)rrmLLALocalOrigin) == PyArray_Size((PyObject*)mmmLocal));
     if (PyArray_TYPE(rrmLLALocalOrigin) == NPY_DOUBLE) {
         double* data1 = (double*)PyArray_DATA(rrmLLALocalOrigin);
         double* data2 = (double*)PyArray_DATA(mmmLocal);
@@ -1079,13 +1081,13 @@ NED2ECEFWrapper(PyObject* self, PyObject* args)
         float* data2 = (float*)PyArray_DATA(mmmLocal);
         float* result_data = (float*)PyArray_DATA((PyArrayObject*)result_array);
         NED2ECEFFloat(
-            data1, data2, nPoints, isOriginSizeOfTargets, a, b, result_data);
+            data1, data2, nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), result_data);
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types accepted.");
         return NULL;
     }
-    return result_array;
+    return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -1108,7 +1110,7 @@ ENU2ECEFWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size(rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
@@ -1123,12 +1125,12 @@ ENU2ECEFWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
         PyArray_NDIM(mmmLocal), PyArray_SHAPE(mmmLocal), PyArray_TYPE(mmmLocal));
     if (result_array == NULL)
         return NULL;
-    size_t nPoints = PyArray_SIZE(mmmLocal) / NCOORDSINPOINT;
-    int isOriginSizeOfTargets = (PyArray_Size(rrmLLALocalOrigin) == PyArray_Size(mmmLocal));
+    int nPoints = (int)PyArray_SIZE(mmmLocal) / NCOORDSINPOINT;
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)rrmLLALocalOrigin) == PyArray_Size((PyObject*)mmmLocal));
     if (PyArray_TYPE(rrmLLALocalOrigin) == NPY_DOUBLE) {
         double* data1 = (double*)PyArray_DATA(rrmLLALocalOrigin);
         double* data2 = (double*)PyArray_DATA(mmmLocal);
@@ -1140,13 +1142,13 @@ ENU2ECEFWrapper(PyObject* self, PyObject* args)
         float* data2 = (float*)PyArray_DATA(mmmLocal);
         float* result_data = (float*)PyArray_DATA((PyArrayObject*)result_array);
         ENU2ECEFFloat(
-            data1, data2, nPoints, isOriginSizeOfTargets, a, b, result_data);
+            data1, data2, nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), result_data);
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types accepted.");
         return NULL;
     }
-    return result_array;
+    return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -1166,7 +1168,7 @@ ENU2ECEFvWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size(rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
@@ -1181,12 +1183,12 @@ ENU2ECEFvWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
         PyArray_NDIM(mmmLocal), PyArray_SHAPE(mmmLocal), PyArray_TYPE(mmmLocal));
     if (result_array == NULL)
         return NULL;
-    size_t nPoints = PyArray_SIZE(mmmLocal) / NCOORDSINPOINT;
-    int isOriginSizeOfTargets = (PyArray_Size(rrmLLALocalOrigin) == PyArray_Size(mmmLocal));
+    int nPoints = (int)PyArray_SIZE(mmmLocal) / NCOORDSINPOINT;
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)rrmLLALocalOrigin) == PyArray_Size((PyObject*)mmmLocal));
     if (PyArray_TYPE(rrmLLALocalOrigin) == NPY_DOUBLE) {
         double* data1 = (double*)PyArray_DATA(rrmLLALocalOrigin);
         double* data2 = (double*)PyArray_DATA(mmmLocal);
@@ -1204,7 +1206,7 @@ ENU2ECEFvWrapper(PyObject* self, PyObject* args)
             "Only 32 and 64 bit float types accepted.");
         return NULL;
     }
-    return result_array;
+    return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -1224,7 +1226,7 @@ NED2ECEFvWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size(rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
@@ -1239,12 +1241,12 @@ NED2ECEFvWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
         PyArray_NDIM(mmmLocal), PyArray_SHAPE(mmmLocal), PyArray_TYPE(mmmLocal));
     if (result_array == NULL)
         return NULL;
-    size_t nPoints = PyArray_SIZE(mmmLocal) / NCOORDSINPOINT;
-    int isOriginSizeOfTargets = (PyArray_Size(rrmLLALocalOrigin) == PyArray_Size(mmmLocal));
+    int nPoints = (int)PyArray_SIZE(mmmLocal) / NCOORDSINPOINT;
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)rrmLLALocalOrigin) == PyArray_Size((PyObject*)mmmLocal));
     if (PyArray_TYPE(rrmLLALocalOrigin) == NPY_DOUBLE) {
         double* data1 = (double*)PyArray_DATA(rrmLLALocalOrigin);
         double* data2 = (double*)PyArray_DATA(mmmLocal);
@@ -1262,7 +1264,7 @@ NED2ECEFvWrapper(PyObject* self, PyObject* args)
             "Only 32 and 64 bit float types accepted.");
         return NULL;
     }
-    return result_array;
+    return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -1282,11 +1284,11 @@ ENU2AERWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
         PyArray_NDIM(mmmENU), PyArray_SHAPE(mmmENU), PyArray_TYPE(mmmENU));
     if (result_array == NULL)
         return NULL;
-    size_t nPoints = PyArray_SIZE(mmmENU) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(mmmENU) / NCOORDSINPOINT;
     if (PyArray_TYPE(mmmENU) == NPY_DOUBLE) {
         double* data1 = (double*)PyArray_DATA(mmmENU);
         double* result_data = (double*)PyArray_DATA((PyArrayObject*)result_array);
@@ -1300,7 +1302,7 @@ ENU2AERWrapper(PyObject* self, PyObject* args)
             "Only 32 and 64 bit float types accepted.");
         return NULL;
     }
-    return result_array;
+    return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -1320,11 +1322,11 @@ NED2AERWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
         PyArray_NDIM(mmmNED), PyArray_SHAPE(mmmNED), PyArray_TYPE(mmmNED));
     if (result_array == NULL)
         return NULL;
-    size_t nPoints = PyArray_SIZE(mmmNED) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(mmmNED) / NCOORDSINPOINT;
     if (PyArray_TYPE(mmmNED) == NPY_DOUBLE) {
         double* data1 = (double*)PyArray_DATA(mmmNED);
         double* result_data = (double*)PyArray_DATA((PyArrayObject*)result_array);
@@ -1338,7 +1340,7 @@ NED2AERWrapper(PyObject* self, PyObject* args)
             "Only 32 and 64 bit float types accepted.");
         return NULL;
     }
-    return result_array;
+    return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -1358,11 +1360,11 @@ AER2NEDWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
         PyArray_NDIM(rrmAER), PyArray_SHAPE(rrmAER), PyArray_TYPE(rrmAER));
     if (result_array == NULL)
         return NULL;
-    size_t nPoints = PyArray_SIZE(rrmAER) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(rrmAER) / NCOORDSINPOINT;
     if (PyArray_TYPE(rrmAER) == NPY_DOUBLE) {
         double* data1 = (double*)PyArray_DATA(rrmAER);
         double* result_data = (double*)PyArray_DATA((PyArrayObject*)result_array);
@@ -1376,7 +1378,7 @@ AER2NEDWrapper(PyObject* self, PyObject* args)
             "Only 32 and 64 bit float types accepted.");
         return NULL;
     }
-    return result_array;
+    return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -1396,11 +1398,11 @@ AER2ENUWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    PyObject* result_array = PyArray_SimpleNew(
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
         PyArray_NDIM(rrmAER), PyArray_SHAPE(rrmAER), PyArray_TYPE(rrmAER));
     if (result_array == NULL)
         return NULL;
-    size_t nPoints = PyArray_SIZE(rrmAER) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(rrmAER) / NCOORDSINPOINT;
     if (PyArray_TYPE(rrmAER) == NPY_DOUBLE) {
         double* data1 = (double*)PyArray_DATA(rrmAER);
         double* result_data = (double*)PyArray_DATA((PyArrayObject*)result_array);
@@ -1414,7 +1416,7 @@ AER2ENUWrapper(PyObject* self, PyObject* args)
             "Only 32 and 64 bit float types accepted.");
         return NULL;
     }
-    return result_array;
+    return (PyObject*)result_array;
 }
 
 // Method definition object for this extension, these argumens mean:

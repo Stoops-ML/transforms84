@@ -49,9 +49,9 @@ float AngularDifferenceFloat(const float AngleStart,
     const float MaxValue,
     int smallestAngle)
 {
-    float Difference = fmod(fabsf(AngleStart - AngleEnd), MaxValue);
+    float Difference = fmodf(fabsf(AngleStart - AngleEnd), MaxValue);
     if (smallestAngle)
-        Difference = fmin(Difference, MaxValue - Difference);
+        Difference = fminf(Difference, MaxValue - Difference);
     else if (AngleStart > AngleEnd)
         Difference = MaxValue - Difference;
     return Difference;
@@ -77,9 +77,9 @@ void AngularDifferencesFloat(const float* AngleStart,
 {
     int i;
     for (i = 0; i < nAngles; ++i) {
-        Difference[i] = fmod(fabsf(AngleStart[i] - AngleEnd[i]), MaxValue);
+        Difference[i] = fmodf(fabsf(AngleStart[i] - AngleEnd[i]), MaxValue);
         if (smallestAngle)
-            Difference[i] = fmin(Difference[i], MaxValue - Difference[i]);
+            Difference[i] = fminf(Difference[i], MaxValue - Difference[i]);
         else if (AngleStart[i] > AngleEnd[i])
             Difference[i] = MaxValue - Difference[i];
     }
@@ -195,7 +195,7 @@ RadAngularDifferenceWrapper(PyObject* self, PyObject* args)
         }
 
         // Create result array
-        PyObject* result_array = PyArray_SimpleNew(PyArray_NDIM(radAngleEnd),
+        PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(radAngleEnd),
             PyArray_SHAPE(radAngleEnd),
             PyArray_TYPE(radAngleEnd));
         if (result_array == NULL) {
@@ -203,22 +203,22 @@ RadAngularDifferenceWrapper(PyObject* self, PyObject* args)
             return NULL;
         }
 
-        npy_intp nPoints = PyArray_SIZE(radAngleStart);
+        int nPoints = (int)PyArray_SIZE(radAngleStart);
         if (PyArray_TYPE(radAngleEnd) == NPY_DOUBLE) {
             double* data1 = (double*)PyArray_DATA(radAngleStart);
             double* data2 = (double*)PyArray_DATA(radAngleEnd);
-            double* result_data = (double*)PyArray_DATA((PyArrayObject*)result_array);
+            double* result_data = (double*)PyArray_DATA(result_array);
             AngularDifferencesDouble(data1, data2, 2.0 * PI, nPoints, smallestAngle, result_data);
         } else if (PyArray_TYPE(radAngleEnd) == NPY_FLOAT) {
             float* data1 = (float*)PyArray_DATA(radAngleStart);
             float* data2 = (float*)PyArray_DATA(radAngleEnd);
-            float* result_data = (float*)PyArray_DATA((PyArrayObject*)result_array);
-            AngularDifferencesFloat(data1, data2, 2.0 * PI, nPoints, smallestAngle, result_data);
+            float* result_data = (float*)PyArray_DATA(result_array);
+            AngularDifferencesFloat(data1, data2, (float)(2.0 * PI), nPoints, smallestAngle, result_data);
         } else {
             PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
             return NULL;
         }
-        return result_array;
+        return (PyObject*)result_array;
     }
     // Check if inputs are float scalars
     else if (PyFloat_Check(arg1) && PyFloat_Check(arg2)) {
@@ -231,7 +231,7 @@ RadAngularDifferenceWrapper(PyObject* self, PyObject* args)
             result_data = AngularDifferenceDouble(radAngleStart, radAngleEnd, maxValue, smallestAngle);
             return Py_BuildValue("d", result_data);
         } else if (sizeof(radAngleEnd) == sizeof(float)) {
-            float maxValue = 2.0 * PI;
+            float maxValue = (float)(2.0 * PI);
             result_data = AngularDifferenceFloat((float)radAngleStart, (float)radAngleEnd, maxValue, smallestAngle);
             return Py_BuildValue("f", result_data);
         } else {
@@ -249,7 +249,7 @@ RadAngularDifferenceWrapper(PyObject* self, PyObject* args)
             result_data = AngularDifferenceDouble(radAngleStart, radAngleEnd, maxValue, smallestAngle);
             return Py_BuildValue("d", result_data);
         } else if (sizeof(radAngleEnd) == sizeof(float)) {
-            float maxValue = 2.0 * PI;
+            float maxValue = (float)(2.0 * PI);
             result_data = AngularDifferenceFloat((float)radAngleStart, (float)radAngleEnd, maxValue, smallestAngle);
             return Py_BuildValue("f", result_data);
         } else {
@@ -302,7 +302,7 @@ DegAngularDifferenceWrapper(PyObject* self, PyObject* args)
         }
 
         // Create result array
-        PyObject* result_array = PyArray_SimpleNew(PyArray_NDIM(degAngleEnd),
+        PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(degAngleEnd),
             PyArray_SHAPE(degAngleEnd),
             PyArray_TYPE(degAngleEnd));
         if (result_array == NULL) {
@@ -310,22 +310,22 @@ DegAngularDifferenceWrapper(PyObject* self, PyObject* args)
             return NULL;
         }
 
-        npy_intp nPoints = PyArray_SIZE(degAngleStart);
+        int nPoints = (int)PyArray_SIZE(degAngleStart);
         if (PyArray_TYPE(degAngleEnd) == NPY_DOUBLE) {
             double* data1 = (double*)PyArray_DATA(degAngleStart);
             double* data2 = (double*)PyArray_DATA(degAngleEnd);
-            double* result_data = (double*)PyArray_DATA((PyArrayObject*)result_array);
+            double* result_data = (double*)PyArray_DATA(result_array);
             AngularDifferencesDouble(data1, data2, DEGCIRCLE, nPoints, smallestAngle, result_data);
         } else if (PyArray_TYPE(degAngleEnd) == NPY_FLOAT) {
             float* data1 = (float*)PyArray_DATA(degAngleStart);
             float* data2 = (float*)PyArray_DATA(degAngleEnd);
-            float* result_data = (float*)PyArray_DATA((PyArrayObject*)result_array);
+            float* result_data = (float*)PyArray_DATA(result_array);
             AngularDifferencesFloat(data1, data2, DEGCIRCLE, nPoints, smallestAngle, result_data);
         } else {
             PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
             return NULL;
         }
-        return result_array;
+        return (PyObject*)result_array;
     }
     // Check if inputs are float scalars
     else if (PyFloat_Check(arg1) && PyFloat_Check(arg2)) {
@@ -424,7 +424,7 @@ RRM2DDMWrapper(PyObject* self, PyObject* args)
         float* data1 = (float*)PyArray_DATA(in_array);
         float* result_data = (float*)PyArray_DATA(result_array);
         XXM2YYMFloat(
-            data1, nPoints, 180.0 / PI, result_data);
+            data1, nPoints, (float)(180.0 / PI), result_data);
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float or int types accepted.");
@@ -487,7 +487,7 @@ DDM2RRMWrapper(PyObject* self, PyObject* args)
         float* data1 = (float*)PyArray_DATA(in_array);
         float* result_data = (float*)PyArray_DATA(result_array);
         XXM2YYMFloat(
-            data1, nPoints, PI / 180.0, result_data);
+            data1, nPoints, (float)(PI / 180.0), result_data);
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float or int types accepted.");

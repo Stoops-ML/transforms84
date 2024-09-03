@@ -5,6 +5,8 @@ from transforms84.helpers import DDM2RRM
 from transforms84.systems import WGS84
 from transforms84.transforms import NED2ECEF
 
+from .conftest import tol_double_rtol, tol_float_rtol
+
 # https://www.lddgo.net/en/coordinate/ecef-NED
 
 
@@ -31,18 +33,22 @@ def test_NED2ECEF_raise_wrong_size():
         NED2ECEF(XYZ, ref_point, WGS84.a, WGS84.b)
 
 
-@pytest.mark.parametrize("dtype", [np.float64, np.float32])
-def test_NED2ECEF_float32_point(tolerance_float_atol, dtype):
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_rtol), (np.float32, tol_float_rtol)]
+)
+def test_NED2ECEF_float32_point(dtype, tol):
     XYZ = np.array([[1334.3], [-2544.4], [360.0]], dtype=dtype)
     ref_point = DDM2RRM(np.array([[44.532], [-72.782], [1.699]], dtype=dtype))
     out = NED2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
-    assert np.isclose(out[0, 0], 1.3457e06, rtol=0.001)
-    assert np.isclose(out[1, 0], -4.3509e06, rtol=0.001)
-    assert np.isclose(out[2, 0], 4.4523e06, rtol=0.001)
+    assert np.isclose(out[0, 0], 1.3457e06, rtol=tol)
+    assert np.isclose(out[1, 0], -4.3509e06, rtol=tol)
+    assert np.isclose(out[2, 0], 4.4523e06, rtol=tol)
 
 
-@pytest.mark.parametrize("dtype", [np.float64, np.float32])
-def test_NED2ECEF_float32_points(dtype):
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_rtol), (np.float32, tol_float_rtol)]
+)
+def test_NED2ECEF_float32_points(dtype, tol):
     XYZ = np.array(
         [
             [[1334.3], [-2544.4], [360.0]],
@@ -57,9 +63,9 @@ def test_NED2ECEF_float32_points(dtype):
         )
     )
     out = NED2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
-    assert np.all(np.isclose(out[:, 0, 0], 1.3457e06, rtol=0.001))
-    assert np.all(np.isclose(out[:, 1, 0], -4.3509e06, rtol=0.001))
-    assert np.all(np.isclose(out[:, 2, 0], 4.4523e06, rtol=0.001))
+    assert np.all(np.isclose(out[:, 0, 0], 1.3457e06, rtol=tol))
+    assert np.all(np.isclose(out[:, 1, 0], -4.3509e06, rtol=tol))
+    assert np.all(np.isclose(out[:, 2, 0], 4.4523e06, rtol=tol))
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])

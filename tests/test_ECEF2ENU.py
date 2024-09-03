@@ -5,6 +5,8 @@ from transforms84.helpers import DDM2RRM
 from transforms84.systems import WGS84
 from transforms84.transforms import ECEF2ENU, geodetic2ECEF
 
+from .conftest import tol_double_atol, tol_float_atol
+
 # https://www.lddgo.net/en/coordinate/ecef-enu
 
 
@@ -42,18 +44,22 @@ def test_ECEF2ENU_raise_wrong_size():
         ECEF2ENU(ref_point, XYZ, WGS84.a, WGS84.b)
 
 
-@pytest.mark.parametrize("dtype", [np.float64, np.float32])
-def test_ECEF2ENU_point(tolerance_float_atol, dtype):
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_ECEF2ENU_point(dtype, tol):
     XYZ = np.array([[3906.67536618], [2732.16708], [1519.47079847]], dtype=dtype)
     ref_point = np.array([[0.1], [0.2], [5000]], dtype=dtype)
     out = ECEF2ENU(ref_point, XYZ, WGS84.a, WGS84.b)
-    assert np.isclose(out[0, 0], 1901.5690521235, atol=tolerance_float_atol)
-    assert np.isclose(out[1, 0], 5316.9485968901, atol=tolerance_float_atol)
-    assert np.isclose(out[2, 0], -6378422.76482545, atol=tolerance_float_atol)
+    assert np.isclose(out[0, 0], 1901.5690521235, atol=tol)
+    assert np.isclose(out[1, 0], 5316.9485968901, atol=tol)
+    assert np.isclose(out[2, 0], -6378422.76482545, atol=tol)
 
 
-@pytest.mark.parametrize("dtype", [np.float64, np.float32])
-def test_ECEF2ENU_points(tolerance_float_atol, dtype):
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_ECEF2ENU_points(dtype, tol):
     XYZ = np.array(
         [
             [[3906.67536618], [2732.16708], [1519.47079847]],
@@ -63,11 +69,9 @@ def test_ECEF2ENU_points(tolerance_float_atol, dtype):
     )
     ref_point = np.array([[[0.1], [0.2], [5000]], [[0.1], [0.2], [5000]]], dtype=dtype)
     out = ECEF2ENU(ref_point, XYZ, WGS84.a, WGS84.b)
-    assert np.all(np.isclose(out[:, 0, 0], 1901.5690521235, atol=tolerance_float_atol))
-    assert np.all(np.isclose(out[:, 1, 0], 5316.9485968901, atol=tolerance_float_atol))
-    assert np.all(
-        np.isclose(out[:, 2, 0], -6378422.76482545, atol=tolerance_float_atol)
-    )
+    assert np.all(np.isclose(out[:, 0, 0], 1901.5690521235, atol=tol))
+    assert np.all(np.isclose(out[:, 1, 0], 5316.9485968901, atol=tol))
+    assert np.all(np.isclose(out[:, 2, 0], -6378422.76482545, atol=tol))
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])

@@ -4,6 +4,8 @@ import pytest
 from transforms84.helpers import DDM2RRM
 from transforms84.transforms import NED2AER
 
+from .conftest import tol_double_atol, tol_float_atol
+
 
 def test_NED2AER_raise_wrong_dtype():
     NED = np.array([[-9.1013], [4.1617], [4.2812]], dtype=np.float16)
@@ -11,19 +13,24 @@ def test_NED2AER_raise_wrong_dtype():
         NED2AER(NED)  # type: ignore
 
 
-@pytest.mark.parametrize("dtype", [np.float64, np.float32])
-def test_NED2AER_point(tolerance_float_atol, dtype):
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_NED2AER_point(dtype, tol):
     NED = np.array([[-9.1013], [4.1617], [4.2812]], dtype=dtype)
     assert np.all(
         np.isclose(
             NED2AER(NED),
             DDM2RRM(np.array([[155.4271], [-23.1609], [10.8849]], dtype=dtype)),
+            atol=tol,
         ),
     )
 
 
-@pytest.mark.parametrize("dtype", [np.float64, np.float32])
-def test_NED2AER_points(tolerance_float_atol, dtype):
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_NED2AER_points(dtype, tol):
     NED = np.array(
         [
             [[-9.1013], [4.1617], [4.2812]],
@@ -35,5 +42,6 @@ def test_NED2AER_points(tolerance_float_atol, dtype):
         np.isclose(
             NED2AER(NED),
             DDM2RRM(np.array([[155.4271], [-23.1609], [10.8849]], dtype=dtype)),
+            atol=tol,
         ),
     )
