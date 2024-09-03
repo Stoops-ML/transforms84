@@ -169,4 +169,5 @@ legacy_tox_ini = """
     commands =
         ruff check
         ruff format --diff
+        python setup.py build_ext --inplace -f
 """
