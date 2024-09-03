@@ -94,19 +94,59 @@ HaversineWrapper(PyObject* self, PyObject* args)
     }
 
     npy_intp nPoints = PyArray_SIZE(rrmEnd) / NCOORDSINPOINT;
-    PyObject* result_array = PyArray_SimpleNew(1, &nPoints, PyArray_TYPE(rrmEnd));
-    int isArraysSizeEqual = (PyArray_Size((PyObject*)rrmStart) == PyArray_Size((PyObject*)rrmEnd));
+    int array_type;
+    PyArrayObject *inArrayEnd, *inArrayStart;
+    if (PyArray_ISINTEGER(rrmEnd) == 0) {
+        array_type = PyArray_TYPE(rrmEnd);
+        inArrayStart = rrmStart;
+        inArrayEnd = rrmEnd;
+    } else {
+        array_type = NPY_FLOAT;
+        inArrayEnd = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(rrmEnd), PyArray_SHAPE(rrmEnd), array_type);
+        if (inArrayEnd == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayEnd, rrmEnd) < 0) {
+            Py_DECREF(inArrayEnd);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayEnd))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+        inArrayStart = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(rrmStart), PyArray_SHAPE(rrmStart), array_type);
+        if (inArrayStart == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayStart, rrmStart) < 0) {
+            Py_DECREF(inArrayStart);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayStart))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
+        1, &nPoints, array_type);
+    int isArraysSizeEqual = (PyArray_Size((PyObject*)inArrayStart) == PyArray_Size((PyObject*)inArrayEnd));
     if (result_array == NULL)
         return NULL;
-    if (PyArray_TYPE(rrmEnd) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(rrmStart);
-        double* data2 = (double*)PyArray_DATA(rrmEnd);
+    if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
+        double* data1 = (double*)PyArray_DATA(inArrayStart);
+        double* data2 = (double*)PyArray_DATA(inArrayEnd);
         double* result_data = (double*)PyArray_DATA((PyArrayObject*)result_array);
         HaversineDouble(
             data1, data2, (int)nPoints, isArraysSizeEqual, mRadiusSphere, result_data);
-    } else if (PyArray_TYPE(rrmEnd) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(rrmStart);
-        float* data2 = (float*)PyArray_DATA(rrmEnd);
+    } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
+        float* data1 = (float*)PyArray_DATA(inArrayStart);
+        float* data2 = (float*)PyArray_DATA(inArrayEnd);
         float* result_data = (float*)PyArray_DATA((PyArrayObject*)result_array);
         HaversineFloat(
             data1, data2, (int)nPoints, isArraysSizeEqual, mRadiusSphere, result_data);
