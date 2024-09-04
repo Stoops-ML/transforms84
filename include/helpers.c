@@ -384,15 +384,12 @@ RRM2DDMWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    int array_type;
     PyArrayObject* in_array;
-    if (PyArray_ISINTEGER(rrmPoint) == 0) {
-        array_type = PyArray_TYPE(rrmPoint);
+    if (PyArray_ISINTEGER(rrmPoint) == 0)
         in_array = rrmPoint;
-    } else {
-        array_type = NPY_FLOAT;
+    else {
         in_array = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(rrmPoint), PyArray_SHAPE(rrmPoint), array_type);
+            PyArray_NDIM(rrmPoint), PyArray_SHAPE(rrmPoint), NPY_DOUBLE);
         if (in_array == NULL) {
             PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
             return NULL;
@@ -408,7 +405,7 @@ RRM2DDMWrapper(PyObject* self, PyObject* args)
         }
     }
     PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
-        PyArray_NDIM(in_array), PyArray_SHAPE(in_array), array_type);
+        PyArray_NDIM(in_array), PyArray_SHAPE(in_array), PyArray_TYPE(in_array));
     if (result_array == NULL) {
         PyErr_SetString(PyExc_ValueError, "Could not create output array.");
         return NULL;
@@ -448,15 +445,12 @@ DDM2RRMWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    int array_type;
     PyArrayObject* in_array;
-    if (PyArray_ISINTEGER(ddmPoint) == 0) {
-        array_type = PyArray_TYPE(ddmPoint);
+    if (PyArray_ISINTEGER(ddmPoint) == 0)
         in_array = ddmPoint;
-    } else {
-        array_type = NPY_FLOAT;
+    else {
         in_array = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(ddmPoint), PyArray_SHAPE(ddmPoint), array_type);
+            PyArray_NDIM(ddmPoint), PyArray_SHAPE(ddmPoint), NPY_DOUBLE);
         if (in_array == NULL) {
             PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
             return NULL;
@@ -472,7 +466,7 @@ DDM2RRMWrapper(PyObject* self, PyObject* args)
         }
     }
     PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
-        PyArray_NDIM(in_array), PyArray_SHAPE(in_array), array_type);
+        PyArray_NDIM(in_array), PyArray_SHAPE(in_array), PyArray_TYPE(in_array));
     if (result_array == NULL) {
         PyErr_SetString(PyExc_ValueError, "Could not create output array.");
         return NULL;

@@ -21,7 +21,7 @@ def test_ENU2AER_point(dtype, tol):
     assert np.all(
         np.isclose(
             ENU2AER(ENU),
-            DDM2RRM(np.array([[34.1160], [4.1931], [15.1070]], dtype=np.float64)),
+            DDM2RRM(np.array([[34.1160], [4.1931], [15.1070]], dtype=dtype)),
             atol=tol,
         ),
     )
@@ -41,7 +41,43 @@ def test_ENU2AER_points(dtype, tol):
     assert np.all(
         np.isclose(
             ENU2AER(ENU),
-            DDM2RRM(np.array([[34.1160], [4.1931], [15.1070]], dtype=np.float64)),
+            DDM2RRM(np.array([[34.1160], [4.1931], [15.1070]], dtype=dtype)),
+            atol=tol,
+        ),
+    )
+
+
+@pytest.mark.skip(reason="Get check data")
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.int64, tol_double_atol), (np.int32, tol_float_atol)]
+)
+def test_ENU2AER_point_int(dtype, tol):
+    ENU = np.array([[1000], [100], [100]], dtype=dtype)
+    assert np.all(
+        np.isclose(
+            ENU2AER(ENU),
+            np.array([[34.1160], [4.1931], [15.1070]], dtype=dtype),
+            atol=tol,
+        ),
+    )
+
+
+@pytest.mark.skip(reason="Get check data")
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.int64, tol_double_atol), (np.int32, tol_float_atol)]
+)
+def test_ENU2AER_points_int(dtype, tol):
+    ENU = np.array(
+        [
+            [[1000], [100], [100]],
+            [[1000], [100], [100]],
+        ],
+        dtype=dtype,
+    )
+    assert np.all(
+        np.isclose(
+            ENU2AER(ENU),
+            np.array([[34.1160], [4.1931], [15.1070]], dtype=np.float64),
             atol=tol,
         ),
     )

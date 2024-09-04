@@ -17,6 +17,30 @@ def test_geodetic2ECEF_raise_wrong_size():
         geodetic2ECEF(in_arr, WGS84.a, WGS84.b)
 
 
+@pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
+def test_geodetic2ECEF_point_int(dtype):
+    in_arr = np.array([[1], [2], [5]], dtype=dtype)
+    out = geodetic2ECEF(in_arr, WGS84.a, WGS84.b)
+    assert np.all(np.isclose(out[0, 0], -1437504.9581578))
+    assert np.all(np.isclose(out[1, 0], 3141005.63721087))
+    assert np.all(np.isclose(out[2, 0], 5343772.65324303))
+
+
+@pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
+def test_geodetic2ECEF_points_int(dtype):
+    in_arr = np.array(
+        [
+            [[1], [2], [5]],
+            [[1], [2], [5]],
+        ],
+        dtype=dtype,
+    )
+    out = geodetic2ECEF(in_arr, WGS84.a, WGS84.b)
+    assert np.all(np.isclose(out[:, 0, 0], -1437504.9581578))
+    assert np.all(np.isclose(out[:, 1, 0], 3141005.63721087))
+    assert np.all(np.isclose(out[:, 2, 0], 5343772.65324303))
+
+
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
 def test_geodetic2ECEF_point(dtype):
     in_arr = np.array([[np.deg2rad(30)], [np.deg2rad(25)], [5]], dtype=dtype)

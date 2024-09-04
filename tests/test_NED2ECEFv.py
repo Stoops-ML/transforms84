@@ -20,3 +20,19 @@ def test_NED2ECEFv_float(dtype, tol):
             atol=tol,
         )
     )
+
+
+@pytest.mark.skip(reason="Get check data")
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.int64, tol_double_atol), (np.int32, tol_float_atol)]
+)
+def test_NED2ECEFv_int(dtype, tol):
+    rrm_local = np.array([[61], [30], [0]], dtype=dtype)
+    uvw = np.array([[-434.0403], [152.4451], [-684.6964]], dtype=dtype)
+    assert np.all(
+        np.isclose(
+            NED2ECEFv(rrm_local, uvw),
+            np.array([[530.2445], [492.1283], [396.3459]], dtype=dtype),
+            atol=tol,
+        )
+    )

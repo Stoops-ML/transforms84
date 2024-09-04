@@ -22,7 +22,7 @@ def test_Haersine_raise_wrong_size():
         Haversine(rrm_start, rrm_start, WGS84.mean_radius)
 
 
-@pytest.mark.parametrize("dtype", [np.int64, np.int32])
+@pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
 def test_Haversine_int(dtype):
     rrm_start = np.array([[0], [0], [0]], dtype=dtype)
     rrm_end = np.array([[1], [1], [0]], dtype=dtype)
@@ -30,9 +30,9 @@ def test_Haversine_int(dtype):
     assert np.isclose(Haversine(rrm_end, rrm_start, WGS84.mean_radius), 8120200.0)
 
 
-@pytest.mark.parametrize("dtype", [np.int64, np.int32])
+@pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
 def test_Haversine_with_height_int(dtype):
-    rrm_start_with_height = np.array([[0], [np.deg2rad(34)], [100000]], dtype=dtype)
+    rrm_start_with_height = np.array([[0], [0], [10]], dtype=dtype)
     rrm_start = np.array([[0], [0], [0]], dtype=dtype)
     rrm_end = np.array([[1], [1], [0]], dtype=dtype)
     assert np.isclose(
@@ -53,7 +53,7 @@ def test_Haversine_with_height_int(dtype):
     )
 
 
-@pytest.mark.parametrize("dtype", [np.int64, np.int32])
+@pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
 def test_Haversine_one2many_int(dtype):
     rrm_target = DDM2RRM(np.array([[0], [0], [0]], dtype=dtype))
     num_repeats = 3
