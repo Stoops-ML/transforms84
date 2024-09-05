@@ -1,10 +1,7 @@
 #include <Python.h>
+#include <definitions.h>
 #include <math.h>
 #include <numpy/arrayobject.h>
-
-#define NCOORDSINPOINT 3
-#define DEGCIRCLE 360.0
-#define PI 3.14159265358979323846
 
 /*
 Calculate the angular difference between two numbers of double precision.
