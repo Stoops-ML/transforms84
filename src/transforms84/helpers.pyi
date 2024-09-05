@@ -1,15 +1,17 @@
+from typing import Union
+
 import numpy.typing as npt
 
 from . import DTYPES_SUPPORTED
 
 def deg_angular_difference(
-    angle1: float | npt.NDArray[DTYPES_SUPPORTED],
-    angle2: float | npt.NDArray[DTYPES_SUPPORTED],
+    angle1: Union[float, npt.NDArray[DTYPES_SUPPORTED]],
+    angle2: Union[float, npt.NDArray[DTYPES_SUPPORTED]],
     smallest_angle: bool,
 ) -> float: ...
 def rad_angular_difference(
-    angle1: float | npt.NDArray[DTYPES_SUPPORTED],
-    angle2: float | npt.NDArray[DTYPES_SUPPORTED],
+    angle1: Union[float, npt.NDArray[DTYPES_SUPPORTED]],
+    angle2: Union[float, npt.NDArray[DTYPES_SUPPORTED]],
     smallest_angle: bool,
 ) -> float: ...
 def RRM2DDM(

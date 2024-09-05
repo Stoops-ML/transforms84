@@ -33,6 +33,68 @@ def test_ENU2ECEF_raise_wrong_size():
         ENU2ECEF(XYZ, ref_point, WGS84.a, WGS84.b)
 
 
+@pytest.mark.skip(
+    reason="16 bit integer results in overflow error when creating numpy array"
+)
+@pytest.mark.parametrize("dtype,tol", [(np.int16, tol_float_atol)])
+def test_ENU2ECEF_point_int16(dtype, tol):
+    XYZ = np.array([[1345660], [-4350891], [4452314]], dtype=dtype)
+    ref_point = np.array([[0], [0], [10]], dtype=dtype)
+    out = ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert np.isclose(out[0, 0], 10830461, atol=tol)
+    assert np.isclose(out[1, 0], 1345660, atol=tol)
+    assert np.isclose(out[2, 0], -4350891, atol=tol)
+
+
+@pytest.mark.skip(
+    reason="16 bit integer results in overflow error when creating numpy array"
+)
+@pytest.mark.parametrize("dtype,tol", [(np.int16, tol_float_atol)])
+def test_ENU2ECEF_points_int16(dtype, tol):
+    XYZ = np.array(
+        [
+            [[1345660], [-4350891], [4452314]],
+            [[1345660], [-4350891], [4452314]],
+        ],
+        dtype=dtype,
+    )
+    ref_point = np.array([[[0], [0], [10]], [[0], [0], [10]]], dtype=dtype)
+    out = ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert np.all(np.isclose(out[:, 0, 0], 10830461, atol=tol))
+    assert np.all(np.isclose(out[:, 1, 0], 1345660, atol=tol))
+    assert np.all(np.isclose(out[:, 2, 0], -4350891, atol=tol))
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.int64, tol_double_atol), (np.int32, tol_float_atol)]
+)
+def test_ENU2ECEF_point_int(dtype, tol):
+    XYZ = np.array([[1345660], [-4350891], [4452314]], dtype=dtype)
+    ref_point = np.array([[0], [0], [10]], dtype=dtype)
+    out = ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert np.isclose(out[0, 0], 10830461, atol=tol)
+    assert np.isclose(out[1, 0], 1345660, atol=tol)
+    assert np.isclose(out[2, 0], -4350891, atol=tol)
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.int64, tol_double_atol), (np.int32, tol_float_atol)]
+)
+def test_ENU2ECEF_points_int(dtype, tol):
+    XYZ = np.array(
+        [
+            [[1345660], [-4350891], [4452314]],
+            [[1345660], [-4350891], [4452314]],
+        ],
+        dtype=dtype,
+    )
+    ref_point = np.array([[[0], [0], [10]], [[0], [0], [10]]], dtype=dtype)
+    out = ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert np.all(np.isclose(out[:, 0, 0], 10830461, atol=tol))
+    assert np.all(np.isclose(out[:, 1, 0], 1345660, atol=tol))
+    assert np.all(np.isclose(out[:, 2, 0], -4350891, atol=tol))
+
+
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )

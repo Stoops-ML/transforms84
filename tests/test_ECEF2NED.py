@@ -42,6 +42,127 @@ def test_ECEF2NED_raise_wrong_size():
         ECEF2NED(ref_point, XYZ, WGS84.a, WGS84.b)
 
 
+@pytest.mark.skip(
+    reason="16 bit integer results in overflow error when creating numpy array"
+)
+@pytest.mark.parametrize("dtype", [np.int16])
+def test_ECEF2NED_point_int16(dtype):
+    XYZ = np.array([[1345660], [-4350891], [4452314]], dtype=dtype)
+    ref_point = np.array([[0], [0], [10]], dtype=dtype)
+    out = ECEF2NED(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert np.isclose(out[0, 0], 4452314, rtol=0.001)
+    assert np.isclose(out[1, 0], -4350891, rtol=0.001)
+    assert np.isclose(out[2, 0], 5032487, rtol=0.001)
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.int64])
+def test_ECEF2NED_point_int(dtype):
+    XYZ = np.array([[1345660], [-4350891], [4452314]], dtype=dtype)
+    ref_point = np.array([[0], [0], [10]], dtype=dtype)
+    out = ECEF2NED(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert np.isclose(out[0, 0], 4452314, rtol=0.001)
+    assert np.isclose(out[1, 0], -4350891, rtol=0.001)
+    assert np.isclose(out[2, 0], 5032487, rtol=0.001)
+
+
+@pytest.mark.skip(
+    reason="16 bit integer results in overflow error when creating numpy array"
+)
+@pytest.mark.parametrize("dtype", [np.int16])
+def test_ECEF2NED_points_int16(dtype):
+    XYZ = np.array(
+        [
+            [[1345660], [-4350891], [4452314]],
+            [[1345660], [-4350891], [4452314]],
+        ],
+        dtype=dtype,
+    )
+    ref_point = np.array(
+        [[[0], [0], [10]], [[0], [0], [10]]],
+        dtype=dtype,
+    )
+    out = ECEF2NED(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert np.all(np.isclose(out[:, 0, 0], 4452314, rtol=0.001))
+    assert np.all(np.isclose(out[:, 1, 0], -4350891, rtol=0.001))
+    assert np.all(np.isclose(out[:, 2, 0], 5032487, rtol=0.001))
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.int64])
+def test_ECEF2NED_points_int(dtype):
+    XYZ = np.array(
+        [
+            [[1345660], [-4350891], [4452314]],
+            [[1345660], [-4350891], [4452314]],
+        ],
+        dtype=dtype,
+    )
+    ref_point = np.array(
+        [[[0], [0], [10]], [[0], [0], [10]]],
+        dtype=dtype,
+    )
+    out = ECEF2NED(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert np.all(np.isclose(out[:, 0, 0], 4452314, rtol=0.001))
+    assert np.all(np.isclose(out[:, 1, 0], -4350891, rtol=0.001))
+    assert np.all(np.isclose(out[:, 2, 0], 5032487, rtol=0.001))
+
+
+@pytest.mark.skip(
+    reason="16 bit integer results in overflow error when creating numpy array"
+)
+@pytest.mark.parametrize("dtype", [np.int16])
+def test_ECEF2NED_one2many_int16(dtype):
+    rrm_target = np.array([[1], [1], [100]], dtype=dtype)
+    num_repeats = 3
+    rrm_targets = np.ascontiguousarray(
+        np.tile(rrm_target, num_repeats).T.reshape((-1, 3, 1))
+    )
+    rrm_local = np.array([[0], [0], [10]], dtype=dtype)
+    rrm_locals = np.ascontiguousarray(
+        np.tile(rrm_local, rrm_targets.shape[0]).T.reshape((-1, 3, 1))
+    )
+    assert np.all(
+        ECEF2NED(
+            rrm_locals,
+            geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b).astype(dtype),
+            WGS84.a,
+            WGS84.b,
+        )
+        == ECEF2NED(
+            rrm_local,
+            geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b).astype(dtype),
+            WGS84.a,
+            WGS84.b,
+        )
+    )
+
+
+@pytest.mark.parametrize("dtype", [np.int32, np.int64])
+def test_ECEF2NED_one2many_int(dtype):
+    rrm_target = np.array([[1], [1], [100]], dtype=dtype)
+    num_repeats = 3
+    rrm_targets = np.ascontiguousarray(
+        np.tile(rrm_target, num_repeats).T.reshape((-1, 3, 1))
+    )
+    rrm_local = np.array([[0], [0], [10]], dtype=dtype)
+    rrm_locals = np.ascontiguousarray(
+        np.tile(rrm_local, rrm_targets.shape[0]).T.reshape((-1, 3, 1))
+    )
+    assert np.all(
+        ECEF2NED(
+            rrm_locals,
+            geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b).astype(dtype),
+            WGS84.a,
+            WGS84.b,
+        )
+        == ECEF2NED(
+            rrm_local,
+            geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b).astype(dtype),
+            WGS84.a,
+            WGS84.b,
+        )
+    )
+
+
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
 def test_ECEF2NED_point(dtype):
     XYZ = np.array([[1345660], [-4350891], [4452314]], dtype=dtype)
