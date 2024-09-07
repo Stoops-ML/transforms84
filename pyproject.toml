@@ -1,6 +1,6 @@
 
 [build-system]
-requires = ["setuptools", "setuptools-scm", "numpy"]
+requires = ["setuptools", "setuptools-scm", "numpy", "wheel", "build"]
 build-backend = "setuptools.build_meta"
 
 [project]

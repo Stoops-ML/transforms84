@@ -1,3 +1,4 @@
+#include <omp.h>
 #include <Python.h>
 #include <math.h>
 #include <numpy/arrayobject.h>
@@ -76,6 +77,7 @@ void AngularDifferencesFloat(const float* AngleStart,
     float* Difference)
 {
     int i;
+    // #pragma omp parallel for if(nAngles > omp_get_num_procs () * 2)
     for (i = 0; i < nAngles; ++i) {
         Difference[i] = fmodf(fabsf(AngleStart[i] - AngleEnd[i]), MaxValue);
         if (smallestAngle)
