@@ -348,8 +348,8 @@ void ENU2ECEFvFloat(const float* rrmLLALocalOrigin,
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
-        mmmXYZTarget[iTarget + 1] = cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[2];
-        mmmXYZTarget[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[2];
+        mmmXYZTarget[iTarget + 1] = cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
+        mmmXYZTarget[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2];
     }
 }
 
@@ -396,8 +396,8 @@ void ENU2ECEFvDouble(const double* rrmLLALocalOrigin,
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
-        mmmXYZTarget[iTarget + 1] = cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[2];
-        mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[2];
+        mmmXYZTarget[iTarget + 1] = cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
+        mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2];
     }
 }
 
