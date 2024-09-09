@@ -45,6 +45,23 @@ def test_ECEF2ENU_raise_wrong_size():
 
 
 @pytest.mark.parametrize(
+    "dtype,tol",
+    [
+        (np.int16, tol_float_atol),
+        (np.int32, tol_float_atol),
+        (np.int64, tol_float_atol),
+    ],
+)
+def test_ECEF2ENU_point_int(dtype, tol):
+    XYZ = np.array([[0], [0], [0]], dtype=dtype)
+    ref_point = np.array([[1], [1], [500]], dtype=dtype)
+    out = ECEF2ENU(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert np.isclose(out[0, 0], 0, atol=tol)
+    assert np.isclose(out[1, 0], 19458.6147548328, atol=tol)
+    assert np.isclose(out[2, 0], -6363502.5003553545, atol=tol)
+
+
+@pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
 def test_ECEF2ENU_point(dtype, tol):
@@ -54,6 +71,29 @@ def test_ECEF2ENU_point(dtype, tol):
     assert np.isclose(out[0, 0], 1901.5690521235, atol=tol)
     assert np.isclose(out[1, 0], 5316.9485968901, atol=tol)
     assert np.isclose(out[2, 0], -6378422.76482545, atol=tol)
+
+
+@pytest.mark.parametrize(
+    "dtype,tol",
+    [
+        (np.int16, tol_float_atol),
+        (np.int32, tol_float_atol),
+        (np.int64, tol_float_atol),
+    ],
+)
+def test_ECEF2ENU_points_int(dtype, tol):
+    XYZ = np.array(
+        [
+            [[0], [0], [0]],
+            [[0], [0], [0]],
+        ],
+        dtype=dtype,
+    )
+    ref_point = np.array([[[1], [1], [500]], [[1], [1], [500]]], dtype=dtype)
+    out = ECEF2ENU(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert np.all(np.isclose(out[:, 0, 0], 0, atol=tol))
+    assert np.all(np.isclose(out[:, 1, 0], 19458.6147548328, atol=tol))
+    assert np.all(np.isclose(out[:, 2, 0], -6363502.5003553545, atol=tol))
 
 
 @pytest.mark.parametrize(
@@ -72,6 +112,27 @@ def test_ECEF2ENU_points(dtype, tol):
     assert np.all(np.isclose(out[:, 0, 0], 1901.5690521235, atol=tol))
     assert np.all(np.isclose(out[:, 1, 0], 5316.9485968901, atol=tol))
     assert np.all(np.isclose(out[:, 2, 0], -6378422.76482545, atol=tol))
+
+
+@pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
+def test_ECEF2ENU_one2many_int(dtype):
+    rrm_target = DDM2RRM(np.array([[0], [0], [0]], dtype=dtype))
+    num_repeats = 3
+    rrm_targets = np.ascontiguousarray(
+        np.tile(rrm_target, num_repeats).T.reshape((-1, 3, 1))
+    )
+    rrm_local = DDM2RRM(np.array([[1], [1], [0]], dtype=dtype))
+    rrm_locals = np.ascontiguousarray(
+        np.tile(rrm_local, rrm_targets.shape[0]).T.reshape((-1, 3, 1))
+    )
+    assert np.all(
+        ECEF2ENU(
+            rrm_locals, geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b), WGS84.a, WGS84.b
+        )
+        == ECEF2ENU(
+            rrm_local, geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b), WGS84.a, WGS84.b
+        )
+    )
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])

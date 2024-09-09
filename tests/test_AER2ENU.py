@@ -22,12 +22,42 @@ def test_AER2ENU_point(dtype):
     )
 
 
+@pytest.mark.skip(reason="Get check data")
+@pytest.mark.parametrize("dtype", [np.int16, np.int32, np.int64])
+def test_AER2ENU_point_int(dtype):
+    AER = np.array([[0], [0], [0]], dtype=dtype)
+    assert np.all(
+        np.isclose(
+            AER2ENU(AER),
+            np.array([[8.4504], [12.4737], [1.1046]], dtype=dtype),
+        ),
+    )
+
+
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
-def test_AER2ENU_float64_points(dtype):
+def test_AER2ENU_points(dtype):
     AER = np.array(
         [
             [[34.1160], [4.1931], [15.1070]],
             [[34.1160], [4.1931], [15.1070]],
+        ],
+        dtype=dtype,
+    )
+    assert np.all(
+        np.isclose(
+            AER2ENU(DDM2RRM(AER)),
+            np.array([[8.4504], [12.4737], [1.1046]], dtype=dtype),
+        ),
+    )
+
+
+@pytest.mark.skip(reason="Get check data")
+@pytest.mark.parametrize("dtype", [np.int16, np.int32, np.int64])
+def test_AER2ENU_points_int(dtype):
+    AER = np.array(
+        [
+            [[0], [0], [0]],
+            [[0], [0], [0]],
         ],
         dtype=dtype,
     )

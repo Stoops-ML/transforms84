@@ -20,3 +20,19 @@ def test_ENU2ECEFv(dtype, tol):
             atol=tol,
         )
     )
+
+
+@pytest.mark.skip(reason="Get check data")
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.int64, tol_double_atol), (np.int32, tol_float_atol)]
+)
+def test_ENU2ECEFv_int(dtype, tol):
+    rrm_local = np.array([[0], [0], [0]], dtype=dtype)
+    uvw = np.array([[-27], [-16.4298], [-0.3186]], dtype=dtype)
+    assert np.all(
+        np.isclose(
+            ENU2ECEFv(rrm_local, uvw),
+            np.array([[27.9798], [-1.0993], [-15.7724]], dtype=np.float32),
+            atol=tol,
+        )
+    )
