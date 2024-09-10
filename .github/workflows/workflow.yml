@@ -31,9 +31,7 @@ jobs:
         message: Lint Python and C files
         committer_name: GitHub Actions
         committer_email: 41898282+github-actions[bot]@users.noreply.github.com
-        add: |
-          - *.py
-          - *.c
+        add: '["*.py", "*.c"]'
 
   tox-checks:
     runs-on: ubuntu-latest
