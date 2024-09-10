@@ -1451,8 +1451,8 @@ ENU2ECEFvWrapper(PyObject* self, PyObject* args)
             "Only 32 and 64 bit float types or all integer are accepted.");
         return NULL;
     }
-    return (PyObject*)result_array;
-}
+      return (PyObject*)result_array;
+} 
 
 static PyObject*
 NED2ECEFvWrapper(PyObject* self, PyObject* args)
