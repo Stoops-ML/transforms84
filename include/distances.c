@@ -136,17 +136,11 @@ HaversineWrapper(PyObject* self, PyObject* args)
     if (result_array == NULL)
         return NULL;
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArrayStart);
-        double* data2 = (double*)PyArray_DATA(inArrayEnd);
-        double* result_data = (double*)PyArray_DATA(result_array);
         HaversineDouble(
-            data1, data2, (int)nPoints, isArraysSizeEqual, mRadiusSphere, result_data);
+            (double*)PyArray_DATA(inArrayStart), (double*)PyArray_DATA(inArrayEnd), (int)nPoints, isArraysSizeEqual, mRadiusSphere, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArrayStart);
-        float* data2 = (float*)PyArray_DATA(inArrayEnd);
-        float* result_data = (float*)PyArray_DATA(result_array);
         HaversineFloat(
-            data1, data2, (int)nPoints, isArraysSizeEqual, (float)(mRadiusSphere), result_data);
+            (float*)PyArray_DATA(inArrayStart), (float*)PyArray_DATA(inArrayEnd), (int)nPoints, isArraysSizeEqual, (float)(mRadiusSphere), (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
