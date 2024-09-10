@@ -10,7 +10,7 @@ from .conftest import tol_double_atol, tol_float_atol
 # https://www.lddgo.net/en/coordinate/ecef-enu
 
 
-def test_ENU2ECEF_raise_wrong_dtype():
+def test_ENU2ECEF_raise_wrong_dtype(): 
     XYZ = np.array([[3906.67536618], [2732.16708], [1519.47079847]], dtype=np.float16)
     ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float16)
     with pytest.raises(ValueError):
