@@ -23,10 +23,10 @@ The following coordinate transformations have been implemented:
 - ENU &rarr; ECEF [🔗](https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ENU_to_ECEF)
 - ENU &rarr; AER [🔗](https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf)
 - AER &rarr; ENU [🔗](https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf)
-- ECEF &rarr; NED
-- NED &rarr; ECEF
-- NED &rarr; AER
-- AER &rarr; NED
+- ECEF &rarr; NED [🔗](https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ECEF_to_ENU) [🔗](https://en.wikipedia.org/wiki/Local_tangent_plane_coordinates)
+- NED &rarr; ECEF [🔗](https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ENU_to_ECEF) [🔗](https://en.wikipedia.org/wiki/Local_tangent_plane_coordinates)
+- NED &rarr; AER [🔗](https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf) [🔗](https://en.wikipedia.org/wiki/Local_tangent_plane_coordinates)
+- AER &rarr; NED [🔗](https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf) [🔗](https://en.wikipedia.org/wiki/Local_tangent_plane_coordinates)
 
 ### Velocity Transformations
 The following velocity transformations have been implemented:
@@ -109,4 +109,8 @@ True
 - [Coordinate systems for display](https://www.mathworks.com/help/aerotbx/ug/coordinate-systems-for-display.html)
 
 ## Contributing
-PRs are always welcome and appreciated! Please install the pre-commit hooks before making commits.
+PRs are always welcome and appreciated!
+
+After forking the repo install the dev requirements: `pip install -e .[dev]`.
+
+Pre-commit hooks may be installed: `pre-commit install --hook-type pre-commit --hook-type pre-push`. This isn't required as pull requests are checked with tox and apply lint automatically.
