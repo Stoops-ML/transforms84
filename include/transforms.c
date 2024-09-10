@@ -348,8 +348,8 @@ void ENU2ECEFvFloat(const float* rrmLLALocalOrigin,
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
-        mmmXYZTarget[iTarget + 1] = cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[2];
-        mmmXYZTarget[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[2];
+        mmmXYZTarget[iTarget + 1] = cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
+        mmmXYZTarget[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2];
     }
 }
 
@@ -396,8 +396,8 @@ void ENU2ECEFvDouble(const double* rrmLLALocalOrigin,
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
-        mmmXYZTarget[iTarget + 1] = cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[2];
-        mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[2];
+        mmmXYZTarget[iTarget + 1] = cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
+        mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2];
     }
 }
 
@@ -500,8 +500,8 @@ void ENU2ECEFFloat(const float* rrmLLALocalOrigin,
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 0];
-        mmmXYZTarget[iTarget + 1] = cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[2] + mmmXYZLocalOrigin[iOrigin + 1];
-        mmmXYZTarget[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[2] + mmmXYZLocalOrigin[iOrigin + 2];
+        mmmXYZTarget[iTarget + 1] = cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 1];
+        mmmXYZTarget[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 2];
     }
     free(mmmXYZLocalOrigin);
 }
@@ -535,8 +535,11 @@ void ENU2ECEFDouble(const double* rrmLLALocalOrigin,
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         iTarget = iPoint * NCOORDSINPOINT;
         iOrigin = iTarget * isOriginSizeOfTargets;
+        // mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + mmmXYZLocalOrigin[iOrigin + 0];
+        // mmmXYZTarget[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 1];
+        // mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 2];
         mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 0];
-        mmmXYZTarget[iTarget + 1] = cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[2] + mmmXYZLocalOrigin[iOrigin + 1];
+        mmmXYZTarget[iTarget + 1] = cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 1];
         mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 2];
     }
     free(mmmXYZLocalOrigin);
@@ -753,13 +756,9 @@ geodetic2ECEFWrapper(PyObject* self, PyObject* args)
         return NULL;
     int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSINPOINT;
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArray);
-        double* result_data = (double*)PyArray_DATA(result_array);
-        geodetic2ECEFDouble(data1, nPoints, a, b, result_data);
+        geodetic2ECEFDouble((double*)PyArray_DATA(inArray), nPoints, a, b, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArray);
-        float* result_data = (float*)PyArray_DATA(result_array);
-        geodetic2ECEFFloat(data1, nPoints, (float)(a), (float)(b), result_data);
+        geodetic2ECEFFloat((float*)PyArray_DATA(inArray), nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
@@ -812,13 +811,9 @@ ECEF2geodeticWrapper(PyObject* self, PyObject* args)
         return NULL;
     int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSINPOINT;
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArray);
-        double* result_data = (double*)PyArray_DATA(result_array);
-        ECEF2geodeticDouble(data1, nPoints, a, b, result_data);
+        ECEF2geodeticDouble((double*)PyArray_DATA(inArray), nPoints, a, b, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArray);
-        float* result_data = (float*)PyArray_DATA(result_array);
-        ECEF2geodeticFloat(data1, nPoints, (float)(a), (float)(b), result_data);
+        ECEF2geodeticFloat((float*)PyArray_DATA(inArray), nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
@@ -906,17 +901,11 @@ ECEF2ENUWrapper(PyObject* self, PyObject* args)
     int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArrayOrigin);
-        double* data2 = (double*)PyArray_DATA(inArrayLocal);
-        double* result_data = (double*)PyArray_DATA(result_array);
         ECEF2ENUDouble(
-            data1, data2, nPoints, isOriginSizeOfTargets, a, b, result_data);
+            (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, a, b, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArrayOrigin);
-        float* data2 = (float*)PyArray_DATA(inArrayLocal);
-        float* result_data = (float*)PyArray_DATA(result_array);
         ECEF2ENUFloat(
-            data1, data2, nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), result_data);
+            (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
@@ -1004,17 +993,11 @@ ECEF2NEDWrapper(PyObject* self, PyObject* args)
     int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArrayOrigin);
-        double* data2 = (double*)PyArray_DATA(inArrayLocal);
-        double* result_data = (double*)PyArray_DATA(result_array);
         ECEF2NEDDouble(
-            data1, data2, nPoints, isOriginSizeOfTargets, a, b, result_data);
+            (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, a, b, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArrayOrigin);
-        float* data2 = (float*)PyArray_DATA(inArrayLocal);
-        float* result_data = (float*)PyArray_DATA(result_array);
         ECEF2NEDFloat(
-            data1, data2, nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), result_data);
+            (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
@@ -1099,17 +1082,11 @@ ECEF2NEDvWrapper(PyObject* self, PyObject* args)
     int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArrayOrigin);
-        double* data2 = (double*)PyArray_DATA(inArrayLocal);
-        double* result_data = (double*)PyArray_DATA(result_array);
         ECEF2NEDvDouble(
-            data1, data2, nPoints, isOriginSizeOfTargets, result_data);
+            (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArrayOrigin);
-        float* data2 = (float*)PyArray_DATA(inArrayLocal);
-        float* result_data = (float*)PyArray_DATA(result_array);
         ECEF2NEDvFloat(
-            data1, data2, nPoints, isOriginSizeOfTargets, result_data);
+            (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
@@ -1194,17 +1171,11 @@ ECEF2ENUvWrapper(PyObject* self, PyObject* args)
     int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArrayOrigin);
-        double* data2 = (double*)PyArray_DATA(inArrayLocal);
-        double* result_data = (double*)PyArray_DATA(result_array);
         ECEF2ENUvDouble(
-            data1, data2, nPoints, isOriginSizeOfTargets, result_data);
+            (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArrayOrigin);
-        float* data2 = (float*)PyArray_DATA(inArrayLocal);
-        float* result_data = (float*)PyArray_DATA(result_array);
         ECEF2ENUvFloat(
-            data1, data2, nPoints, isOriginSizeOfTargets, result_data);
+            (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
@@ -1291,17 +1262,11 @@ NED2ECEFWrapper(PyObject* self, PyObject* args)
     int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArrayOrigin);
-        double* data2 = (double*)PyArray_DATA(inArrayLocal);
-        double* result_data = (double*)PyArray_DATA(result_array);
         NED2ECEFDouble(
-            data1, data2, nPoints, isOriginSizeOfTargets, a, b, result_data);
+            (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, a, b, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArrayOrigin);
-        float* data2 = (float*)PyArray_DATA(inArrayLocal);
-        float* result_data = (float*)PyArray_DATA(result_array);
         NED2ECEFFloat(
-            data1, data2, nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), result_data);
+            (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
@@ -1388,17 +1353,11 @@ ENU2ECEFWrapper(PyObject* self, PyObject* args)
     int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArrayOrigin);
-        double* data2 = (double*)PyArray_DATA(inArrayLocal);
-        double* result_data = (double*)PyArray_DATA(result_array);
         ENU2ECEFDouble(
-            data1, data2, nPoints, isOriginSizeOfTargets, a, b, result_data);
+            (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, a, b, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArrayOrigin);
-        float* data2 = (float*)PyArray_DATA(inArrayLocal);
-        float* result_data = (float*)PyArray_DATA(result_array);
         ENU2ECEFFloat(
-            data1, data2, nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), result_data);
+            (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float)a, (float)b, (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
@@ -1482,17 +1441,11 @@ ENU2ECEFvWrapper(PyObject* self, PyObject* args)
     int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArrayOrigin);
-        double* data2 = (double*)PyArray_DATA(inArrayLocal);
-        double* result_data = (double*)PyArray_DATA(result_array);
         ENU2ECEFvDouble(
-            data1, data2, nPoints, isOriginSizeOfTargets, result_data);
+            (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArrayOrigin);
-        float* data2 = (float*)PyArray_DATA(inArrayLocal);
-        float* result_data = (float*)PyArray_DATA(result_array);
         ENU2ECEFvFloat(
-            data1, data2, nPoints, isOriginSizeOfTargets, result_data);
+            (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
@@ -1576,17 +1529,11 @@ NED2ECEFvWrapper(PyObject* self, PyObject* args)
     int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArrayOrigin);
-        double* data2 = (double*)PyArray_DATA(inArrayLocal);
-        double* result_data = (double*)PyArray_DATA(result_array);
         NED2ECEFvDouble(
-            data1, data2, nPoints, isOriginSizeOfTargets, result_data);
+            (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArrayOrigin);
-        float* data2 = (float*)PyArray_DATA(inArrayLocal);
-        float* result_data = (float*)PyArray_DATA(result_array);
         NED2ECEFvFloat(
-            data1, data2, nPoints, isOriginSizeOfTargets, result_data);
+            (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
@@ -1638,13 +1585,9 @@ ENU2AERWrapper(PyObject* self, PyObject* args)
         return NULL;
     int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSINPOINT;
     if (PyArray_TYPE(inArray) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArray);
-        double* result_data = (double*)PyArray_DATA(result_array);
-        ENU2AERDouble(data1, nPoints, result_data);
+        ENU2AERDouble((double*)PyArray_DATA(inArray), nPoints, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(inArray) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArray);
-        float* result_data = (float*)PyArray_DATA(result_array);
-        ENU2AERFloat(data1, nPoints, result_data);
+        ENU2AERFloat((float*)PyArray_DATA(inArray), nPoints, (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
@@ -1696,13 +1639,9 @@ NED2AERWrapper(PyObject* self, PyObject* args)
         return NULL;
     int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSINPOINT;
     if (PyArray_TYPE(inArray) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArray);
-        double* result_data = (double*)PyArray_DATA(result_array);
-        NED2AERDouble(data1, nPoints, result_data);
+        NED2AERDouble((double*)PyArray_DATA(inArray), nPoints, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(inArray) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArray);
-        float* result_data = (float*)PyArray_DATA(result_array);
-        NED2AERFloat(data1, nPoints, result_data);
+        NED2AERFloat((float*)PyArray_DATA(inArray), nPoints, (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
@@ -1754,13 +1693,9 @@ AER2NEDWrapper(PyObject* self, PyObject* args)
         return NULL;
     int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSINPOINT;
     if (PyArray_TYPE(inArray) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArray);
-        double* result_data = (double*)PyArray_DATA(result_array);
-        AER2NEDDouble(data1, nPoints, result_data);
+        AER2NEDDouble((double*)PyArray_DATA(inArray), nPoints, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(inArray) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArray);
-        float* result_data = (float*)PyArray_DATA(result_array);
-        AER2NEDFloat(data1, nPoints, result_data);
+        AER2NEDFloat((float*)PyArray_DATA(inArray), nPoints, (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
@@ -1812,13 +1747,9 @@ AER2ENUWrapper(PyObject* self, PyObject* args)
         return NULL;
     int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSINPOINT;
     if (PyArray_TYPE(inArray) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(inArray);
-        double* result_data = (double*)PyArray_DATA(result_array);
-        AER2ENUDouble(data1, nPoints, result_data);
+        AER2ENUDouble((double*)PyArray_DATA(inArray), nPoints, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(inArray) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(inArray);
-        float* result_data = (float*)PyArray_DATA(result_array);
-        AER2ENUFloat(data1, nPoints, result_data);
+        AER2ENUFloat((float*)PyArray_DATA(inArray), nPoints, (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
