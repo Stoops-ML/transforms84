@@ -28,8 +28,8 @@ jobs:
       run: clang-format --style=WebKit include/*.c -i
     - name: format all files
       run: |
-        pre-commit run trailing-whitespace
-        pre-commit run end-of-file-fixer
+        pre-commit run trailing-whitespace --all-files
+        pre-commit run end-of-file-fixer --all-files
     - name: Commit changes
       uses: EndBug/add-and-commit@v9
       with:
