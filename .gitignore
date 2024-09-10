@@ -1,4 +1,5 @@
 old/
+*.czml
 
 # Editors
 .vscode/
