@@ -18,6 +18,7 @@ jobs:
 
       - name: Build wheels 🎡
         env:
+          CIBW_BUILD: "cp311-*"
           CIBW_SKIP: "pp* *-win32 *_i686"
         uses: pypa/cibuildwheel@v2.20.0
 
