@@ -1,26 +1,24 @@
 name: Publish to Test PyPi
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
 
 jobs:
-  build:
-    name: Build distribution 📦
+  build_wheels:
+    name: Build wheels on ${matrix.os} 🎡
     strategy:
       matrix:
-        # python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-        python-version: ["3.11"]
         # os: [ubuntu-latest, windows-latest, macos-13, macos-14]
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
-    environment:
-      name: pypi
-      url: https://test.pypi.org/p/transforms84
-    permissions:
-      id-token: write # IMPORTANT: mandatory for trusted publishing
     steps:
       - uses: actions/checkout@v4
 
       - name: Build wheels 🎡
+        env:
+          CIBW_SKIP: "pp* *-win32 *_i686"
         uses: pypa/cibuildwheel@v2.20.0
 
       - uses: actions/upload-artifact@v4
@@ -28,20 +26,23 @@ jobs:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
 
-      - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
+  upload_pypi:
+    needs: [build_wheels]
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://test.pypi.org/p/transforms84
+    permissions:
+      id-token: write
+    if: github.event_name == 'release' && github.event.action == 'published'
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          # unpacks all CIBW artifacts into dist/
+          pattern: cibw-*
+          path: dist
+          merge-multiple: true
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-
-  # publish-to-pypi:
-  #   name: >-
-  #     Publish Python 🐍 distribution 📦 to PyPI
-  #   needs:
-  #   - build
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - name: Download all the dists
-  #     uses: actions/download-artifact@v4
-  #     with:
-  #       name: python-package-distributions
-  #       path: dist/
