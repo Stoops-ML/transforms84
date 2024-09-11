@@ -27,6 +27,18 @@ def test_AER2NED_point(dtype, tol):
     )
 
 
+@pytest.mark.skip(reason="Get check data")
+@pytest.mark.parametrize("dtype", [np.int16, np.int32, np.int64])
+def test_AER2NED_point_int(dtype):
+    AER = np.array([[0], [0], [0]], dtype=dtype)
+    assert np.all(
+        np.isclose(
+            AER2NED(AER),
+            np.array([[8.4504], [12.4737], [1.1046]], dtype=dtype),
+        ),
+    )
+
+
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
@@ -43,5 +55,23 @@ def test_AER2NED_points(dtype, tol):
             AER2NED(DDM2RRM(AER)),
             np.array([[-9.1013], [4.1617], [4.2812]], dtype=dtype),
             atol=tol,
+        ),
+    )
+
+
+@pytest.mark.skip(reason="Get check data")
+@pytest.mark.parametrize("dtype", [np.int16, np.int32, np.int64])
+def test_AER2NED_points_int(dtype):
+    AER = np.array(
+        [
+            [[0], [0], [0]],
+            [[0], [0], [0]],
+        ],
+        dtype=dtype,
+    )
+    assert np.all(
+        np.isclose(
+            AER2NED(DDM2RRM(AER)),
+            np.array([[8.4504], [12.4737], [1.1046]], dtype=dtype),
         ),
     )

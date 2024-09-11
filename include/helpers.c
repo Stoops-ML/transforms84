@@ -1,11 +1,8 @@
 #include <omp.h>
 #include <Python.h>
+#include <definitions.h>
 #include <math.h>
 #include <numpy/arrayobject.h>
-
-#define NCOORDSINPOINT 3
-#define DEGCIRCLE 360.0
-#define PI 3.14159265358979323846
 
 /*
 Calculate the angular difference between two numbers of double precision.
@@ -207,15 +204,9 @@ RadAngularDifferenceWrapper(PyObject* self, PyObject* args)
 
         int nPoints = (int)PyArray_SIZE(radAngleStart);
         if (PyArray_TYPE(radAngleEnd) == NPY_DOUBLE) {
-            double* data1 = (double*)PyArray_DATA(radAngleStart);
-            double* data2 = (double*)PyArray_DATA(radAngleEnd);
-            double* result_data = (double*)PyArray_DATA(result_array);
-            AngularDifferencesDouble(data1, data2, 2.0 * PI, nPoints, smallestAngle, result_data);
+            AngularDifferencesDouble((double*)PyArray_DATA(radAngleStart), (double*)PyArray_DATA(radAngleEnd), 2.0 * PI, nPoints, smallestAngle, (double*)PyArray_DATA(result_array));
         } else if (PyArray_TYPE(radAngleEnd) == NPY_FLOAT) {
-            float* data1 = (float*)PyArray_DATA(radAngleStart);
-            float* data2 = (float*)PyArray_DATA(radAngleEnd);
-            float* result_data = (float*)PyArray_DATA(result_array);
-            AngularDifferencesFloat(data1, data2, (float)(2.0 * PI), nPoints, smallestAngle, result_data);
+            AngularDifferencesFloat((float*)PyArray_DATA(radAngleStart), (float*)PyArray_DATA(radAngleEnd), (float)(2.0 * PI), nPoints, smallestAngle, (float*)PyArray_DATA(result_array));
         } else {
             PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
             return NULL;
@@ -314,15 +305,9 @@ DegAngularDifferenceWrapper(PyObject* self, PyObject* args)
 
         int nPoints = (int)PyArray_SIZE(degAngleStart);
         if (PyArray_TYPE(degAngleEnd) == NPY_DOUBLE) {
-            double* data1 = (double*)PyArray_DATA(degAngleStart);
-            double* data2 = (double*)PyArray_DATA(degAngleEnd);
-            double* result_data = (double*)PyArray_DATA(result_array);
-            AngularDifferencesDouble(data1, data2, DEGCIRCLE, nPoints, smallestAngle, result_data);
+            AngularDifferencesDouble((double*)PyArray_DATA(degAngleStart), (double*)PyArray_DATA(degAngleEnd), DEGCIRCLE, nPoints, smallestAngle, (double*)PyArray_DATA(result_array));
         } else if (PyArray_TYPE(degAngleEnd) == NPY_FLOAT) {
-            float* data1 = (float*)PyArray_DATA(degAngleStart);
-            float* data2 = (float*)PyArray_DATA(degAngleEnd);
-            float* result_data = (float*)PyArray_DATA(result_array);
-            AngularDifferencesFloat(data1, data2, DEGCIRCLE, nPoints, smallestAngle, result_data);
+            AngularDifferencesFloat((float*)PyArray_DATA(degAngleStart), (float*)PyArray_DATA(degAngleEnd), DEGCIRCLE, nPoints, smallestAngle, (float*)PyArray_DATA(result_array));
         } else {
             PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
             return NULL;
@@ -386,15 +371,12 @@ RRM2DDMWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    int array_type;
     PyArrayObject* in_array;
-    if (PyArray_ISINTEGER(rrmPoint) == 0) {
-        array_type = PyArray_TYPE(rrmPoint);
+    if (PyArray_ISINTEGER(rrmPoint) == 0)
         in_array = rrmPoint;
-    } else {
-        array_type = NPY_FLOAT;
+    else {
         in_array = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(rrmPoint), PyArray_SHAPE(rrmPoint), array_type);
+            PyArray_NDIM(rrmPoint), PyArray_SHAPE(rrmPoint), NPY_DOUBLE);
         if (in_array == NULL) {
             PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
             return NULL;
@@ -410,7 +392,7 @@ RRM2DDMWrapper(PyObject* self, PyObject* args)
         }
     }
     PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
-        PyArray_NDIM(in_array), PyArray_SHAPE(in_array), array_type);
+        PyArray_NDIM(in_array), PyArray_SHAPE(in_array), PyArray_TYPE(in_array));
     if (result_array == NULL) {
         PyErr_SetString(PyExc_ValueError, "Could not create output array.");
         return NULL;
@@ -418,15 +400,11 @@ RRM2DDMWrapper(PyObject* self, PyObject* args)
 
     int nPoints = (int)PyArray_SIZE(in_array) / NCOORDSINPOINT;
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(in_array);
-        double* result_data = (double*)PyArray_DATA(result_array);
         XXM2YYMDouble(
-            data1, nPoints, 180.0 / PI, result_data);
+            (double*)PyArray_DATA(in_array), nPoints, 180.0 / PI, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(in_array);
-        float* result_data = (float*)PyArray_DATA(result_array);
         XXM2YYMFloat(
-            data1, nPoints, (float)(180.0 / PI), result_data);
+            (float*)PyArray_DATA(in_array), nPoints, (float)(180.0 / PI), (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float or int types accepted.");
@@ -450,15 +428,12 @@ DDM2RRMWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    int array_type;
     PyArrayObject* in_array;
-    if (PyArray_ISINTEGER(ddmPoint) == 0) {
-        array_type = PyArray_TYPE(ddmPoint);
+    if (PyArray_ISINTEGER(ddmPoint) == 0)
         in_array = ddmPoint;
-    } else {
-        array_type = NPY_FLOAT;
+    else {
         in_array = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(ddmPoint), PyArray_SHAPE(ddmPoint), array_type);
+            PyArray_NDIM(ddmPoint), PyArray_SHAPE(ddmPoint), NPY_DOUBLE);
         if (in_array == NULL) {
             PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
             return NULL;
@@ -474,22 +449,18 @@ DDM2RRMWrapper(PyObject* self, PyObject* args)
         }
     }
     PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
-        PyArray_NDIM(in_array), PyArray_SHAPE(in_array), array_type);
+        PyArray_NDIM(in_array), PyArray_SHAPE(in_array), PyArray_TYPE(in_array));
     if (result_array == NULL) {
         PyErr_SetString(PyExc_ValueError, "Could not create output array.");
         return NULL;
     }
     int nPoints = (int)PyArray_SIZE(in_array) / NCOORDSINPOINT;
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
-        double* data1 = (double*)PyArray_DATA(in_array);
-        double* result_data = (double*)PyArray_DATA(result_array);
         XXM2YYMDouble(
-            data1, nPoints, PI / 180.0, result_data);
+            (double*)PyArray_DATA(in_array), nPoints, PI / 180.0, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
-        float* data1 = (float*)PyArray_DATA(in_array);
-        float* result_data = (float*)PyArray_DATA(result_array);
         XXM2YYMFloat(
-            data1, nPoints, (float)(PI / 180.0), result_data);
+            (float*)PyArray_DATA(in_array), nPoints, (float)(PI / 180.0), (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float or int types accepted.");

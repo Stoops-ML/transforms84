@@ -1,20 +1,49 @@
+from typing import Union
+
+import numpy as np
 import numpy.typing as npt
 
-from . import DTYPES_SUPPORTED
-
 def deg_angular_difference(
-    angle1: float | npt.NDArray[DTYPES_SUPPORTED],
-    angle2: float | npt.NDArray[DTYPES_SUPPORTED],
+    angle1: Union[
+        float,
+        npt.NDArray[
+            Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+        ],
+    ],
+    angle2: Union[
+        float,
+        npt.NDArray[
+            Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+        ],
+    ],
     smallest_angle: bool,
 ) -> float: ...
 def rad_angular_difference(
-    angle1: float | npt.NDArray[DTYPES_SUPPORTED],
-    angle2: float | npt.NDArray[DTYPES_SUPPORTED],
+    angle1: Union[
+        float,
+        npt.NDArray[
+            Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+        ],
+    ],
+    angle2: Union[
+        float,
+        npt.NDArray[
+            Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+        ],
+    ],
     smallest_angle: bool,
 ) -> float: ...
 def RRM2DDM(
-    rrm_position: npt.NDArray[DTYPES_SUPPORTED],
-) -> npt.NDArray[DTYPES_SUPPORTED]: ...
+    rrm_position: npt.NDArray[
+        Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+    ],
+) -> npt.NDArray[
+    Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+]: ...
 def DDM2RRM(
-    ddm_position: npt.NDArray[DTYPES_SUPPORTED],
-) -> npt.NDArray[DTYPES_SUPPORTED]: ...
+    ddm_position: npt.NDArray[
+        Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+    ],
+) -> npt.NDArray[
+    Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+]: ...

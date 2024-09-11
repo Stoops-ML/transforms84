@@ -1,4 +1,6 @@
-import numpy as np
+import os
 
-DTYPES_SUPPORTED = np.float32 | np.float64
-__version__ = "0.2.0"
+commit_hash = os.getenv("COMMIT_HASH", "")
+if commit_hash:  # pragma: no cover
+    commit_hash = f"+{commit_hash}"
+__version__ = f"0.2.0{commit_hash}"

@@ -17,7 +17,7 @@ def test_XXM2YYM_one_point(dtype):
     out = RRM2DDM(DDM2RRM(ddm_point))
     assert np.all(np.isclose(ddm_point, out))
     if np.issubdtype(dtype, np.integer):
-        assert out.dtype == np.float32
+        assert out.dtype == np.float64
     else:
         assert ddm_point.dtype == out.dtype
 
