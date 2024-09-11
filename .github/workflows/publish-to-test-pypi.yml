@@ -23,6 +23,7 @@ jobs:
         python3 -m pip install numpy
         python3 -m pip install setuptools
         python3 -m pip install setuptools-scm
+        python3 -m pip install wheel
         python3 -m setup bdist_wheel
     - name: Store the distribution packages
       uses: actions/upload-artifact@v3
