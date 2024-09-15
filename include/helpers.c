@@ -1,5 +1,5 @@
+#include "definitions.h"
 #include <Python.h>
-#include <definitions.h>
 #include <math.h>
 #include <numpy/arrayobject.h>
 

@@ -1,7 +1,6 @@
+#include "definitions.h"
 #include <Python.h>
 #include <numpy/arrayobject.h>
-#include "definitions.h"
-#include "general.h"
 
 /*
 Calculate the Haversine distance between two points in double precision.
@@ -89,16 +88,44 @@ HaversineWrapper(PyObject* self, PyObject* args)
             "Input arrays must be a multiple of three.");
         return NULL;
     }
-    
-    // ensure float types
+
+    // ensure matching floating point types
     PyArrayObject *inArrayStart, *inArrayEnd;
-    if (((PyArray_TYPE(rrmStart) == NPY_FLOAT) && (PyArray_TYPE(rrmEnd) == NPY_DOUBLE)) || (PyArray_ISFLOAT(rrmStart) == 0))
-        inArrayStart = MakeNpyDoubleArrayFrom(rrmStart);
-    else
+    if (((PyArray_TYPE(rrmStart) == NPY_FLOAT) && (PyArray_TYPE(rrmEnd) == NPY_DOUBLE)) || (PyArray_ISFLOAT(rrmStart) == 0)) {
+        inArrayStart = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(rrmStart), PyArray_SHAPE(rrmStart), NPY_DOUBLE);
+        if (inArrayStart == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayStart, rrmStart) < 0) {
+            Py_DECREF(inArrayStart);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayStart))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    } else
         inArrayStart = rrmStart;
-    if (((PyArray_TYPE(rrmEnd) == NPY_FLOAT) && (PyArray_TYPE(rrmStart) == NPY_DOUBLE)) || (PyArray_ISFLOAT(rrmEnd) == 0))
-        inArrayEnd = MakeNpyDoubleArrayFrom(rrmEnd);
-    else
+    if (((PyArray_TYPE(rrmEnd) == NPY_FLOAT) && (PyArray_TYPE(rrmStart) == NPY_DOUBLE)) || (PyArray_ISFLOAT(rrmEnd) == 0)) {
+        inArrayEnd = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(rrmEnd), PyArray_SHAPE(rrmEnd), NPY_DOUBLE);
+        if (inArrayEnd == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayEnd, rrmEnd) < 0) {
+            Py_DECREF(inArrayEnd);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayEnd))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    } else
         inArrayEnd = rrmEnd;
 
     // prepare inputs
@@ -111,17 +138,17 @@ HaversineWrapper(PyObject* self, PyObject* args)
 
     // run function
     switch (PyArray_TYPE(result_array)) {
-        case NPY_DOUBLE: 
-            HaversineDouble(
-                (double*)PyArray_DATA(inArrayStart), (double*)PyArray_DATA(inArrayEnd), (int)nPoints, isArraysSizeEqual, mRadiusSphere, (double*)PyArray_DATA(result_array));
-            break;
-        case NPY_FLOAT:
-            HaversineFloat(
-                (float*)PyArray_DATA(inArrayStart), (float*)PyArray_DATA(inArrayEnd), (int)nPoints, isArraysSizeEqual, (float)(mRadiusSphere), (float*)PyArray_DATA(result_array));
-            break;
-        default:
-            PyErr_SetString(PyExc_ValueError,
-                "Only 32 and 64 bit float types or all integer are accepted.");
+    case NPY_DOUBLE:
+        HaversineDouble(
+            (double*)PyArray_DATA(inArrayStart), (double*)PyArray_DATA(inArrayEnd), (int)nPoints, isArraysSizeEqual, mRadiusSphere, (double*)PyArray_DATA(result_array));
+        break;
+    case NPY_FLOAT:
+        HaversineFloat(
+            (float*)PyArray_DATA(inArrayStart), (float*)PyArray_DATA(inArrayEnd), (int)nPoints, isArraysSizeEqual, (float)(mRadiusSphere), (float*)PyArray_DATA(result_array));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
         return NULL;
     }
     return (PyObject*)result_array;
