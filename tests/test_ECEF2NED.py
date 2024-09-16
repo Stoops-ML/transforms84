@@ -194,6 +194,29 @@ def test_ECEF2NED_points(dtype):
     assert np.all(np.isclose(out[:, 2, 0], 360.0, rtol=0.001))
 
 
+@pytest.mark.parametrize(
+    "dtype0,dtype1", [(np.float64, np.float32), (np.float32, np.float64)]
+)
+def test_ECEF2NED__different_dtypes(dtype0, dtype1):
+    XYZ = np.array(
+        [
+            [[1345660], [-4350891], [4452314]],
+            [[1345660], [-4350891], [4452314]],
+        ],
+        dtype=dtype0,
+    )
+    ref_point = DDM2RRM(
+        np.array(
+            [[[44.532], [-72.782], [1699.0]], [[44.532], [-72.782], [1699.0]]],
+            dtype=dtype1,
+        )
+    )
+    out = ECEF2NED(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert np.all(np.isclose(out[:, 0, 0], 1334.3, rtol=0.001))
+    assert np.all(np.isclose(out[:, 1, 0], -2544.4, rtol=0.001))
+    assert np.all(np.isclose(out[:, 2, 0], 360.0, rtol=0.001))
+
+
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
 def test_ECEF2NED_one2many(dtype):
     rrm_target = DDM2RRM(np.array([[31], [32], [0]], dtype=dtype))

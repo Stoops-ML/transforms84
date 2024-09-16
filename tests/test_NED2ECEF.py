@@ -17,13 +17,6 @@ def test_NED2ECEF_raise_wrong_dtype():
         NED2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)  # type: ignore
 
 
-def test_NED2ECEF_raise_same_dtype():
-    XYZ = np.array([[1.3457e06], [-4.3509e06], [4.4523e06]], dtype=np.float32)
-    ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float64)
-    with pytest.raises(ValueError):
-        NED2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
-
-
 def test_NED2ECEF_raise_wrong_size():
     XYZ = np.array([[1.3457e06], [-4.3509e06], [4.4523e06]], dtype=np.float32)
     ref_point = np.array([[5010306], [2336344], [3170376.2], [1]], dtype=np.float64)
@@ -84,6 +77,34 @@ def test_NED2ECEF_point(dtype, tol):
     assert np.isclose(out[0, 0], 1.3457e06, rtol=tol)
     assert np.isclose(out[1, 0], -4.3509e06, rtol=tol)
     assert np.isclose(out[2, 0], 4.4523e06, rtol=tol)
+
+
+@pytest.mark.parametrize(
+    "dtype0,dtype1,tol",
+    [
+        (np.float64, np.float32, tol_double_rtol),
+        (np.float32, np.float64, tol_double_rtol),
+    ],
+)
+def test_NED2ECEF_different_dtypes(dtype0, dtype1, tol):
+    XYZ = np.array(
+        [
+            [[1334.3], [-2544.4], [360.0]],
+            [[1334.3], [-2544.4], [360.0]],
+        ],
+        dtype=dtype0,
+    )
+    ref_point = DDM2RRM(
+        np.array(
+            [[[44.532], [-72.782], [1.699]], [[44.532], [-72.782], [1.699]]],
+            dtype=dtype1,
+        )
+    )
+    out = NED2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert out.dtype == np.float64
+    assert np.all(np.isclose(out[:, 0, 0], 1.3457e06, rtol=tol))
+    assert np.all(np.isclose(out[:, 1, 0], -4.3509e06, rtol=tol))
+    assert np.all(np.isclose(out[:, 2, 0], 4.4523e06, rtol=tol))
 
 
 @pytest.mark.parametrize(

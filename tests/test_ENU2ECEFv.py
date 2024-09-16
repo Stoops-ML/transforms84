@@ -8,6 +8,27 @@ from .conftest import tol_double_atol, tol_float_atol
 
 
 @pytest.mark.parametrize(
+    "dtype0,dtype1,tol",
+    [
+        (np.float64, np.float32, tol_double_atol),
+        (np.float32, np.float64, tol_double_atol),
+    ],
+)
+def test_ENU2ECEFv_different_dtypes(dtype0, dtype1, tol):
+    rrm_local = DDM2RRM(np.array([[17.41], [78.27], [0]], dtype=dtype0))
+    uvw = np.array([[-27.6190], [-16.4298], [-0.3186]], dtype=dtype1)
+    out = ENU2ECEFv(rrm_local, uvw)
+    assert out.dtype == np.float64
+    assert np.all(
+        np.isclose(
+            out,
+            np.array([[27.9798], [-1.0993], [-15.7724]], dtype=np.float32),
+            atol=tol,
+        )
+    )
+
+
+@pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
 def test_ENU2ECEFv(dtype, tol):

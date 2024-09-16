@@ -22,6 +22,27 @@ def test_ECEF2ENUv(dtype, tol):
     )
 
 
+@pytest.mark.parametrize(
+    "dtype0,dtype1,tol",
+    [
+        (np.float64, np.float32, tol_double_atol),
+        (np.float32, np.float64, tol_double_atol),
+    ],
+)
+def test_ECEF2ENUv_different_dtypes(dtype0, dtype1, tol):
+    rrm_local = DDM2RRM(np.array([[17.4114], [78.2700], [0]], dtype=dtype0))
+    uvw = np.array([[27.9799], [-1.0990], [-15.7723]], dtype=dtype1)
+    out = ECEF2ENUv(rrm_local, uvw)
+    assert out.dtype == np.float64
+    assert np.all(
+        np.isclose(
+            out,
+            np.array([[-27.6190], [-16.4298], [-0.3186]]),
+            atol=tol,
+        )
+    )
+
+
 @pytest.mark.skip(reason="Get check data")
 @pytest.mark.parametrize(
     "dtype,tol",

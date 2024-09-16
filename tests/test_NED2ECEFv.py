@@ -8,6 +8,27 @@ from .conftest import tol_double_atol, tol_float_atol
 
 
 @pytest.mark.parametrize(
+    "dtype0,dtype1,tol",
+    [
+        (np.float64, np.float32, tol_double_atol),
+        (np.float32, np.float64, tol_double_atol),
+    ],
+)
+def test_NED2ECEFv_different_dtypes(dtype0, dtype1, tol):
+    rrm_local = DDM2RRM(np.array([[61.64], [30.70], [0]], dtype=dtype0))
+    uvw = np.array([[-434.0403], [152.4451], [-684.6964]], dtype=dtype1)
+    out = NED2ECEFv(rrm_local, uvw)
+    assert out.dtype == np.float64
+    assert np.all(
+        np.isclose(
+            out,
+            np.array([[530.2445], [492.1283], [396.3459]]),
+            atol=tol,
+        )
+    )
+
+
+@pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
 def test_NED2ECEFv_float(dtype, tol):

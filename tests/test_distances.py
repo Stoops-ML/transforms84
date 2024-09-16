@@ -82,6 +82,37 @@ def test_Haversine(dtype):
     )
 
 
+@pytest.mark.parametrize(
+    "dtype0,dtype1", [(np.float64, np.float32), (np.float32, np.float64)]
+)
+def test_Haversine_different_dtypes(dtype0, dtype1):
+    rrm_start_with_height = np.array(
+        [[np.deg2rad(33)], [np.deg2rad(34)], [100000]], dtype=dtype0
+    )
+    rrm_start = np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=dtype0)
+    rrm_end = np.array([[np.deg2rad(32)], [np.deg2rad(38)], [0]], dtype=dtype1)
+    out0 = Haversine(rrm_start_with_height, rrm_end, WGS84.mean_radius)
+    out1 = Haversine(rrm_start, rrm_end, WGS84.mean_radius)
+    out2 = Haversine(rrm_end, rrm_start_with_height, WGS84.mean_radius)
+    out3 = Haversine(rrm_end, rrm_start, WGS84.mean_radius)
+    assert out0.dtype == np.float64
+    assert out1.dtype == np.float64
+    assert out2.dtype == np.float64
+    assert out3.dtype == np.float64
+    assert np.isclose(out0, 391225.574516907)
+    assert np.isclose(
+        out1,
+        out0,
+    )
+    assert np.isclose(out1, 391225.574516907)
+    assert np.isclose(out2, 391225.574516907)
+    assert np.isclose(out3, 391225.574516907)
+    assert np.isclose(
+        out1,
+        out3,
+    )
+
+
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
 def test_Haversine_with_height(dtype):
     rrm_start_with_height = np.array(
