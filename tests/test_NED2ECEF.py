@@ -17,13 +17,6 @@ def test_NED2ECEF_raise_wrong_dtype():
         NED2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)  # type: ignore
 
 
-def test_NED2ECEF_raise_same_dtype():
-    XYZ = np.array([[1.3457e06], [-4.3509e06], [4.4523e06]], dtype=np.float32)
-    ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float64)
-    with pytest.raises(ValueError):
-        NED2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
-
-
 def test_NED2ECEF_raise_wrong_size():
     XYZ = np.array([[1.3457e06], [-4.3509e06], [4.4523e06]], dtype=np.float32)
     ref_point = np.array([[5010306], [2336344], [3170376.2], [1]], dtype=np.float64)

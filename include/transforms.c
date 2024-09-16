@@ -1151,10 +1151,6 @@ ECEF2ENUvWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
-    if (PyArray_TYPE(rrmLLALocalOrigin) != PyArray_TYPE(mmmXYZTarget)) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
-        return NULL;
-    }
 
     // ensure matching floating point types
     PyArrayObject *inArrayLocal, *inArrayOrigin;
@@ -1250,10 +1246,6 @@ NED2ECEFWrapper(PyObject* self, PyObject* args)
     }
     if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSINPOINT) != 0 || (PyArray_SIZE(mmmLocal) % NCOORDSINPOINT) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
-        return NULL;
-    }
-    if (PyArray_TYPE(rrmLLALocalOrigin) != PyArray_TYPE(mmmLocal)) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
         return NULL;
     }
 
@@ -1352,10 +1344,6 @@ ENU2ECEFWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
-    if (PyArray_TYPE(rrmLLALocalOrigin) != PyArray_TYPE(mmmLocal)) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
-        return NULL;
-    }
 
     // ensure matching floating point types
     PyArrayObject *inArrayLocal, *inArrayOrigin;
@@ -1449,10 +1437,6 @@ ENU2ECEFvWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
-    if (PyArray_TYPE(rrmLLALocalOrigin) != PyArray_TYPE(mmmLocal)) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
-        return NULL;
-    }
 
     // ensure matching floating point types
     PyArrayObject *inArrayLocal, *inArrayOrigin;
@@ -1544,10 +1528,6 @@ NED2ECEFvWrapper(PyObject* self, PyObject* args)
     }
     if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSINPOINT) != 0 || (PyArray_SIZE(mmmLocal) % NCOORDSINPOINT) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
-        return NULL;
-    }
-    if (PyArray_TYPE(rrmLLALocalOrigin) != PyArray_TYPE(mmmLocal)) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
         return NULL;
     }
 

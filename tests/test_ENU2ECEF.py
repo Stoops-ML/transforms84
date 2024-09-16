@@ -17,13 +17,6 @@ def test_ENU2ECEF_raise_wrong_dtype():
         ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)  # type: ignore
 
 
-def test_ENU2ECEF_raise_same_dtype():
-    XYZ = np.array([[3906.67536618], [2732.16708], [1519.47079847]], dtype=np.float32)
-    ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float64)
-    with pytest.raises(ValueError):
-        ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
-
-
 def test_ENU2ECEF_raise_wrong_size():
     XYZ = np.array([[3906.67536618], [2732.16708], [1519.47079847]], dtype=np.float32)
     ref_point = np.array([[5010306], [2336344], [3170376.2], [1]], dtype=np.float64)
