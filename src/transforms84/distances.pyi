@@ -1,9 +1,16 @@
+from typing import Union
+
+import numpy as np
 import numpy.typing as npt
 
-from . import DTYPES_SUPPORTED
-
 def Haversine(
-    rrmStart: npt.NDArray[DTYPES_SUPPORTED],
-    rrmEnd: npt.NDArray[DTYPES_SUPPORTED],
+    rrmStart: npt.NDArray[
+        Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+    ],
+    rrmEnd: npt.NDArray[
+        Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+    ],
     m_radius_sphere: float,
-) -> npt.NDArray[DTYPES_SUPPORTED]: ...
+) -> npt.NDArray[
+    Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+]: ...
