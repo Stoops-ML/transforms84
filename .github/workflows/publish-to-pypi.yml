@@ -1,52 +1,76 @@
-name: Publish to PyPi
+name: Publish to Test PyPi
 
 on:
+  workflow_dispatch:
   release:
-    types: [created]
+    types: [published]
 
 jobs:
-  build:
-    name: Build distribution 📦
+  build_sdist:
+    name: Build sdist 📦
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.12
+      - name: Build a source tarball
+        run: |
+          python -m pip install --upgrade pip
+          python3 -m pip install numpy
+          python3 -m pip install setuptools
+          python3 -m pip install setuptools-scm
+          python3 setup.py sdist
+      - name: Store the distribution packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/
+
+  build_wheels:
+    name: Build wheels on ${{matrix.os}} 🎡
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        # os: [ubuntu-latest, windows-latest, macos-13, macos-14]
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Build a source tarball
-      run: |
-        python -m pip install --upgrade pip
-        python3 -m pip install numpy
-        python3 -m pip install setuptools
-        python3 -m pip install setuptools-scm
-        python3 setup.py sdist
-    - name: Store the distribution packages
-      uses: actions/upload-artifact@v3
-      with:
-        name: python-package-distributions
-        path: dist/
+      - uses: actions/checkout@v4
 
-  publish-to-pypi:
-    name: >-
-      Publish Python 🐍 distribution 📦 to PyPI
-    needs:
-    - build
+      - name: Build wheels 🎡
+        env:
+          CIBW_BUILD: "cp311-*"
+          CIBW_SKIP: "pp* *-win32 *_i686"
+        uses: pypa/cibuildwheel@v2.20.0
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          path: ./wheelhouse/*.whl
+
+  upload_pypi:
+    needs: [build_sdist, build_wheels]
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://pypi.org/p/transforms84
+      url: https://test.pypi.org/p/transforms84
     permissions:
-      id-token: write  # IMPORTANT: mandatory for trusted publishing
+      id-token: write
+    # upload to pypi only on release, not on manual dispatch
+    if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-    - name: Download all the dists
-      uses: actions/download-artifact@v3
-      with:
-        name: python-package-distributions
-        path: dist/
-    - name: Publish distribution 📦 to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: actions/download-artifact@v4
+        with:
+          # unpacks all CIBW artifacts into dist/
+          pattern: cibw-*
+          path: dist
+          merge-multiple: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: sdist
+
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://pypi.org/legacy/
