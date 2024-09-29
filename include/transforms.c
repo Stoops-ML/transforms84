@@ -565,7 +565,7 @@ void NED2AERFloat(const float* mmmENU, int nPoints, float* rrmAER)
         i = iPoint * NCOORDSINPOINT;
         rrmAER[i + 0] = atan2f(mmmENU[i + 1], mmmENU[i + 0]);
         if (rrmAER[i + 0] < 0)
-            rrmAER[i + 0] = rrmAER[i + 0] + (2.0f * PI);
+            rrmAER[i + 0] = rrmAER[i + 0] + (2.0f * PIf);
         rrmAER[i + 2] = sqrtf(mmmENU[i + 0] * mmmENU[i + 0] + mmmENU[i + 1] * mmmENU[i + 1] + mmmENU[i + 2] * mmmENU[i + 2]);
         rrmAER[i + 1] = asinf(-mmmENU[i + 2] / rrmAER[i + 2]);
     }
@@ -613,7 +613,7 @@ void ENU2AERFloat(const float* mmmNED, int nPoints, float* rrmAER)
         i = iPoint * NCOORDSINPOINT;
         rrmAER[i + 0] = atan2f(mmmNED[i + 0], mmmNED[i + 1]);
         if (rrmAER[i + 0] < 0)
-            rrmAER[i + 0] = rrmAER[i + 0] + (2.0f * PI);
+            rrmAER[i + 0] = rrmAER[i + 0] + (2.0f * PIf);
         rrmAER[i + 2] = sqrtf(mmmNED[i + 0] * mmmNED[i + 0] + mmmNED[i + 1] * mmmNED[i + 1] + mmmNED[i + 2] * mmmNED[i + 2]);
         rrmAER[i + 1] = asinf(mmmNED[i + 2] / rrmAER[i + 2]);
     }
