@@ -2,11 +2,6 @@ import os
 import sys
 from setuptools import Extension, setup
 
-include_dirs = [
-    np.get_include(),
-    "\\".join((os.path.dirname(os.path.realpath(__file__)), "include")),
-]
-
 import numpy as np
 
 include_dirs = [
