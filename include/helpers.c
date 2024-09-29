@@ -74,7 +74,7 @@ void AngularDifferencesFloat(const float* AngleStart,
     float* Difference)
 {
     int i;
-    // #pragma omp parallel for if(nAngles > omp_get_num_procs () * 2)
+    #pragma omp parallel for if(nAngles > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (i = 0; i < nAngles; ++i) {
         Difference[i] = fmodf(fabsf(AngleStart[i] - AngleEnd[i]), MaxValue);
         if (smallestAngle)
@@ -103,6 +103,7 @@ void AngularDifferencesDouble(const double* AngleStart,
     double* Difference)
 {
     int i;
+    #pragma omp parallel for if(nAngles > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (i = 0; i < nAngles; ++i) {
         Difference[i] = fmod(fabs(AngleStart[i] - AngleEnd[i]), MaxValue);
         if (smallestAngle)
@@ -125,6 +126,7 @@ void XXM2YYMDouble(const double* rrmPoint,
     double* ddmPoint)
 {
     int iPoint, i;
+    #pragma omp parallel for if(nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         i = iPoint * NCOORDSINPOINT;
         ddmPoint[i + 0] = rrmPoint[i + 0] * transform;
@@ -146,6 +148,7 @@ void XXM2YYMFloat(const float* rrmPoint,
     float* ddmPoint)
 {
     int iPoint, i;
+    #pragma omp parallel for if(nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         i = iPoint * NCOORDSINPOINT;
         ddmPoint[i + 0] = rrmPoint[i + 0] * transform;

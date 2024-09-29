@@ -1,3 +1,4 @@
+from time import perf_counter
 import numpy as np
 import pytest
 
@@ -7,6 +8,46 @@ from transforms84.systems import WGS84
 
 # https://calculator.academy/haversine-distance-calculator/
 
+def _test_Haversine_omp():
+    N = 10000000
+    print('generating N points')
+    # rrm_start array of N point, from 33.0, 34.0, 0.0 to 33+i/N
+    # rrm_start = np.array([
+    #     [np.deg2rad(33 + i / N) for i in range(N)],
+    #     [np.deg2rad(34 + i / N) for i in range(N)],
+    #     [0 for i in range(N)],
+    # ], dtype=np.float64)
+    # rrm_end = np.array([
+    #     [np.deg2rad(32 + i / N) for i in range(N)],
+    #     [np.deg2rad(38 + i / N) for i in range(N)],
+    #     [0 for i in range(N)],
+    # ], dtype=np.float64)
+
+    rrm_start = np.array([
+        np.deg2rad(np.linspace(33, 33 + 1/N, N)),
+        np.deg2rad(np.linspace(34, 34 + 1/N, N)),
+        np.zeros(N)
+    ], dtype=np.float64)
+    
+    rrm_end = np.array([
+        np.deg2rad(np.linspace(32, 32 + 1/N, N)),
+        np.deg2rad(np.linspace(38, 38 + 1/N, N)),
+        np.zeros(N)
+    ], dtype=np.float64)
+
+    print(rrm_start.shape, rrm_end.shape)
+
+    # generate [[]*N, []*N, []*N] array of points using numpy, with values from x=33.0,34.0,0.0 to X+i/N
+    
+
+
+    print('Haversine')
+    perf_counter_start = perf_counter()
+    Haversine(rrm_start, rrm_end, WGS84.mean_radius)
+    perf_counter_end = perf_counter()
+    print(f"Time: {perf_counter_end - perf_counter_start}")
+# if __name__ == "__main__":
+#     _test_Haversine_omp()
 
 def test_Haersine_raise_wrong_dtype():
     rrm_start = np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=np.float16)

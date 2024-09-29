@@ -25,11 +25,12 @@ target_link_libraries(Transforms84 PRIVATE OpenMP::OpenMP_C)
 target_include_directories(Transforms84 PRIVATE ${Python3_INCLUDE_DIRS})
 target_include_directories(Transforms84 PRIVATE ${Python3_NumPy_INCLUDE_DIRS})
 
-target_include_directories(Transforms84 PUBLIC)
+target_include_directories(Transforms84 PUBLIC include)
 
 add_executable(Transforms84_Tester
     tests/test.c
 )
+
 
 target_link_libraries(Transforms84_Tester PRIVATE Transforms84)
 target_include_directories(Transforms84_Tester PRIVATE include)

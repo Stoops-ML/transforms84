@@ -25,7 +25,7 @@ void HaversineDouble(const double* rrmStart,
     double* mDistance)
 {
     int iPoint, iPointEnd, iPointStart;
-    # pragma omp parallel for if(nPoints > omp_get_num_procs() * 4)
+    #pragma omp parallel for if(nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         iPointEnd = iPoint * NCOORDSINPOINT;
         iPointStart = iPointEnd * isArraysSizeEqual;
@@ -54,7 +54,7 @@ void HaversineFloat(const float* rrmStart,
     float* mDistance)
 {
     int iPoint, iPointEnd, iPointStart;
-    # pragma omp parallel for if(nPoints > omp_get_num_procs() * 4)
+    #pragma omp parallel for if(nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         iPointEnd = iPoint * NCOORDSINPOINT;
         iPointStart = iPointEnd * isArraysSizeEqual;
