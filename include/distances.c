@@ -1,8 +1,8 @@
 #include <omp.h>
 #include <Python.h>
-#include <definitions.h>
 #include <numpy/arrayobject.h>
 
+#include "definitions.h"
 
 /*
 Calculate the Haversine distance between two points in double precision.
@@ -92,32 +92,10 @@ HaversineWrapper(PyObject* self, PyObject* args)
             "Input arrays must be a multiple of three.");
         return NULL;
     }
-    if (PyArray_TYPE(rrmStart) != PyArray_TYPE(rrmEnd)) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
-        return NULL;
-    }
 
-    npy_intp nPoints = PyArray_SIZE(rrmEnd) / NCOORDSINPOINT;
-    PyArrayObject *inArrayEnd, *inArrayStart;
-    if (PyArray_ISINTEGER(rrmEnd) == 0) {
-        inArrayStart = rrmStart;
-        inArrayEnd = rrmEnd;
-    } else {
-        inArrayEnd = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(rrmEnd), PyArray_SHAPE(rrmEnd), NPY_DOUBLE);
-        if (inArrayEnd == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
-            return NULL;
-        }
-        if (PyArray_CopyInto(inArrayEnd, rrmEnd) < 0) {
-            Py_DECREF(inArrayEnd);
-            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
-            return NULL;
-        }
-        if (!(PyArray_ISCONTIGUOUS(inArrayEnd))) {
-            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
-            return NULL;
-        }
+    // ensure matching floating point types
+    PyArrayObject *inArrayStart, *inArrayEnd;
+    if (((PyArray_TYPE(rrmStart) == NPY_FLOAT) && (PyArray_TYPE(rrmEnd) == NPY_DOUBLE)) || (PyArray_ISFLOAT(rrmStart) == 0)) {
         inArrayStart = (PyArrayObject*)PyArray_SimpleNew(
             PyArray_NDIM(rrmStart), PyArray_SHAPE(rrmStart), NPY_DOUBLE);
         if (inArrayStart == NULL) {
@@ -133,19 +111,46 @@ HaversineWrapper(PyObject* self, PyObject* args)
             PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
             return NULL;
         }
-    }
+    } else
+        inArrayStart = rrmStart;
+    if (((PyArray_TYPE(rrmEnd) == NPY_FLOAT) && (PyArray_TYPE(rrmStart) == NPY_DOUBLE)) || (PyArray_ISFLOAT(rrmEnd) == 0)) {
+        inArrayEnd = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(rrmEnd), PyArray_SHAPE(rrmEnd), NPY_DOUBLE);
+        if (inArrayEnd == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayEnd, rrmEnd) < 0) {
+            Py_DECREF(inArrayEnd);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayEnd))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    } else
+        inArrayEnd = rrmEnd;
+
+    // prepare inputs
+    npy_intp nPoints = PyArray_SIZE(rrmEnd) / NCOORDSINPOINT;
+    int isArraysSizeEqual = (PyArray_Size((PyObject*)inArrayStart) == PyArray_Size((PyObject*)inArrayEnd));
     PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
         1, &nPoints, PyArray_TYPE(inArrayEnd));
-    int isArraysSizeEqual = (PyArray_Size((PyObject*)inArrayStart) == PyArray_Size((PyObject*)inArrayEnd));
     if (result_array == NULL)
         return NULL;
-    if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
+
+    // run function
+    switch (PyArray_TYPE(result_array)) {
+    case NPY_DOUBLE:
         HaversineDouble(
             (double*)PyArray_DATA(inArrayStart), (double*)PyArray_DATA(inArrayEnd), (int)nPoints, isArraysSizeEqual, mRadiusSphere, (double*)PyArray_DATA(result_array));
-    } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
+        break;
+    case NPY_FLOAT:
         HaversineFloat(
             (float*)PyArray_DATA(inArrayStart), (float*)PyArray_DATA(inArrayEnd), (int)nPoints, isArraysSizeEqual, (float)(mRadiusSphere), (float*)PyArray_DATA(result_array));
-    } else {
+        break;
+    default:
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float types or all integer are accepted.");
         return NULL;

@@ -17,13 +17,6 @@ def test_ENU2ECEF_raise_wrong_dtype():
         ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)  # type: ignore
 
 
-def test_ENU2ECEF_raise_same_dtype():
-    XYZ = np.array([[3906.67536618], [2732.16708], [1519.47079847]], dtype=np.float32)
-    ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float64)
-    with pytest.raises(ValueError):
-        ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
-
-
 def test_ENU2ECEF_raise_wrong_size():
     XYZ = np.array([[3906.67536618], [2732.16708], [1519.47079847]], dtype=np.float32)
     ref_point = np.array([[5010306], [2336344], [3170376.2], [1]], dtype=np.float64)
@@ -122,6 +115,29 @@ def test_ENU2ECEF_points(dtype, tol):
     )
     ref_point = np.array([[[0.1], [0.2], [5000]], [[0.1], [0.2], [5000]]], dtype=dtype)
     out = ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert np.all(np.isclose(out[:, 0, 0], 3906.67536618, atol=tol))
+    assert np.all(np.isclose(out[:, 1, 0], 2732.16708, atol=tol))
+    assert np.all(np.isclose(out[:, 2, 0], 1519.47079847, atol=tol))
+
+
+@pytest.mark.parametrize(
+    "dtype0,dtype1,tol",
+    [
+        (np.float64, np.float32, tol_double_atol),
+        (np.float32, np.float64, tol_float_atol),
+    ],
+)
+def test_ENU2ECEF_different_dtypes(dtype0, dtype1, tol):
+    XYZ = np.array(
+        [
+            [[1901.5690521235], [5316.9485968901], [-6378422.76482545]],
+            [[1901.5690521235], [5316.9485968901], [-6378422.76482545]],
+        ],
+        dtype=dtype0,
+    )
+    ref_point = np.array([[[0.1], [0.2], [5000]], [[0.1], [0.2], [5000]]], dtype=dtype1)
+    out = ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert out.dtype == np.float64
     assert np.all(np.isclose(out[:, 0, 0], 3906.67536618, atol=tol))
     assert np.all(np.isclose(out[:, 1, 0], 2732.16708, atol=tol))
     assert np.all(np.isclose(out[:, 2, 0], 1519.47079847, atol=tol))

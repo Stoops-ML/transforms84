@@ -22,6 +22,27 @@ def test_ECEF2NEDv_float(dtype, tol):
     )
 
 
+@pytest.mark.parametrize(
+    "dtype0,dtype1,tol",
+    [
+        (np.float64, np.float32, tol_double_atol),
+        (np.float32, np.float64, tol_double_atol),
+    ],
+)
+def test_ECEF2NEDv_different_dtypes(dtype0, dtype1, tol):
+    rrm_local = DDM2RRM(np.array([[61.64], [30.70], [0]], dtype=dtype0))
+    uvw = np.array([[530.2445], [492.1283], [396.3459]], dtype=dtype1)
+    out = ECEF2NEDv(rrm_local, uvw)
+    assert out.dtype == np.float64
+    assert np.all(
+        np.isclose(
+            out,
+            np.array([[-434.0403], [152.4451], [-684.6964]]),
+            atol=tol,
+        )
+    )
+
+
 @pytest.mark.skip(reason="Get check data")
 @pytest.mark.parametrize(
     "dtype,tol", [(np.int64, tol_double_atol), (np.int32, tol_float_atol)]

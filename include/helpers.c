@@ -1,8 +1,9 @@
 #include <omp.h>
 #include <Python.h>
-#include <definitions.h>
 #include <math.h>
 #include <numpy/arrayobject.h>
+
+#include "definitions.h"
 
 /*
 Calculate the angular difference between two numbers of double precision.
