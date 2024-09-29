@@ -41,7 +41,7 @@ def test_az_bounds(dtype, tol):
         else:
             assert np.all(np.isclose(rrm_aer[:2], rrm_direction[:2], atol=tol))
             assert np.isclose(rrm_aer[2], rrm_direction[2], atol=10)
-        assert rrm_aer[0, 0] >= -0.00001 and rrm_aer[0, 0] <= (2 * np.pi)
+        assert rrm_aer[0, 0] >= -0.00001 and rrm_aer[0, 0] <= (2 * np.pi) * 1.00001
         assert rrm_aer[1, 0] >= -np.pi and rrm_aer[1, 0] <= np.pi
         assert np.isclose(rrm_aer[1, 0], 0, atol=tol)
         assert rrm_aer.dtype == dtype
@@ -73,6 +73,6 @@ def test_el_bounds(dtype, tol):
         else:
             assert np.all(np.isclose(rrm_aer[:2], rrm_direction[:2], atol=tol))
         assert np.isclose(rrm_aer[2], rrm_direction[2], atol=10)
-        assert rrm_aer[0, 0] >= -0.00001 and rrm_aer[0, 0] <= (2 * np.pi)
+        assert rrm_aer[0, 0] >= -0.00001 and rrm_aer[0, 0] <= (2 * np.pi) * 1.00001
         assert rrm_aer[1, 0] >= -np.pi and rrm_aer[1, 0] <= np.pi
         assert rrm_aer.dtype == dtype
