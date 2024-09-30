@@ -40,4 +40,3 @@ target_link_libraries(Transforms84_Tester PRIVATE OpenMP::OpenMP_C)
 target_include_directories(Transforms84_Tester PRIVATE ${Python3_INCLUDE_DIRS})
 target_include_directories(Transforms84_Tester PRIVATE ${Python3_NumPy_INCLUDE_DIRS})
 target_include_directories(Transforms84_Tester PRIVATE ${OpenMP_C_INCLUDE_DIRS})
-

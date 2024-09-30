@@ -32,7 +32,7 @@ int main()
         wgs84_mean_radius,
         mDistance);
     end = clock();
-    printf("Haversine distances (%lg): %f, %f, %f\n", 
+    printf("Haversine distances (%lg): %f, %f, %f\n",
         (end - start) / (long double)CLOCKS_PER_SEC,
         mDistance[0],
         mDistance[1],

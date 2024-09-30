@@ -1,15 +1,15 @@
 import os
 import sys
-from setuptools import Extension, setup
 
 import numpy as np
+from setuptools import Extension, setup
 
 include_dirs = [
     np.get_include(),
     "\\".join((os.path.dirname(os.path.realpath(__file__)), "include")),
 ]
 
-extra_compile_args=["-fopenmp" if sys.platform == 'linux' else "/openmp"]
+extra_compile_args = ["-fopenmp" if sys.platform == "linux" else "/openmp"]
 setup(
     ext_modules=[
         Extension(
