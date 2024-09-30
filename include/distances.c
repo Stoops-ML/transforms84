@@ -1,6 +1,8 @@
-#include "definitions.h"
 #include <Python.h>
 #include <numpy/arrayobject.h>
+#include <omp.h>
+
+#include "definitions.h"
 
 /*
 Calculate the Haversine distance between two points in double precision.
@@ -22,8 +24,9 @@ void HaversineDouble(const double* rrmStart,
     double mRadiusSphere,
     double* mDistance)
 {
-    int iPointEnd, iPointStart;
-    for (int iPoint = 0; iPoint < nPoints; ++iPoint) {
+    int iPoint, iPointEnd, iPointStart;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         iPointEnd = iPoint * NCOORDSINPOINT;
         iPointStart = iPointEnd * isArraysSizeEqual;
         mDistance[iPoint] = 2.0 * mRadiusSphere * asin(sqrt((1.0 - cos(rrmEnd[iPointEnd] - rrmStart[iPointStart]) + cos(rrmStart[iPointStart]) * cos(rrmEnd[iPointEnd]) * (1.0 - cos(rrmEnd[iPointEnd + 1] - rrmStart[iPointStart + 1]))) / 2.0));
@@ -50,8 +53,9 @@ void HaversineFloat(const float* rrmStart,
     float mRadiusSphere,
     float* mDistance)
 {
-    int iPointEnd, iPointStart;
-    for (int iPoint = 0; iPoint < nPoints; ++iPoint) {
+    int iPoint, iPointEnd, iPointStart;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         iPointEnd = iPoint * NCOORDSINPOINT;
         iPointStart = iPointEnd * isArraysSizeEqual;
         mDistance[iPoint] = (float)(2.0) * mRadiusSphere * asinf(sqrtf(((float)(1.0) - cosf(rrmEnd[iPointEnd] - rrmStart[iPointStart]) + cosf(rrmStart[iPointStart]) * cosf(rrmEnd[iPointEnd]) * ((float)(1.0) - cosf(rrmEnd[iPointEnd + 1] - rrmStart[iPointStart + 1]))) / (float)(2.0)));

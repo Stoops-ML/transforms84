@@ -1,6 +1,6 @@
 
 [build-system]
-requires = ["setuptools", "setuptools-scm", "numpy"]
+requires = ["setuptools", "setuptools-scm", "numpy", "wheel", "build"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -101,7 +101,7 @@ extend-include = ["*.ipynb"]
 src = ["src", "tests"]
 
 [tool.ruff.lint]
-ignore = ["UP007"]
+ignore = ["UP007", "E501"]
 select = ["E", "F", "UP", "B", "SIM", "I"]
 
 [tool.pytest.ini_options]
