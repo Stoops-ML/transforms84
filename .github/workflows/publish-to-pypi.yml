@@ -29,9 +29,10 @@ jobs:
           path: dist/
 
   build_wheels:
-    name: Build wheels on ${{matrix.os}} 🎡
+    name: Build wheels on ${{matrix.os}} for Python `${{matrix.python-version}} 🎡
     strategy:
       matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         # os: [ubuntu-latest, windows-latest, macos-13, macos-14]
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
@@ -40,9 +41,9 @@ jobs:
 
       - name: Build wheels 🎡
         env:
-          CIBW_BUILD: "cp311-*"
+          # CIBW_BUILD: "cp311-*"
           CIBW_SKIP: "pp* *-win32 *_i686"
-        uses: pypa/cibuildwheel@v2.20.0
+        uses: pypa/cibuildwheel@v2.21.1
 
       - uses: actions/upload-artifact@v4
         with:
