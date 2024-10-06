@@ -47,3 +47,20 @@ def DDM2RRM(
 ) -> npt.NDArray[
     Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
 ]: ...
+def wrap(
+    num: Union[
+        float,
+        int,
+        npt.NDArray[Union[np.float32, np.float64]],
+    ],
+    bound_lower: Union[
+        float,
+        int,
+        npt.NDArray[Union[np.float32, np.float64]],
+    ],
+    bound_upper: Union[
+        float,
+        int,
+        npt.NDArray[Union[np.float32, np.float64]],
+    ],
+): ...

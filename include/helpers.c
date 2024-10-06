@@ -158,6 +158,243 @@ void XXM2YYMFloat(const float* rrmPoint,
     }
 }
 
+/*
+Wrap a point between two numbers
+*/
+void WrapsFloat3(const float* val,
+    const float* maxVal,
+    const float* minVal,
+    int nPoints,
+    float* boundedVal)
+{
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (int iPoint = 0; iPoint < nPoints; ++iPoint) {
+        boundedVal[iPoint] = fmodf(val[iPoint] - minVal[iPoint], maxVal[iPoint] - minVal[iPoint]) + minVal[iPoint];
+        if (boundedVal[iPoint] < minVal[iPoint])
+            boundedVal[iPoint] += maxVal[iPoint] - minVal[iPoint];
+    }
+}
+
+/*
+Wrap a point between two numbers
+*/
+void WrapsDouble3(const double* val,
+    const double* maxVal,
+    const double* minVal,
+    int nPoints,
+    double* boundedVal)
+{
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (int iPoint = 0; iPoint < nPoints; ++iPoint) {
+        boundedVal[iPoint] = fmod(val[iPoint] - minVal[iPoint], maxVal[iPoint] - minVal[iPoint]) + minVal[iPoint];
+        if (boundedVal[iPoint] < minVal[iPoint])
+            boundedVal[iPoint] += maxVal[iPoint] - minVal[iPoint];
+    }
+}
+
+/*
+Wrap a point between two numbers
+*/
+void WrapsFloat1(const float* val,
+    const float maxVal,
+    const float minVal,
+    int nPoints,
+    float* boundedVal)
+{
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (int iPoint = 0; iPoint < nPoints; ++iPoint) {
+        boundedVal[iPoint] = fmodf(val[iPoint] - minVal, maxVal - minVal) + minVal;
+        if (boundedVal[iPoint] < minVal)
+            boundedVal[iPoint] += maxVal - minVal;
+    }
+}
+
+/*
+Wrap a point between two numbers
+*/
+void WrapsDouble1(const double* val,
+    const double maxVal,
+    const double minVal,
+    int nPoints,
+    double* boundedVal)
+{
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (int iPoint = 0; iPoint < nPoints; ++iPoint) {
+        boundedVal[iPoint] = fmod(val[iPoint] - minVal, maxVal - minVal) + minVal;
+        if (boundedVal[iPoint] < minVal)
+            boundedVal[iPoint] += maxVal - minVal;
+    }
+}
+
+/*
+Wrap a point between two numbers
+*/
+double Wrap(const double val,
+    const double maxVal,
+    const double minVal)
+{
+    double boundedVal = fmod(val - minVal, maxVal - minVal) + minVal;
+    if (boundedVal < minVal)
+        boundedVal += maxVal - minVal;
+    return boundedVal;
+}
+
+static PyObject*
+WrapWrapper(PyObject* self, PyObject* args)
+{
+    PyObject *arg1, *arg2, *arg3;
+
+    // Parse the input tuple
+    if (!PyArg_ParseTuple(args, "OOO", &arg1, &arg2, &arg3))
+        return NULL;
+
+    if (!PyArray_Check(arg1)) {
+        double val, minVal, maxVal;
+        if (PyLong_Check(arg1))
+            val = PyLong_AsDouble(arg1);
+        else if (PyFloat_Check(arg1))
+            val = PyFloat_AsDouble(arg1);
+        else {
+            PyErr_SetString(PyExc_ValueError, "Value must be a float or an integer.");
+            return NULL;
+        }
+        if (PyLong_Check(arg2))
+            minVal = PyLong_AsDouble(arg2);
+        else if (PyFloat_Check(arg2))
+            minVal = PyFloat_AsDouble(arg2);
+        else {
+            PyErr_SetString(PyExc_ValueError, "Minimum value must be a float or an integer.");
+            return NULL;
+        }
+        if (PyLong_Check(arg3))
+            maxVal = PyLong_AsDouble(arg3);
+        else if (PyFloat_Check(arg3))
+            maxVal = PyFloat_AsDouble(arg3);
+        else {
+            PyErr_SetString(PyExc_ValueError, "Maximum value must be a float or an integer.");
+            return NULL;
+        }
+        if (maxVal <= minVal) {
+            PyErr_SetString(PyExc_ValueError, "The maximum value must be a greater than the minimum value.");
+            return NULL;
+        }
+        return Py_BuildValue("d", Wrap(val, maxVal, +minVal));
+    } else if (PyArray_Check(arg1) && (!PyArray_Check(arg2) && !PyArray_Check(arg3))) {
+        PyArrayObject* val = (PyArrayObject*)arg1;
+
+        if (!PyArray_ISCONTIGUOUS(val)) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+            return NULL;
+        }
+        if (PyArray_NDIM(val) != 1) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays have one dimensoin.");
+            return NULL;
+        }
+
+        // Create result array
+        PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(val),
+            PyArray_SHAPE(val),
+            PyArray_TYPE(val));
+        if (result_array == NULL) {
+            PyErr_SetString(PyExc_ValueError, "Could not create output array.");
+            return NULL;
+        }
+
+        int nPoints = (int)PyArray_SIZE(val);
+        double minVal, maxVal;
+        if (PyLong_Check(arg2))
+            minVal = PyLong_AsDouble(arg2);
+        else if (PyFloat_Check(arg2))
+            minVal = PyFloat_AsDouble(arg2);
+        else {
+            PyErr_SetString(PyExc_ValueError, "Minimum value must be a float or an integer.");
+            return NULL;
+        }
+        if (PyLong_Check(arg3))
+            maxVal = PyLong_AsDouble(arg3);
+        else if (PyFloat_Check(arg3))
+            maxVal = PyFloat_AsDouble(arg3);
+        else {
+            PyErr_SetString(PyExc_ValueError, "Maximum value must be a float or an integer.");
+            return NULL;
+        }
+        if (maxVal <= minVal) {
+            PyErr_SetString(PyExc_ValueError, "The maximum value must be a greater than the minimum value.");
+            return NULL;
+        }
+
+        if (PyArray_TYPE(val) == NPY_DOUBLE)
+            WrapsDouble1((double*)PyArray_DATA(val), maxVal, minVal, nPoints, (double*)PyArray_DATA(result_array));
+        else if (PyArray_TYPE(val) == NPY_FLOAT)
+            WrapsFloat1((float*)PyArray_DATA(val), (float)(maxVal), (float)(minVal), nPoints, (float*)PyArray_DATA(result_array));
+        else {
+            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
+            return NULL;
+        }
+        return (PyObject*)result_array;
+    } else if (PyArray_Check(arg1) && PyArray_Check(arg2) && PyArray_Check(arg3)) {
+        PyArrayObject* val = (PyArrayObject*)arg1;
+        PyArrayObject* minVal = (PyArrayObject*)arg2;
+        PyArrayObject* maxVal = (PyArrayObject*)arg3;
+
+        if (!(PyArray_ISCONTIGUOUS(minVal)) || !(PyArray_ISCONTIGUOUS(maxVal)) || !(PyArray_ISCONTIGUOUS(val))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+            return NULL;
+        }
+        if ((PyArray_NDIM(minVal) != 1) || (PyArray_NDIM(maxVal) != 1) || (PyArray_NDIM(val) != 1)) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays have one dimensoin.");
+            return NULL;
+        }
+        if ((PyArray_SIZE(minVal) != PyArray_SIZE(maxVal)) || (PyArray_SIZE(maxVal) != PyArray_SIZE(val))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays are of unequal size.");
+            return NULL;
+        }
+        if ((PyArray_TYPE(minVal) != PyArray_TYPE(maxVal)) || (PyArray_TYPE(maxVal) != PyArray_TYPE(val))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
+            return NULL;
+        }
+
+        // Create result array
+        PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(val),
+            PyArray_SHAPE(val),
+            PyArray_TYPE(val));
+        if (result_array == NULL) {
+            PyErr_SetString(PyExc_ValueError, "Could not create output array.");
+            return NULL;
+        }
+
+        int nPoints = (int)PyArray_SIZE(val);
+        if (PyArray_TYPE(val) == NPY_DOUBLE) {
+            double* maxVals = (double*)PyArray_DATA(maxVal);
+            double* minVals = (double*)PyArray_DATA(minVal);
+            for (npy_intp i = 0; i < nPoints; i++) {
+                if (minVals[i] > maxVals[i]) {
+                    PyErr_SetString(PyExc_ValueError, "All maximum values must be larger than all minimum values.");
+                    return NULL;
+                }
+            }
+            WrapsDouble3((double*)PyArray_DATA(val), maxVals, minVals, nPoints, (double*)PyArray_DATA(result_array));
+        } else if (PyArray_TYPE(val) == NPY_FLOAT) {
+            float* maxVals = (float*)PyArray_DATA(maxVal);
+            float* minVals = (float*)PyArray_DATA(minVal);
+            for (npy_intp i = 0; i < nPoints; i++) {
+                if (minVals[i] > maxVals[i]) {
+                    PyErr_SetString(PyExc_ValueError, "All maximum values must be larger than all minimum values.");
+                    return NULL;
+                }
+            }
+            WrapsFloat3((float*)PyArray_DATA(val), maxVals, minVals, nPoints, (float*)PyArray_DATA(result_array));
+        } else {
+            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
+            return NULL;
+        }
+        return (PyObject*)result_array;
+    } else {
+        PyErr_SetString(PyExc_TypeError, "Bounds must be either two arrays or two floats and value must be a float or an array.");
+        return NULL;
+    }
+}
+
 static PyObject*
 RadAngularDifferenceWrapper(PyObject* self, PyObject* args)
 {
@@ -481,6 +718,10 @@ DDM2RRMWrapper(PyObject* self, PyObject* args)
 //           method, or being a static method of a class.
 // ml_doc:  The docstring for the method
 static PyMethodDef MyMethods[] = {
+    { "wrap",
+        WrapWrapper,
+        METH_VARARGS,
+        "Wrap a number in bounds" },
     { "rad_angular_difference",
         RadAngularDifferenceWrapper,
         METH_VARARGS,

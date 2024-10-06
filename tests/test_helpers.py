@@ -6,7 +6,50 @@ from transforms84.helpers import (
     RRM2DDM,
     deg_angular_difference,
     rad_angular_difference,
+    wrap,
 )
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_wrap_array(dtype):
+    for i in range(-180, 180):
+        out = wrap(float(i) + np.arange(10, dtype=dtype), -90, 90)
+        assert np.all(out >= -90)
+        assert np.all(out <= 90)
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_wrap_arrays(dtype):
+    for i in range(-180, 180):
+        out = wrap(
+            float(i) + np.arange(10, dtype=dtype),
+            -90.0 * np.ones((10,), dtype=dtype),
+            90.0 * np.ones((10,), dtype=dtype),
+        )
+        assert np.all(out >= -90)
+        assert np.all(out <= 90)
+
+
+@pytest.mark.parametrize("dtype", [float, int])
+def test_wrap_no_array(dtype):
+    for i in range(-180, 180):
+        out = wrap(dtype(i), -90, 90)
+        assert out >= -90
+        assert out <= 90
+
+
+def test_wrap_unequal_size():
+    with pytest.raises(ValueError):
+        wrap(np.array([-181.1, 100]), np.array([-180.0]), np.array([180.0]))
+
+
+def test_wrap_bad_bounds():
+    with pytest.raises(ValueError):
+        wrap(np.array([-181.1, 100]), np.array([180.0]), np.array([-180.0]))
+    with pytest.raises(ValueError):
+        wrap(np.array([-181.1, 100]), 180.0, -180.0)
+    with pytest.raises(ValueError):
+        wrap(-181.1, 180.0, -180.0)
 
 
 @pytest.mark.parametrize(
