@@ -17,7 +17,10 @@ def deg_angular_difference(
         ],
     ],
     smallest_angle: bool,
-) -> float: ...
+) -> Union[
+    float,
+    npt.NDArray[Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]],
+]: ...
 def rad_angular_difference(
     angle1: Union[
         float,
@@ -32,7 +35,10 @@ def rad_angular_difference(
         ],
     ],
     smallest_angle: bool,
-) -> float: ...
+) -> Union[
+    float,
+    npt.NDArray[Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]],
+]: ...
 def RRM2DDM(
     rrm_position: npt.NDArray[
         Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
@@ -63,4 +69,7 @@ def wrap(
         int,
         npt.NDArray[Union[np.float32, np.float64]],
     ],
-): ...
+) -> Union[
+    float,
+    npt.NDArray[Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]],
+]: ...
