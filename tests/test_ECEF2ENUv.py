@@ -23,6 +23,29 @@ def test_ECEF2ENUv(dtype, tol):
 
 
 @pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_ECEF2ENUv_parallel(dtype, tol):
+    rrm_local = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[17.4114], [78.2700], [0]], dtype=dtype)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    uvw = np.ascontiguousarray(
+        np.tile(
+            np.array([[27.9799], [-1.0990], [-15.7723]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    assert np.all(
+        np.isclose(
+            ECEF2ENUv(rrm_local, uvw),
+            np.array([[-27.6190], [-16.4298], [-0.3186]]),
+            atol=tol,
+        )
+    )
+
+
+@pytest.mark.parametrize(
     "dtype0,dtype1,tol",
     [
         (np.float64, np.float32, tol_double_atol),

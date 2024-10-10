@@ -105,3 +105,18 @@ def test_ECEF2geodetic_points(dtype, tol):
     assert np.all(np.isclose(out[:, 0, 0], np.deg2rad(30)))
     assert np.all(np.isclose(out[:, 1, 0], np.deg2rad(25)))
     assert np.all(np.isclose(out[:, 2, 0], 5, atol=tol))
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_ECEF2geodetic_parallel(dtype, tol):
+    in_arr = np.ascontiguousarray(
+        np.tile(
+            np.array([[5010306], [2336344], [3170376.2]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    out = ECEF2geodetic(in_arr, WGS84.a, WGS84.b)
+    assert np.all(np.isclose(out[:, 0, 0], np.deg2rad(30)))
+    assert np.all(np.isclose(out[:, 1, 0], np.deg2rad(25)))
+    assert np.all(np.isclose(out[:, 2, 0], 5, atol=tol))

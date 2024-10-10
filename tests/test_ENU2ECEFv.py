@@ -43,6 +43,29 @@ def test_ENU2ECEFv(dtype, tol):
     )
 
 
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_ENU2ECEFv_parallel(dtype, tol):
+    rrm_local = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[17.41], [78.27], [0]], dtype=dtype)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    uvw = np.ascontiguousarray(
+        np.tile(
+            np.array([[-27.6190], [-16.4298], [-0.3186]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    assert np.all(
+        np.isclose(
+            ENU2ECEFv(rrm_local, uvw),
+            np.array([[27.9798], [-1.0993], [-15.7724]], dtype=np.float32),
+            atol=tol,
+        )
+    )
+
+
 @pytest.mark.skip(reason="Get check data")
 @pytest.mark.parametrize(
     "dtype,tol", [(np.int64, tol_double_atol), (np.int32, tol_float_atol)]

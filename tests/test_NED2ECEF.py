@@ -130,6 +130,26 @@ def test_NED2ECEF_points(dtype, tol):
     assert np.all(np.isclose(out[:, 2, 0], 4.4523e06, rtol=tol))
 
 
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_rtol), (np.float32, tol_float_rtol)]
+)
+def test_NED2ECEF_parallel(dtype, tol):
+    XYZ = np.ascontiguousarray(
+        np.tile(np.array([[1334.3], [-2544.4], [360.0]], dtype=dtype), 1000).T.reshape(
+            (-1, 3, 1)
+        )
+    )
+    ref_point = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[44.532], [-72.782], [1.699]], dtype=dtype)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    out = NED2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert np.all(np.isclose(out[:, 0, 0], 1.3457e06, rtol=tol))
+    assert np.all(np.isclose(out[:, 1, 0], -4.3509e06, rtol=tol))
+    assert np.all(np.isclose(out[:, 2, 0], 4.4523e06, rtol=tol))
+
+
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
 def test_NED2ECEF_one2many_float(dtype):
     num_repeats = 3

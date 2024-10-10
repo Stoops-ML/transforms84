@@ -126,10 +126,10 @@ void XXM2YYMDouble(const double* rrmPoint,
     const double transform,
     double* ddmPoint)
 {
-    int iPoint, i;
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSINPOINT;
         ddmPoint[i + 0] = rrmPoint[i + 0] * transform;
         ddmPoint[i + 1] = rrmPoint[i + 1] * transform;
         ddmPoint[i + 2] = rrmPoint[i + 2];
@@ -148,10 +148,10 @@ void XXM2YYMFloat(const float* rrmPoint,
     const float transform,
     float* ddmPoint)
 {
-    int iPoint, i;
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSINPOINT;
         ddmPoint[i + 0] = rrmPoint[i + 0] * transform;
         ddmPoint[i + 1] = rrmPoint[i + 1] * transform;
         ddmPoint[i + 2] = rrmPoint[i + 2];
@@ -167,8 +167,9 @@ void WrapsFloat3(const float* val,
     int nPoints,
     float* boundedVal)
 {
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
-    for (int iPoint = 0; iPoint < nPoints; ++iPoint) {
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         boundedVal[iPoint] = fmodf(val[iPoint] - minVal[iPoint], maxVal[iPoint] - minVal[iPoint]) + minVal[iPoint];
         if (boundedVal[iPoint] < minVal[iPoint])
             boundedVal[iPoint] += maxVal[iPoint] - minVal[iPoint];
@@ -184,8 +185,9 @@ void WrapsDouble3(const double* val,
     int nPoints,
     double* boundedVal)
 {
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
-    for (int iPoint = 0; iPoint < nPoints; ++iPoint) {
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         boundedVal[iPoint] = fmod(val[iPoint] - minVal[iPoint], maxVal[iPoint] - minVal[iPoint]) + minVal[iPoint];
         if (boundedVal[iPoint] < minVal[iPoint])
             boundedVal[iPoint] += maxVal[iPoint] - minVal[iPoint];
@@ -201,8 +203,9 @@ void WrapsFloat1(const float* val,
     int nPoints,
     float* boundedVal)
 {
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
-    for (int iPoint = 0; iPoint < nPoints; ++iPoint) {
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         boundedVal[iPoint] = fmodf(val[iPoint] - minVal, maxVal - minVal) + minVal;
         if (boundedVal[iPoint] < minVal)
             boundedVal[iPoint] += maxVal - minVal;
@@ -218,8 +221,9 @@ void WrapsDouble1(const double* val,
     int nPoints,
     double* boundedVal)
 {
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
-    for (int iPoint = 0; iPoint < nPoints; ++iPoint) {
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         boundedVal[iPoint] = fmod(val[iPoint] - minVal, maxVal - minVal) + minVal;
         if (boundedVal[iPoint] < minVal)
             boundedVal[iPoint] += maxVal - minVal;

@@ -59,6 +59,24 @@ def test_AER2NED_points(dtype, tol):
     )
 
 
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_AER2NED_paralllel(dtype, tol):
+    AER = np.ascontiguousarray(
+        np.tile(
+            np.array([[155.427], [-23.161], [10.885]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    assert np.all(
+        np.isclose(
+            AER2NED(DDM2RRM(AER)),
+            np.array([[-9.1013], [4.1617], [4.2812]], dtype=dtype),
+            atol=tol,
+        ),
+    )
+
+
 @pytest.mark.skip(reason="Get check data")
 @pytest.mark.parametrize("dtype", [np.int16, np.int32, np.int64])
 def test_AER2NED_points_int(dtype):

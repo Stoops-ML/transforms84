@@ -47,6 +47,24 @@ def test_ENU2AER_points(dtype, tol):
     )
 
 
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_ENU2AER_parallel(dtype, tol):
+    ENU = np.ascontiguousarray(
+        np.tile(np.array([[8.4504], [12.4737], [1.1046]], dtype=dtype), 1000).T.reshape(
+            (-1, 3, 1)
+        )
+    )
+    assert np.all(
+        np.isclose(
+            ENU2AER(ENU),
+            DDM2RRM(np.array([[34.1160], [4.1931], [15.1070]], dtype=dtype)),
+            atol=tol,
+        ),
+    )
+
+
 @pytest.mark.skip(reason="Get check data")
 @pytest.mark.parametrize(
     "dtype,tol", [(np.int64, tol_double_atol), (np.int32, tol_float_atol)]
