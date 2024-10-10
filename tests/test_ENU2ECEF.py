@@ -121,6 +121,29 @@ def test_ENU2ECEF_points(dtype, tol):
 
 
 @pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_ENU2ECEF_parallel(dtype, tol):
+    XYZ = np.ascontiguousarray(
+        np.tile(
+            np.array(
+                [[1901.5690521235], [5316.9485968901], [-6378422.76482545]], dtype=dtype
+            ),
+            1000,
+        ).T.reshape((-1, 3, 1000))
+    )
+    ref_point = np.ascontiguousarray(
+        np.tile(np.array([[0.1], [0.2], [5000]], dtype=dtype), 1000).T.reshape(
+            (-1, 3, 1000)
+        )
+    )
+    out = ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)
+    assert np.all(np.isclose(out[:, 0, 0], 3906.67536618, atol=tol))
+    assert np.all(np.isclose(out[:, 1, 0], 2732.16708, atol=tol))
+    assert np.all(np.isclose(out[:, 2, 0], 1519.47079847, atol=tol))
+
+
+@pytest.mark.parametrize(
     "dtype0,dtype1,tol",
     [
         (np.float64, np.float32, tol_double_atol),

@@ -236,3 +236,24 @@ def test_ECEF2NED_one2many(dtype):
             rrm_local, geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b), WGS84.a, WGS84.b
         )
     )
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_ECEF2NED_parallel(dtype):
+    rrm_target = DDM2RRM(np.array([[31], [32], [0]], dtype=dtype))
+    num_repeats = 1000
+    rrm_targets = np.ascontiguousarray(
+        np.tile(rrm_target, num_repeats).T.reshape((-1, 3, 1))
+    )
+    rrm_local = DDM2RRM(np.array([[30], [31], [0]], dtype=dtype))
+    rrm_locals = np.ascontiguousarray(
+        np.tile(rrm_local, rrm_targets.shape[0]).T.reshape((-1, 3, 1))
+    )
+    assert np.all(
+        ECEF2NED(
+            rrm_locals, geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b), WGS84.a, WGS84.b
+        )
+        == ECEF2NED(
+            rrm_local, geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b), WGS84.a, WGS84.b
+        )
+    )

@@ -31,9 +31,32 @@ def test_NED2ECEFv_different_dtypes(dtype0, dtype1, tol):
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
-def test_NED2ECEFv_float(dtype, tol):
+def test_NED2ECEFv(dtype, tol):
     rrm_local = DDM2RRM(np.array([[61.64], [30.70], [0]], dtype=dtype))
     uvw = np.array([[-434.0403], [152.4451], [-684.6964]], dtype=dtype)
+    assert np.all(
+        np.isclose(
+            NED2ECEFv(rrm_local, uvw),
+            np.array([[530.2445], [492.1283], [396.3459]], dtype=dtype),
+            atol=tol,
+        )
+    )
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_NED2ECEFv_parallel(dtype, tol):
+    rrm_local = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[61.64], [30.70], [0]], dtype=dtype)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    uvw = np.ascontiguousarray(
+        np.tile(
+            np.array([[-434.0403], [152.4451], [-684.6964]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
     assert np.all(
         np.isclose(
             NED2ECEFv(rrm_local, uvw),

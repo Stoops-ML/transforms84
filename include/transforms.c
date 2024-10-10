@@ -24,12 +24,11 @@ void geodetic2ECEFFloat(const float* rrmLLA,
     float* mmmXYZ)
 {
     float e2 = 1 - (b * b) / (a * a);
-    int iPoint, i;
-    float N;
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
-        N = a / sqrtf(1 - e2 * (sinf(rrmLLA[i + 0]) * sinf(rrmLLA[i + 0])));
+        int i = iPoint * NCOORDSINPOINT;
+        float N = a / sqrtf(1 - e2 * (sinf(rrmLLA[i + 0]) * sinf(rrmLLA[i + 0])));
         mmmXYZ[i + 0] = (N + rrmLLA[i + 2]) * cosf(rrmLLA[i + 0]) * cosf(rrmLLA[i + 1]);
         mmmXYZ[i + 1] = (N + rrmLLA[i + 2]) * cosf(rrmLLA[i + 0]) * sinf(rrmLLA[i + 1]);
         mmmXYZ[i + 2] = ((1 - e2) * N + rrmLLA[i + 2]) * sinf(rrmLLA[i + 0]);
@@ -54,12 +53,11 @@ void geodetic2ECEFDouble(const double* rrmLLA,
     double* mmmXYZ)
 {
     double e2 = 1 - (b * b) / (a * a);
-    int iPoint, i;
-    double N;
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
-        N = a / sqrt(1 - e2 * sin(rrmLLA[i + 0]) * sin(rrmLLA[i + 0]));
+        int i = iPoint * NCOORDSINPOINT;
+        double N = a / sqrt(1 - e2 * sin(rrmLLA[i + 0]) * sin(rrmLLA[i + 0]));
         mmmXYZ[i + 0] = (N + rrmLLA[i + 2]) * cos(rrmLLA[i + 0]) * cos(rrmLLA[i + 1]);
         mmmXYZ[i + 1] = (N + rrmLLA[i + 2]) * cos(rrmLLA[i + 0]) * sin(rrmLLA[i + 1]);
         mmmXYZ[i + 2] = ((1 - e2) * N + rrmLLA[i + 2]) * sin(rrmLLA[i + 0]);
@@ -83,26 +81,25 @@ void ECEF2geodeticFloat(const float* mmmXYZ,
     float b,
     float* rrmLLA)
 {
-    int iPoint, i;
-    float p, F, G, c, s, k, P, Q, r0, U, V, z0, e2, ed2, half;
-    half = 0.5;
-    e2 = ((a * a) - (b * b)) / (a * a);
-    ed2 = ((a * a) - (b * b)) / (b * b);
+    int iPoint;
+    float half = 0.5;
+    float e2 = ((a * a) - (b * b)) / (a * a);
+    float ed2 = ((a * a) - (b * b)) / (b * b);
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
-        p = sqrtf(mmmXYZ[i + 0] * mmmXYZ[i + 0] + mmmXYZ[i + 1] * mmmXYZ[i + 1]);
-        F = 54 * b * b * mmmXYZ[i + 2] * mmmXYZ[i + 2];
-        G = p * p + (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2] - e2 * (a * a - b * b);
-        c = e2 * e2 * F * p * p / (G * G * G);
-        s = cbrtf(1 + c + sqrtf(c * c + 2 * c));
-        k = s + 1 + 1 / s;
-        P = F / (3 * k * k * G * G);
-        Q = sqrtf(1 + 2 * e2 * e2 * P);
-        r0 = -P * e2 * p / (1 + Q) + sqrtf(half * a * a * (1 + 1 / Q) - P * (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2] / (Q * (1 + Q)) - half * P * p * p);
-        U = sqrtf((p - e2 * r0) * (p - e2 * r0) + mmmXYZ[i + 2] * mmmXYZ[i + 2]);
-        V = sqrtf((p - e2 * r0) * (p - e2 * r0) + (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2]);
-        z0 = b * b * mmmXYZ[i + 2] / (a * V);
+        int i = iPoint * NCOORDSINPOINT;
+        float p = sqrtf(mmmXYZ[i + 0] * mmmXYZ[i + 0] + mmmXYZ[i + 1] * mmmXYZ[i + 1]);
+        float F = 54 * b * b * mmmXYZ[i + 2] * mmmXYZ[i + 2];
+        float G = p * p + (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2] - e2 * (a * a - b * b);
+        float c = e2 * e2 * F * p * p / (G * G * G);
+        float s = cbrtf(1 + c + sqrtf(c * c + 2 * c));
+        float k = s + 1 + 1 / s;
+        float P = F / (3 * k * k * G * G);
+        float Q = sqrtf(1 + 2 * e2 * e2 * P);
+        float r0 = -P * e2 * p / (1 + Q) + sqrtf(half * a * a * (1 + 1 / Q) - P * (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2] / (Q * (1 + Q)) - half * P * p * p);
+        float U = sqrtf((p - e2 * r0) * (p - e2 * r0) + mmmXYZ[i + 2] * mmmXYZ[i + 2]);
+        float V = sqrtf((p - e2 * r0) * (p - e2 * r0) + (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2]);
+        float z0 = b * b * mmmXYZ[i + 2] / (a * V);
         rrmLLA[i + 0] = atanf((mmmXYZ[i + 2] + ed2 * z0) / p);
         rrmLLA[i + 1] = atan2f(mmmXYZ[i + 1], mmmXYZ[i + 0]);
         rrmLLA[i + 2] = U * (1 - b * b / (a * V));
@@ -128,10 +125,10 @@ void ECEF2geodeticDouble(const double* mmmXYZ,
 {
     double e2 = ((a * a) - (b * b)) / (a * a);
     double ed2 = ((a * a) - (b * b)) / (b * b);
-    int iPoint, i;
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSINPOINT;
         double p = sqrt(mmmXYZ[i + 0] * mmmXYZ[i + 0] + mmmXYZ[i + 1] * mmmXYZ[i + 1]);
         double F = 54 * b * b * mmmXYZ[i + 2] * mmmXYZ[i + 2];
         double G = p * p + (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2] - e2 * (a * a - b * b);
@@ -173,15 +170,14 @@ void ECEF2ENUFloat(const float* rrmLLALocalOrigin,
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(float));
     geodetic2ECEFFloat(rrmLLALocalOrigin, nOriginPoints, (float)(a), (float)(b), mmmXYZLocalOrigin);
-    float DeltaX, DeltaY, DeltaZ;
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
-        DeltaX = mmmXYZTarget[iTarget + 0] - mmmXYZLocalOrigin[iOrigin + 0];
-        DeltaY = mmmXYZTarget[iTarget + 1] - mmmXYZLocalOrigin[iOrigin + 1];
-        DeltaZ = mmmXYZTarget[iTarget + 2] - mmmXYZLocalOrigin[iOrigin + 2];
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
+        float DeltaX = mmmXYZTarget[iTarget + 0] - mmmXYZLocalOrigin[iOrigin + 0];
+        float DeltaY = mmmXYZTarget[iTarget + 1] - mmmXYZLocalOrigin[iOrigin + 1];
+        float DeltaZ = mmmXYZTarget[iTarget + 2] - mmmXYZLocalOrigin[iOrigin + 2];
         mmmLocal[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + cosf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY;
         mmmLocal[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + cosf(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
         mmmLocal[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + sinf(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
@@ -213,15 +209,14 @@ void ECEF2ENUDouble(const double* rrmLLALocalOrigin,
     double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(double));
     geodetic2ECEFDouble(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
-    double DeltaX, DeltaY, DeltaZ;
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
-        DeltaX = mmmXYZTarget[iTarget + 0] - mmmXYZLocalOrigin[iOrigin + 0];
-        DeltaY = mmmXYZTarget[iTarget + 1] - mmmXYZLocalOrigin[iOrigin + 1];
-        DeltaZ = mmmXYZTarget[iTarget + 2] - mmmXYZLocalOrigin[iOrigin + 2];
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
+        double DeltaX = mmmXYZTarget[iTarget + 0] - mmmXYZLocalOrigin[iOrigin + 0];
+        double DeltaY = mmmXYZTarget[iTarget + 1] - mmmXYZLocalOrigin[iOrigin + 1];
+        double DeltaZ = mmmXYZTarget[iTarget + 2] - mmmXYZLocalOrigin[iOrigin + 2];
         mmmLocal[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + cos(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY;
         mmmLocal[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + cos(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
         mmmLocal[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + sin(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
@@ -241,15 +236,14 @@ void ECEF2NEDFloat(const float* rrmLLALocalOrigin,
     float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(float));
     geodetic2ECEFFloat(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
-    float DeltaX, DeltaY, DeltaZ;
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
-        DeltaX = mmmXYZTarget[iTarget + 0] - mmmXYZLocalOrigin[iOrigin + 0];
-        DeltaY = mmmXYZTarget[iTarget + 1] - mmmXYZLocalOrigin[iOrigin + 1];
-        DeltaZ = mmmXYZTarget[iTarget + 2] - mmmXYZLocalOrigin[iOrigin + 2];
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
+        float DeltaX = mmmXYZTarget[iTarget + 0] - mmmXYZLocalOrigin[iOrigin + 0];
+        float DeltaY = mmmXYZTarget[iTarget + 1] - mmmXYZLocalOrigin[iOrigin + 1];
+        float DeltaZ = mmmXYZTarget[iTarget + 2] - mmmXYZLocalOrigin[iOrigin + 2];
         mmmLocal[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + cosf(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
         mmmLocal[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + cosf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY;
         mmmLocal[iTarget + 2] = -cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
@@ -269,15 +263,14 @@ void ECEF2NEDDouble(const double* rrmLLALocalOrigin,
     double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(double));
     geodetic2ECEFDouble(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
-    double DeltaX, DeltaY, DeltaZ;
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
-        DeltaX = mmmXYZTarget[iTarget + 0] - mmmXYZLocalOrigin[iOrigin + 0];
-        DeltaY = mmmXYZTarget[iTarget + 1] - mmmXYZLocalOrigin[iOrigin + 1];
-        DeltaZ = mmmXYZTarget[iTarget + 2] - mmmXYZLocalOrigin[iOrigin + 2];
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
+        double DeltaX = mmmXYZTarget[iTarget + 0] - mmmXYZLocalOrigin[iOrigin + 0];
+        double DeltaY = mmmXYZTarget[iTarget + 1] - mmmXYZLocalOrigin[iOrigin + 1];
+        double DeltaZ = mmmXYZTarget[iTarget + 2] - mmmXYZLocalOrigin[iOrigin + 2];
         mmmLocal[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + cos(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
         mmmLocal[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + cos(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY;
         mmmLocal[iTarget + 2] = -cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * DeltaX + -cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * DeltaY + -sin(rrmLLALocalOrigin[iOrigin + 0]) * DeltaZ;
@@ -291,11 +284,11 @@ void ECEF2NEDvFloat(const float* rrmLLALocalOrigin,
     int isOriginSizeOfTargets,
     float* mmmLocal)
 {
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmLocal[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
         mmmLocal[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1];
         mmmLocal[iTarget + 2] = -cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
@@ -308,11 +301,11 @@ void ECEF2NEDvDouble(const double* rrmLLALocalOrigin,
     int isOriginSizeOfTargets,
     double* mmmLocal)
 {
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmLocal[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
         mmmLocal[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1];
         mmmLocal[iTarget + 2] = -cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
@@ -325,11 +318,11 @@ void ECEF2ENUvFloat(const float* rrmLLALocalOrigin,
     int isOriginSizeOfTargets,
     float* mmmLocal)
 {
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmLocal[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1];
         mmmLocal[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
         mmmLocal[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
@@ -342,11 +335,11 @@ void ECEF2ENUvDouble(const double* rrmLLALocalOrigin,
     int isOriginSizeOfTargets,
     double* mmmLocal)
 {
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmLocal[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1];
         mmmLocal[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
         mmmLocal[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
@@ -359,11 +352,11 @@ void ENU2ECEFvFloat(const float* rrmLLALocalOrigin,
     int isOriginSizeOfTargets,
     float* mmmXYZTarget)
 {
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
         mmmXYZTarget[iTarget + 1] = cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
         mmmXYZTarget[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2];
@@ -376,11 +369,11 @@ void NED2ECEFvFloat(const float* rrmLLALocalOrigin,
     int isOriginSizeOfTargets,
     float* mmmXYZTarget)
 {
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
         mmmXYZTarget[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
         mmmXYZTarget[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2];
@@ -393,11 +386,11 @@ void NED2ECEFvDouble(const double* rrmLLALocalOrigin,
     int isOriginSizeOfTargets,
     double* mmmXYZTarget)
 {
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
         mmmXYZTarget[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
         mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2];
@@ -410,11 +403,11 @@ void ENU2ECEFvDouble(const double* rrmLLALocalOrigin,
     int isOriginSizeOfTargets,
     double* mmmXYZTarget)
 {
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
         mmmXYZTarget[iTarget + 1] = cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
         mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2];
@@ -445,11 +438,11 @@ void NED2ECEFFloat(const float* rrmLLALocalOrigin,
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(float));
     geodetic2ECEFFloat(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 0];
         mmmXYZTarget[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 1];
         mmmXYZTarget[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 2];
@@ -481,11 +474,11 @@ void NED2ECEFDouble(const double* rrmLLALocalOrigin,
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(double));
     geodetic2ECEFDouble(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 0];
         mmmXYZTarget[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 1];
         mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 2];
@@ -517,11 +510,11 @@ void ENU2ECEFFloat(const float* rrmLLALocalOrigin,
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(float));
     geodetic2ECEFFloat(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 0];
         mmmXYZTarget[iTarget + 1] = cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 1];
         mmmXYZTarget[iTarget + 2] = cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 1] + sinf(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 2];
@@ -554,11 +547,11 @@ void ENU2ECEFDouble(const double* rrmLLALocalOrigin,
     double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(double));
     geodetic2ECEFDouble(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
-    int iPoint, iTarget, iOrigin;
+    int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        iTarget = iPoint * NCOORDSINPOINT;
-        iOrigin = iTarget * isOriginSizeOfTargets;
+        int iTarget = iPoint * NCOORDSINPOINT;
+        int iOrigin = iTarget * isOriginSizeOfTargets;
         // mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + mmmXYZLocalOrigin[iOrigin + 0];
         // mmmXYZTarget[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 1];
         // mmmXYZTarget[iTarget + 2] = cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + sin(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 2];
@@ -582,10 +575,10 @@ range [rad, rad, m]
 */
 void NED2AERFloat(const float* mmmENU, int nPoints, float* rrmAER)
 {
-    int iPoint, i;
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSINPOINT;
         rrmAER[i + 0] = atan2f(mmmENU[i + 1], mmmENU[i + 0]);
         if (rrmAER[i + 0] < 0)
             rrmAER[i + 0] = rrmAER[i + 0] + (2.0f * PIf);
@@ -607,10 +600,10 @@ range [rad, rad, m]
 */
 void NED2AERDouble(const double* mmmNED, int nPoints, double* rrmAER)
 {
-    int iPoint, i;
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSINPOINT;
         rrmAER[i + 0] = atan2(mmmNED[i + 1], mmmNED[i + 0]);
         if (rrmAER[i + 0] < 0)
             rrmAER[i + 0] = rrmAER[i + 0] + 2.0 * PI;
@@ -632,10 +625,10 @@ range [rad, rad, m]
 */
 void ENU2AERFloat(const float* mmmNED, int nPoints, float* rrmAER)
 {
-    int iPoint, i;
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSINPOINT;
         rrmAER[i + 0] = atan2f(mmmNED[i + 0], mmmNED[i + 1]);
         if (rrmAER[i + 0] < 0)
             rrmAER[i + 0] = rrmAER[i + 0] + (2.0f * PIf);
@@ -656,10 +649,10 @@ range [rad, rad, m]
 */
 void ENU2AERDouble(const double* mmmENU, int nPoints, double* rrmAER)
 {
-    int iPoint, i;
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSINPOINT;
         rrmAER[i + 0] = atan2(mmmENU[i + 0], mmmENU[i + 1]);
         if (rrmAER[i + 0] < 0)
             rrmAER[i + 0] = rrmAER[i + 0] + 2.0 * PI;
@@ -679,10 +672,10 @@ range [rad, rad, m]
 */
 void AER2NEDFloat(const float* rrmAER, int nPoints, float* mmmNED)
 {
-    int iPoint, i;
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSINPOINT;
         mmmNED[i + 0] = cosf(rrmAER[i + 1]) * cosf(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmNED[i + 1] = cosf(rrmAER[i + 1]) * sinf(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmNED[i + 2] = -sinf(rrmAER[i + 1]) * rrmAER[i + 2];
@@ -700,10 +693,10 @@ range [rad, rad, m]
 */
 void AER2NEDDouble(const double* rrmAER, int nPoints, double* mmmNED)
 {
-    int iPoint, i;
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSINPOINT;
         mmmNED[i + 0] = cos(rrmAER[i + 1]) * cos(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmNED[i + 1] = cos(rrmAER[i + 1]) * sin(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmNED[i + 2] = -sin(rrmAER[i + 1]) * rrmAER[i + 2];
@@ -721,10 +714,10 @@ range [rad, rad, m]
 */
 void AER2ENUFloat(const float* rrmAER, int nPoints, float* mmmENU)
 {
-    int iPoint, i;
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSINPOINT;
         mmmENU[i + 0] = cosf(rrmAER[i + 1]) * sinf(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmENU[i + 1] = cosf(rrmAER[i + 1]) * cosf(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmENU[i + 2] = sinf(rrmAER[i + 1]) * rrmAER[i + 2];
@@ -742,10 +735,10 @@ range [rad, rad, m]
 */
 void AER2ENUDouble(const double* rrmAER, int nPoints, double* mmmENU)
 {
-    int iPoint, i;
+    int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSINPOINT;
         mmmENU[i + 0] = cos(rrmAER[i + 1]) * sin(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmENU[i + 1] = cos(rrmAER[i + 1]) * cos(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmENU[i + 2] = sin(rrmAER[i + 1]) * rrmAER[i + 2];

@@ -132,6 +132,26 @@ def test_Haversine(dtype):
     )
 
 
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_Haversine_parallel(dtype):
+    rrm_start = np.ascontiguousarray(
+        np.tile(
+            np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    rrm_end = np.ascontiguousarray(
+        np.tile(
+            np.array([[np.deg2rad(32)], [np.deg2rad(38)], [0]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    assert np.all(
+        np.isclose(Haversine(rrm_start, rrm_end, WGS84.mean_radius), 391225.574516907)
+    )
+    assert np.all(
+        np.isclose(Haversine(rrm_end, rrm_start, WGS84.mean_radius), 391225.574516907)
+    )
+
+
 @pytest.mark.parametrize(
     "dtype0,dtype1", [(np.float64, np.float32), (np.float32, np.float64)]
 )
