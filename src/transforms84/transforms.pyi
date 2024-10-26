@@ -3,6 +3,15 @@ from typing import Union
 import numpy as np
 import numpy.typing as npt
 
+def geodetic2UTM(
+    rrmLLA: npt.NDArray[
+        Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+    ],
+    m_semi_major_axis: float,
+    m_semi_minor_axis: float,
+) -> npt.NDArray[
+    Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+]: ...
 def geodetic2ECEF(
     rrmLLA: npt.NDArray[
         Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]

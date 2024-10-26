@@ -27,7 +27,7 @@ void HaversineDouble(const double* rrmStart,
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int iPointEnd = iPoint * NCOORDSINPOINT;
+        int iPointEnd = iPoint * NCOORDSIN3D;
         int iPointStart = iPointEnd * isArraysSizeEqual;
         mDistance[iPoint] = 2.0 * mRadiusSphere * asin(sqrt((1.0 - cos(rrmEnd[iPointEnd] - rrmStart[iPointStart]) + cos(rrmStart[iPointStart]) * cos(rrmEnd[iPointEnd]) * (1.0 - cos(rrmEnd[iPointEnd + 1] - rrmStart[iPointStart + 1]))) / 2.0));
     }
@@ -56,7 +56,7 @@ void HaversineFloat(const float* rrmStart,
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int iPointEnd = iPoint * NCOORDSINPOINT;
+        int iPointEnd = iPoint * NCOORDSIN3D;
         int iPointStart = iPointEnd * isArraysSizeEqual;
         mDistance[iPoint] = (float)(2.0) * mRadiusSphere * asinf(sqrtf(((float)(1.0) - cosf(rrmEnd[iPointEnd] - rrmStart[iPointStart]) + cosf(rrmStart[iPointStart]) * cosf(rrmEnd[iPointEnd]) * ((float)(1.0) - cosf(rrmEnd[iPointEnd + 1] - rrmStart[iPointStart + 1]))) / (float)(2.0)));
     }
@@ -81,13 +81,13 @@ HaversineWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmStart) == PyArray_NDIM(rrmEnd)) && (PyArray_SIZE(rrmStart) == PyArray_SIZE(rrmEnd)) || ((PyArray_SIZE(rrmStart) == NCOORDSINPOINT) && (PyArray_SIZE(rrmStart) < PyArray_SIZE(rrmEnd))))) {
+    if (!((PyArray_NDIM(rrmStart) == PyArray_NDIM(rrmEnd)) && (PyArray_SIZE(rrmStart) == PyArray_SIZE(rrmEnd)) || ((PyArray_SIZE(rrmStart) == NCOORDSIN3D) && (PyArray_SIZE(rrmStart) < PyArray_SIZE(rrmEnd))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the start point must be of size three.");
         return NULL;
     }
-    if ((PyArray_SIZE(rrmStart) % NCOORDSINPOINT) != 0 || (PyArray_SIZE(rrmEnd) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(rrmStart) % NCOORDSIN3D) != 0 || (PyArray_SIZE(rrmEnd) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must be a multiple of three.");
         return NULL;
@@ -133,7 +133,7 @@ HaversineWrapper(PyObject* self, PyObject* args)
         inArrayEnd = rrmEnd;
 
     // prepare inputs
-    npy_intp nPoints = PyArray_SIZE(rrmEnd) / NCOORDSINPOINT;
+    npy_intp nPoints = PyArray_SIZE(rrmEnd) / NCOORDSIN3D;
     int isArraysSizeEqual = (PyArray_Size((PyObject*)inArrayStart) == PyArray_Size((PyObject*)inArrayEnd));
     PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
         1, &nPoints, PyArray_TYPE(inArrayEnd));
