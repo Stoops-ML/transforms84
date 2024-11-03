@@ -7,6 +7,124 @@
 #include "definitions.h"
 
 /*
+UTM to geodetic transformation of double precision.
+https://fypandroid.wordpress.com/2011/09/03/converting-utm-to-latitude-and-longitude-or-vice-versa/
+
+@param double *mmUTM array of size nx1 easting, northing[m, m]
+height (h) [rad, rad, m]
+@param int nPoints Number of LLA points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
+*/
+void UTM2geodeticDouble(const double* mmUTM,
+    long ZoneNumber,
+    char ZoneLetter,
+    int nPoints,
+    double a,
+    double b,
+    double* rrmLLA)
+{
+    double k0 = 0.9996;
+    double e2 = 1.0 - (b * b) / (a * a);
+    double e = sqrt(e2);
+    double ed2 = ((a * a) - (b * b)) / (b * b);
+    double lon0 = (((double)ZoneNumber - 1.0) * 6.0 - 177.0) * PI / 180.0;
+    double e1 = (1.0 - sqrt(1.0 - e2)) / (1.0 + sqrt(1.0 - e2));
+    int iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        int i = iPoint * NCOORDSIN3D;
+        int iUTM = iPoint * NCOORDSIN2D;
+        double x = mmUTM[iUTM + 0] - 500000.0;
+        double y = mmUTM[iUTM + 1];
+        if (ZoneLetter < 'N')
+            y -= 10000000.0;
+        double m = y / k0;
+        double mu = m / (a * (1 - e2 / 4.0 - 3.0 * pow(e, 4) / 64.0 - 5.0 * pow(e, 6) / 256.0));
+        double j1 = 3.0 * e1 / 2 - 27.0 * pow(e1, 3) / 32.0;
+        double j2 = 21.0 * pow(e1, 2) / 16.0 - 55.0 * pow(e1, 4) / 32.0;
+        double j3 = 151.0 * pow(e1, 3) / 96.0;
+        double j4 = 1097.0 * pow(e1, 4) / 512.0;
+        double fp_lat = mu + j1 * sin(2.0 * mu) + j2 * sin(4.0 * mu) + j3 * sin(6.0 * mu) + j4 * sin(8.0 * mu);
+        double c1 = ed2 * pow(cos(fp_lat), 2);
+        double t1 = pow(tan(fp_lat), 2);
+        double r1 = a * (1 - e2) / pow((1 - e2 * pow(sin(fp_lat), 2)), 1.5);
+        double n1 = a / sqrt(1 - e2 * pow(sin(fp_lat), 2));
+        double d = x / (n1 * k0);
+        double q1 = n1 * tan(fp_lat) / r1;
+        double q2 = pow(d, 2) / 2.0;
+        double q3 = (5 + 3 * t1 + 10 * c1 - 4 * pow(c1, 2) - 9.0 * ed2) * pow(d, 4) / 24.0;
+        double q4 = (61.0 + 90.0 * t1 + 298.0 * c1 + 45.0 * pow(t1, 2) - 252.0 * ed2 - 3 * pow(c1, 2)) * pow(d, 6) / 720.0;
+        rrmLLA[i + 0] = fp_lat - q1 * (q2 - q3 + q4);
+        double q5 = d;
+        double q6 = (1.0 + 2.0 * t1 + c1) * pow(d, 3) / 6.0;
+        double q7 = (5.0 - 2.0 * c1 + 28.0 * t1 - 3.0 * pow(c1, 2) + 8.0 * ed2 + 24.0 * pow(t1, 2)) * pow(d, 5) / 120.0;
+        rrmLLA[i + 1] = lon0 + (q5 - q6 + q7) / cos(fp_lat);
+        rrmLLA[i + 2] = 0.0;
+    }
+}
+
+/*
+UTM to geodetic transformation of float precision.
+
+@param double *mmUTM array of size nx1 easting, northing[m, m]
+height (h) [rad, rad, m]
+@param int nPoints Number of LLA points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
+*/
+void UTM2geodeticFloat(const float* mmUTM,
+    int ZoneNumber,
+    char ZoneLetter,
+    int nPoints,
+    float a,
+    float b,
+    float* rrmLLA)
+{
+    float k0 = 0.9996f;
+    float e2 = 1.0f - (b * b) / (a * a);
+    float e = sqrtf(e2);
+    float ed2 = ((a * a) - (b * b)) / (b * b);
+    float lon0 = (((float)ZoneNumber - 1.0f) * 6.0f - 177.0f) * PIf / 180.0f;
+    float e1 = (1.0f - sqrtf(1.0f - e2)) / (1.0f + sqrtf(1.0f - e2));
+    int iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        int i = iPoint * NCOORDSIN3D;
+        int iUTM = iPoint * NCOORDSIN2D;
+        float x = mmUTM[iUTM + 0] - 500000.0f;
+        float y = mmUTM[iUTM + 1];
+        if (ZoneLetter < 'N')
+            y -= 10000000.0f;
+        float m = y / k0;
+        float mu = m / (a * (1 - e2 / 4.0f - 3.0f * powf(e, 4) / 64.0f - 5.0f * powf(e, 6) / 256.0f));
+        float j1 = 3.0f * e1 / 2 - 27.0f * powf(e1, 3) / 32.0f;
+        float j2 = 21.0f * powf(e1, 2) / 16.0f - 55.0f * powf(e1, 4) / 32.0f;
+        float j3 = 151.0f * powf(e1, 3) / 96.0f;
+        float j4 = 1097.0f * powf(e1, 4) / 512.0f;
+        float fp_lat = mu + j1 * sinf(2.0f * mu) + j2 * sinf(4.0f * mu) + j3 * sinf(6.0f * mu) + j4 * sinf(8.0f * mu);
+        float c1 = ed2 * powf(cosf(fp_lat), 2);
+        float t1 = powf(tanf(fp_lat), 2);
+        float r1 = a * (1 - e2) / powf((1 - e2 * powf(sinf(fp_lat), 2)), 1.5);
+        float n1 = a / sqrtf(1 - e2 * powf(sinf(fp_lat), 2));
+        float d = x / (n1 * k0);
+        float q1 = n1 * tanf(fp_lat) / r1;
+        float q2 = powf(d, 2) / 2.0f;
+        float q3 = (5 + 3 * t1 + 10 * c1 - 4 * powf(c1, 2) - 9.0f * ed2) * powf(d, 4) / 24.0f;
+        float q4 = (61.0f + 90.0f * t1 + 298.0f * c1 + 45.0f * powf(t1, 2) - 252.0f * ed2 - 3 * powf(c1, 2)) * powf(d, 6) / 720.0f;
+        rrmLLA[i + 0] = fp_lat - q1 * (q2 - q3 + q4);
+        float q5 = d;
+        float q6 = (1.0f + 2.0f * t1 + c1) * powf(d, 3) / 6.0f;
+        float q7 = (5.0f - 2.0f * c1 + 28.0f * t1 - 3.0f * powf(c1, 2) + 8.0f * ed2 + 24.0f * powf(t1, 2)) * powf(d, 5) / 120.0f;
+        rrmLLA[i + 1] = lon0 + (q5 - q6 + q7) / cosf(fp_lat);
+        rrmLLA[i + 2] = 0.0f;
+    }
+}
+
+
+/*
 Geodetic to UTM transformation of float precision.
 
 @param float *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
@@ -885,6 +1003,85 @@ geodetic2UTMWrapper(PyObject* self, PyObject* args)
         break;
     case NPY_FLOAT:
         geodetic2UTMFloat((float*)PyArray_DATA(inArray), nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+    return (PyObject*)result_array;
+}
+
+static PyObject*
+UTM2geodeticWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject* mmUTM;
+    double a, b;
+    PyObject *ZoneNumberPy;
+    char ZoneLetter;
+
+    // checks
+    if (!PyArg_ParseTuple(args, "O!Osdd", &PyArray_Type, &mmUTM, &ZoneNumberPy, &ZoneLetter, &a, &b))
+        return NULL;
+    if (!PyLong_Check(ZoneNumberPy)) {
+        PyErr_SetString(PyExc_TypeError, "Zone number must be an integer");
+        return NULL;
+    }
+    long ZoneNumber = PyLong_AsLong(ZoneNumberPy);
+    if (PyErr_Occurred()) {
+        return NULL; // Conversion failed
+    }
+    if (!(PyArray_ISCONTIGUOUS(mmUTM))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
+        return NULL;
+    }
+    if ((PyArray_SIZE(mmUTM) % NCOORDSIN2D) != 0) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 2.");
+        return NULL;
+    }
+
+    PyArrayObject* inArray;
+    if (PyArray_ISINTEGER(mmUTM) == 0)
+        inArray = mmUTM;
+    else {
+        inArray = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mmUTM), PyArray_SHAPE(mmUTM), NPY_DOUBLE);
+        if (inArray == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArray, mmUTM) < 0) {
+            Py_DECREF(inArray);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArray))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSIN2D;
+    PyArrayObject* result_array;
+    if (nPoints == 1) {
+        npy_intp dims[2] = { 3, 1 };
+        result_array = (PyArrayObject*)PyArray_SimpleNew(
+            2, dims, PyArray_TYPE(inArray));
+    } else {
+        npy_intp dims[3] = { nPoints, 3, 1 };
+        result_array = (PyArrayObject*)PyArray_SimpleNew(
+            3, dims, PyArray_TYPE(inArray));
+    }
+    if (result_array == NULL)
+        return NULL;
+
+    // run function
+    switch (PyArray_TYPE(result_array)) {
+    case NPY_DOUBLE:
+        UTM2geodeticDouble((double*)PyArray_DATA(inArray), ZoneNumber, ZoneLetter, nPoints, a, b, (double*)PyArray_DATA(result_array));
+        break;
+    case NPY_FLOAT:
+        UTM2geodeticFloat((float*)PyArray_DATA(inArray), ZoneNumber, ZoneLetter, nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
         break;
     default:
         PyErr_SetString(PyExc_ValueError,
@@ -2054,6 +2251,10 @@ static PyMethodDef MyMethods[] = {
         geodetic2UTMWrapper,
         METH_VARARGS,
         "Convert geodetic coordinate system to UTM." },
+    { "UTM2geodetic",
+        UTM2geodeticWrapper,
+        METH_VARARGS,
+        "Convert UTM to geodetic." },
     { NULL, NULL, 0, NULL }
 };
 

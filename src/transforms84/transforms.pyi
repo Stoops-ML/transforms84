@@ -12,6 +12,17 @@ def geodetic2UTM(
 ) -> npt.NDArray[
     Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
 ]: ...
+def UTM2geodetic(
+    mmUTM: npt.NDArray[
+        Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+    ],
+    zone_number: int,
+    zone_letter: str,
+    m_semi_major_axis: float,
+    m_semi_minor_axis: float,
+) -> npt.NDArray[
+    Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+]: ...
 def geodetic2ECEF(
     rrmLLA: npt.NDArray[
         Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
