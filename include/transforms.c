@@ -160,7 +160,7 @@ void geodetic2UTMFloat(const float* rrmLLA,
         mmUTM[iUTM + 0] = k0 * N * (A + (1.0f - T + C) * powf(A, 3) / 6.0f + (5.0f - 18.0f * T + powf(T, 2) + 72.0f * C - 58.0f * powf(e, 2)) * powf(A, 5) / 120.0f) + 500000.0f; // easting
         mmUTM[iUTM + 1] = k0 * (M + N * tanf(rrmLLA[i + 0]) * (powf(A, 2) / 2.0f + powf(A, 4) / 24.0f * (5.0f - T + 9.0f * C + 4.0f * powf(C, 2)) + powf(A, 6) / 720.0f * (61.0f - 58.0f * T + powf(T, 2) + 600.0f * C - 330.0f * powf(e, 2)))); // northing
         if (rrmLLA[i + 0] < 0.0f)
-            mmUTM[iUTM + 1] = mmUTM[iUTM + 1] + 10000000.0f;
+            mmUTM[iUTM + 1] += 10000000.0f;
     }
 }
 
@@ -200,7 +200,7 @@ void geodetic2UTMDouble(const double* rrmLLA,
         mmUTM[iUTM + 0] = k0 * N * (A + (1.0 - T + C) * pow(A, 3) / 6.0 + (5.0 - 18.0 * T + pow(T, 2) + 72.0 * C - 58.0 * e2) * pow(A, 5) / 120.0) + 500000.0; // easting
         mmUTM[iUTM + 1] = k0 * (M + N * tan(rrmLLA[i + 0]) * (pow(A, 2) / 2.0 + pow(A, 4) / 24.0 * (5.0 - T + 9.0 * C + 4.0 * pow(C, 2)) + pow(A, 6) / 720.0 * (61.0 - 58.0 * T + pow(T, 2) + 600.0 * C - 330.0 * e2))); // northing
         if (rrmLLA[i + 0] < 0.0)
-            mmUTM[iUTM + 1] = mmUTM[iUTM + 1] + 10000000.0;
+            mmUTM[iUTM + 1] += 10000000.0;
     }
 }
 
