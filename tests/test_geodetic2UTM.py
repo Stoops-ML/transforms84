@@ -44,11 +44,10 @@ def test_points_int(dtype):
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
 def test_point(dtype):
-    in_arr = np.array([[np.deg2rad(30)], [np.deg2rad(25)], [5]], dtype=dtype)
-    out = geodetic2UTM(in_arr, WGS84.a, WGS84.b)
-    assert np.all(np.isclose(out[0, 0], 5010302.11))
-    assert np.all(np.isclose(out[1, 0], 2336342.24))
-    assert np.all(np.isclose(out[2, 0], 3170373.78))
+    in_arr = np.array([[31.750000], [35.550000], [100]], dtype=dtype)
+    out = geodetic2UTM(DDM2RRM(in_arr), WGS84.a, WGS84.b)
+    assert np.all(np.isclose(out[0, 0], 741548.22))
+    assert np.all(np.isclose(out[1, 0], 3515555.26))
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
