@@ -123,7 +123,6 @@ void UTM2geodeticFloat(const float* mmUTM,
     }
 }
 
-
 /*
 Geodetic to UTM transformation of float precision.
 
@@ -1017,7 +1016,7 @@ UTM2geodeticWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject* mmUTM;
     double a, b;
-    PyObject *ZoneNumberPy;
+    PyObject* ZoneNumberPy;
     char ZoneLetter;
 
     // checks
