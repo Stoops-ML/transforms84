@@ -142,8 +142,6 @@ void geodetic2UTMFloat(const float* rrmLLA,
     float k0 = 0.9996f;
     float e2 = 1.0f - (b * b) / (a * a);
     float e = sqrtf(e2);
-    float ed2 = ((a * a) - (b * b)) / (b * b);
-    float n = (a - b) / (a + b);
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
@@ -182,8 +180,6 @@ void geodetic2UTMDouble(const double* rrmLLA,
     double k0 = 0.9996;
     double e2 = 1.0 - (b * b) / (a * a);
     double e = sqrt(e2);
-    double ed2 = ((a * a) - (b * b)) / (b * b);
-    double n = (a - b) / (a + b);
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
