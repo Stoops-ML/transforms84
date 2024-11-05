@@ -983,14 +983,21 @@ geodetic2UTMWrapper(PyObject* self, PyObject* args)
 
     int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSIN3D;
     PyArrayObject* result_array;
-    if (nPoints == 1) {
+    if ((nPoints == 1) && (PyArray_NDIM(inArray) == 2)) {
         npy_intp dims[2] = { 2, 1 };
         result_array = (PyArrayObject*)PyArray_SimpleNew(
-            2, dims, PyArray_TYPE(inArray));
-    } else {
+            PyArray_NDIM(inArray), dims, PyArray_TYPE(inArray));
+    } else if ((nPoints == 1) && (PyArray_NDIM(inArray) == 3)) {
+        npy_intp dims[3] = { 1, 2, 1 };
+        result_array = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(inArray), dims, PyArray_TYPE(inArray));
+    } else if (nPoints > 1) {
         npy_intp dims[3] = { nPoints, 2, 1 };
         result_array = (PyArrayObject*)PyArray_SimpleNew(
-            3, dims, PyArray_TYPE(inArray));
+            PyArray_NDIM(inArray), dims, PyArray_TYPE(inArray));
+    } else {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output array.");
+        return NULL;
     }
     if (result_array == NULL)
         return NULL;
@@ -1065,11 +1072,11 @@ UTM2geodeticWrapper(PyObject* self, PyObject* args)
     if (nPoints == 1) {
         npy_intp dims[2] = { 3, 1 };
         result_array = (PyArrayObject*)PyArray_SimpleNew(
-            2, dims, PyArray_TYPE(inArray));
+            PyArray_NDIM(inArray), dims, PyArray_TYPE(inArray));
     } else {
         npy_intp dims[3] = { nPoints, 3, 1 };
         result_array = (PyArrayObject*)PyArray_SimpleNew(
-            3, dims, PyArray_TYPE(inArray));
+            PyArray_NDIM(inArray), dims, PyArray_TYPE(inArray));
     }
     if (result_array == NULL)
         return NULL;
