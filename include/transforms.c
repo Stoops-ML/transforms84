@@ -1070,15 +1070,15 @@ UTM2geodeticWrapper(PyObject* self, PyObject* args)
     int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSIN2D;
     PyArrayObject* result_array;
     if ((nPoints == 1) && (PyArray_NDIM(inArray) == 2)) {
-        npy_intp dims[2] = { 2, 1 };
+        npy_intp dims[2] = { 3, 1 };
         result_array = (PyArrayObject*)PyArray_SimpleNew(
             PyArray_NDIM(inArray), dims, PyArray_TYPE(inArray));
     } else if ((nPoints == 1) && (PyArray_NDIM(inArray) == 3)) {
-        npy_intp dims[3] = { 1, 2, 1 };
+        npy_intp dims[3] = { 1, 3, 1 };
         result_array = (PyArrayObject*)PyArray_SimpleNew(
             PyArray_NDIM(inArray), dims, PyArray_TYPE(inArray));
     } else if (nPoints > 1) {
-        npy_intp dims[3] = { nPoints, 2, 1 };
+        npy_intp dims[3] = { nPoints, 3, 1 };
         result_array = (PyArrayObject*)PyArray_SimpleNew(
             PyArray_NDIM(inArray), dims, PyArray_TYPE(inArray));
     } else {
