@@ -7,6 +7,199 @@
 #include "definitions.h"
 
 /*
+UTM to geodetic transformation of double precision.
+https://fypandroid.wordpress.com/2011/09/03/converting-utm-to-latitude-and-longitude-or-vice-versa/
+
+@param double *mmUTM array of size nx1 easting, northing[m, m]
+height (h) [rad, rad, m]
+@param int nPoints Number of LLA points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
+*/
+void UTM2geodeticDouble(const double* mmUTM,
+    long ZoneNumber,
+    char* ZoneLetter,
+    int nPoints,
+    double a,
+    double b,
+    double* rrmLLA)
+{
+    double k0 = 0.9996;
+    double e2 = 1.0 - (b * b) / (a * a);
+    double e = sqrt(e2);
+    double ed2 = ((a * a) - (b * b)) / (b * b);
+    double lon0 = (((double)ZoneNumber - 1.0) * 6.0 - 177.0) * PI / 180.0;
+    double e1 = (1.0 - sqrt(1.0 - e2)) / (1.0 + sqrt(1.0 - e2));
+    int iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        int i = iPoint * NCOORDSIN3D;
+        int iUTM = iPoint * NCOORDSIN2D;
+        double x = mmUTM[iUTM + 0] - 500000.0;
+        double y = mmUTM[iUTM + 1];
+        if (ZoneLetter[0] < 'N')
+            y -= 10000000.0;
+        double m = y / k0;
+        double mu = m / (a * (1 - e2 / 4.0 - 3.0 * pow(e, 4) / 64.0 - 5.0 * pow(e, 6) / 256.0));
+        double j1 = 3.0 * e1 / 2 - 27.0 * pow(e1, 3) / 32.0;
+        double j2 = 21.0 * pow(e1, 2) / 16.0 - 55.0 * pow(e1, 4) / 32.0;
+        double j3 = 151.0 * pow(e1, 3) / 96.0;
+        double j4 = 1097.0 * pow(e1, 4) / 512.0;
+        double fp_lat = mu + j1 * sin(2.0 * mu) + j2 * sin(4.0 * mu) + j3 * sin(6.0 * mu) + j4 * sin(8.0 * mu);
+        double c1 = ed2 * pow(cos(fp_lat), 2);
+        double t1 = pow(tan(fp_lat), 2);
+        double r1 = a * (1 - e2) / pow((1 - e2 * pow(sin(fp_lat), 2)), 1.5);
+        double n1 = a / sqrt(1 - e2 * pow(sin(fp_lat), 2));
+        double d = x / (n1 * k0);
+        double q1 = n1 * tan(fp_lat) / r1;
+        double q2 = pow(d, 2) / 2.0;
+        double q3 = (5 + 3 * t1 + 10 * c1 - 4 * pow(c1, 2) - 9.0 * ed2) * pow(d, 4) / 24.0;
+        double q4 = (61.0 + 90.0 * t1 + 298.0 * c1 + 45.0 * pow(t1, 2) - 252.0 * ed2 - 3 * pow(c1, 2)) * pow(d, 6) / 720.0;
+        rrmLLA[i + 0] = fp_lat - q1 * (q2 - q3 + q4);
+        double q5 = d;
+        double q6 = (1.0 + 2.0 * t1 + c1) * pow(d, 3) / 6.0;
+        double q7 = (5.0 - 2.0 * c1 + 28.0 * t1 - 3.0 * pow(c1, 2) + 8.0 * ed2 + 24.0 * pow(t1, 2)) * pow(d, 5) / 120.0;
+        rrmLLA[i + 1] = lon0 + (q5 - q6 + q7) / cos(fp_lat);
+        rrmLLA[i + 2] = 0.0;
+    }
+}
+
+/*
+UTM to geodetic transformation of float precision.
+
+@param double *mmUTM array of size nx1 easting, northing[m, m]
+height (h) [rad, rad, m]
+@param int nPoints Number of LLA points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
+*/
+void UTM2geodeticFloat(const float* mmUTM,
+    long ZoneNumber,
+    char* ZoneLetter,
+    int nPoints,
+    float a,
+    float b,
+    float* rrmLLA)
+{
+    float k0 = 0.9996f;
+    float e2 = 1.0f - (b * b) / (a * a);
+    float e = sqrtf(e2);
+    float ed2 = ((a * a) - (b * b)) / (b * b);
+    float lon0 = (((float)ZoneNumber - 1.0f) * 6.0f - 177.0f) * PIf / 180.0f;
+    float e1 = (1.0f - sqrtf(1.0f - e2)) / (1.0f + sqrtf(1.0f - e2));
+    int iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        int i = iPoint * NCOORDSIN3D;
+        int iUTM = iPoint * NCOORDSIN2D;
+        float x = mmUTM[iUTM + 0] - 500000.0f;
+        float y = mmUTM[iUTM + 1];
+        if (ZoneLetter[0] < 'N')
+            y -= 10000000.0f;
+        float m = y / k0;
+        float mu = m / (a * (1 - e2 / 4.0f - 3.0f * powf(e, 4) / 64.0f - 5.0f * powf(e, 6) / 256.0f));
+        float j1 = 3.0f * e1 / 2 - 27.0f * powf(e1, 3) / 32.0f;
+        float j2 = 21.0f * powf(e1, 2) / 16.0f - 55.0f * powf(e1, 4) / 32.0f;
+        float j3 = 151.0f * powf(e1, 3) / 96.0f;
+        float j4 = 1097.0f * powf(e1, 4) / 512.0f;
+        float fp_lat = mu + j1 * sinf(2.0f * mu) + j2 * sinf(4.0f * mu) + j3 * sinf(6.0f * mu) + j4 * sinf(8.0f * mu);
+        float c1 = ed2 * powf(cosf(fp_lat), 2);
+        float t1 = powf(tanf(fp_lat), 2);
+        float r1 = a * (1 - e2) / powf((1 - e2 * powf(sinf(fp_lat), 2)), 1.5);
+        float n1 = a / sqrtf(1 - e2 * powf(sinf(fp_lat), 2));
+        float d = x / (n1 * k0);
+        float q1 = n1 * tanf(fp_lat) / r1;
+        float q2 = powf(d, 2) / 2.0f;
+        float q3 = (5 + 3 * t1 + 10 * c1 - 4 * powf(c1, 2) - 9.0f * ed2) * powf(d, 4) / 24.0f;
+        float q4 = (61.0f + 90.0f * t1 + 298.0f * c1 + 45.0f * powf(t1, 2) - 252.0f * ed2 - 3 * powf(c1, 2)) * powf(d, 6) / 720.0f;
+        rrmLLA[i + 0] = fp_lat - q1 * (q2 - q3 + q4);
+        float q5 = d;
+        float q6 = (1.0f + 2.0f * t1 + c1) * powf(d, 3) / 6.0f;
+        float q7 = (5.0f - 2.0f * c1 + 28.0f * t1 - 3.0f * powf(c1, 2) + 8.0f * ed2 + 24.0f * powf(t1, 2)) * powf(d, 5) / 120.0f;
+        rrmLLA[i + 1] = lon0 + (q5 - q6 + q7) / cosf(fp_lat);
+        rrmLLA[i + 2] = 0.0f;
+    }
+}
+
+/*
+Geodetic to UTM transformation of float precision.
+
+@param float *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
+height (h) [rad, rad, m]
+@param int nPoints Number of LLA points
+@param float a semi-major axis
+@param float b semi-minor axis
+@param float *mmUTM array of size nx1 easting, northing[m, m]
+*/
+void geodetic2UTMFloat(const float* rrmLLA,
+    int nPoints,
+    float a,
+    float b,
+    float* mmUTM)
+{
+    float k0 = 0.9996f;
+    float e2 = 1.0f - (b * b) / (a * a);
+    float e = sqrtf(e2);
+    int iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        int i = iPoint * NCOORDSIN3D;
+        int iUTM = iPoint * NCOORDSIN2D;
+        int zone = (rrmLLA[i + 1] * 180.0 / PI + 180) / 6 + 1;
+        float radCentralMeridian = ((float)(zone) * 6.0f - 183.0f) * PI / 180.0f;
+        float N = a / sqrtf(1 - e2 * powf(sinf(rrmLLA[i + 0]), 2));
+        float T = powf(tanf(rrmLLA[i + 0]), 2);
+        float C = (e2 * powf(cosf(rrmLLA[i + 0]), 2)) / (1 - e2);
+        float A = cosf(rrmLLA[i + 0]) * (rrmLLA[i + 1] - radCentralMeridian);
+        float M = a * ((1 - powf(e, 2) / 4.0f - 3.0 * powf(e, 4) / 64.0f - 5.0f * powf(e, 6) / 256.0f) * rrmLLA[i + 0] - (3.0f * powf(e, 2) / 8.0f + 3.0f * powf(e, 4) / 32.0f + 45.0f * powf(e, 6) / 1024.0f) * sinf(2.0f * rrmLLA[i + 0]) + (15.0f * powf(e, 4) / 256.0f + 45 * powf(e, 6) / 1024.0f) * sinf(4.0f * rrmLLA[i + 0]) - (35.0f * powf(e, 6) / 3072.0f) * sinf(6.0f * rrmLLA[i + 0]));
+        mmUTM[iUTM + 0] = k0 * N * (A + (1.0f - T + C) * powf(A, 3) / 6.0f + (5.0f - 18.0f * T + powf(T, 2) + 72.0f * C - 58.0f * powf(e, 2)) * powf(A, 5) / 120.0f) + 500000.0f; // easting
+        mmUTM[iUTM + 1] = k0 * (M + N * tanf(rrmLLA[i + 0]) * (powf(A, 2) / 2.0f + powf(A, 4) / 24.0f * (5.0f - T + 9.0f * C + 4.0f * powf(C, 2)) + powf(A, 6) / 720.0f * (61.0f - 58.0f * T + powf(T, 2) + 600.0f * C - 330.0f * powf(e, 2)))); // northing
+        if (rrmLLA[i + 0] < 0.0f)
+            mmUTM[iUTM + 1] += 10000000.0f;
+    }
+}
+
+/*
+Geodetic to UTM transformation of double precision.
+
+@param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
+height (h) [rad, rad, m]
+@param int nPoints Number of LLA points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *mmUTM array of size nx1 easting, northing[m, m]
+*/
+void geodetic2UTMDouble(const double* rrmLLA,
+    int nPoints,
+    double a,
+    double b,
+    double* mmUTM)
+{
+    double k0 = 0.9996;
+    double e2 = 1.0 - (b * b) / (a * a);
+    double e = sqrt(e2);
+    int iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        int i = iPoint * NCOORDSIN3D;
+        int iUTM = iPoint * NCOORDSIN2D;
+        int zone = (rrmLLA[i + 1] * 180.0 / PI + 180) / 6 + 1;
+        double radCentralMeridian = ((double)(zone) * 6.0 - 183.0) * PI / 180.0;
+        double N = a / sqrt(1 - e2 * pow(sin(rrmLLA[i + 0]), 2));
+        double T = pow(tan(rrmLLA[i + 0]), 2);
+        double C = (e2 * pow(cos(rrmLLA[i + 0]), 2)) / (1 - e2);
+        double A = cos(rrmLLA[i + 0]) * (rrmLLA[i + 1] - radCentralMeridian);
+        double M = a * ((1 - e2 / 4.0 - 3.0 * pow(e, 4) / 64.0 - 5.0 * pow(e, 6) / 256.0) * rrmLLA[i + 0] - (3.0 * e2 / 8.0 + 3.0 * pow(e, 4) / 32.0 + 45.0 * pow(e, 6) / 1024.0) * sin(2.0 * rrmLLA[i + 0]) + (15.0 * pow(e, 4) / 256.0 + 45 * pow(e, 6) / 1024.0) * sin(4.0 * rrmLLA[i + 0]) - (35.0 * pow(e, 6) / 3072.0) * sin(6.0 * rrmLLA[i + 0]));
+        mmUTM[iUTM + 0] = k0 * N * (A + (1.0 - T + C) * pow(A, 3) / 6.0 + (5.0 - 18.0 * T + pow(T, 2) + 72.0 * C - 58.0 * e2) * pow(A, 5) / 120.0) + 500000.0; // easting
+        mmUTM[iUTM + 1] = k0 * (M + N * tan(rrmLLA[i + 0]) * (pow(A, 2) / 2.0 + pow(A, 4) / 24.0 * (5.0 - T + 9.0 * C + 4.0 * pow(C, 2)) + pow(A, 6) / 720.0 * (61.0 - 58.0 * T + pow(T, 2) + 600.0 * C - 330.0 * e2))); // northing
+        if (rrmLLA[i + 0] < 0.0)
+            mmUTM[iUTM + 1] += 10000000.0;
+    }
+}
+
+/*
 Geodetic to ECEF transformation of float precision.
 https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_geodetic_to_ECEF_coordinates
 
@@ -23,11 +216,11 @@ void geodetic2ECEFFloat(const float* rrmLLA,
     float b,
     float* mmmXYZ)
 {
-    float e2 = 1 - (b * b) / (a * a);
+    float e2 = 1.0f - (b * b) / (a * a);
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSIN3D;
         float N = a / sqrtf(1 - e2 * (sinf(rrmLLA[i + 0]) * sinf(rrmLLA[i + 0])));
         mmmXYZ[i + 0] = (N + rrmLLA[i + 2]) * cosf(rrmLLA[i + 0]) * cosf(rrmLLA[i + 1]);
         mmmXYZ[i + 1] = (N + rrmLLA[i + 2]) * cosf(rrmLLA[i + 0]) * sinf(rrmLLA[i + 1]);
@@ -52,11 +245,11 @@ void geodetic2ECEFDouble(const double* rrmLLA,
     double b,
     double* mmmXYZ)
 {
-    double e2 = 1 - (b * b) / (a * a);
+    double e2 = 1.0 - (b * b) / (a * a);
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSIN3D;
         double N = a / sqrt(1 - e2 * sin(rrmLLA[i + 0]) * sin(rrmLLA[i + 0]));
         mmmXYZ[i + 0] = (N + rrmLLA[i + 2]) * cos(rrmLLA[i + 0]) * cos(rrmLLA[i + 1]);
         mmmXYZ[i + 1] = (N + rrmLLA[i + 2]) * cos(rrmLLA[i + 0]) * sin(rrmLLA[i + 1]);
@@ -87,7 +280,7 @@ void ECEF2geodeticFloat(const float* mmmXYZ,
     float ed2 = ((a * a) - (b * b)) / (b * b);
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSIN3D;
         float p = sqrtf(mmmXYZ[i + 0] * mmmXYZ[i + 0] + mmmXYZ[i + 1] * mmmXYZ[i + 1]);
         float F = 54 * b * b * mmmXYZ[i + 2] * mmmXYZ[i + 2];
         float G = p * p + (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2] - e2 * (a * a - b * b);
@@ -128,7 +321,7 @@ void ECEF2geodeticDouble(const double* mmmXYZ,
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSIN3D;
         double p = sqrt(mmmXYZ[i + 0] * mmmXYZ[i + 0] + mmmXYZ[i + 1] * mmmXYZ[i + 1]);
         double F = 54 * b * b * mmmXYZ[i + 2] * mmmXYZ[i + 2];
         double G = p * p + (1 - e2) * mmmXYZ[i + 2] * mmmXYZ[i + 2] - e2 * (a * a - b * b);
@@ -168,12 +361,12 @@ void ECEF2ENUFloat(const float* rrmLLALocalOrigin,
     float* mmmLocal)
 {
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
-    float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(float));
+    float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(float));
     geodetic2ECEFFloat(rrmLLALocalOrigin, nOriginPoints, (float)(a), (float)(b), mmmXYZLocalOrigin);
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         float DeltaX = mmmXYZTarget[iTarget + 0] - mmmXYZLocalOrigin[iOrigin + 0];
         float DeltaY = mmmXYZTarget[iTarget + 1] - mmmXYZLocalOrigin[iOrigin + 1];
@@ -206,13 +399,13 @@ void ECEF2ENUDouble(const double* rrmLLALocalOrigin,
     double* mmmLocal)
 {
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
-    double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(double));
+    double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(double));
     geodetic2ECEFDouble(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         double DeltaX = mmmXYZTarget[iTarget + 0] - mmmXYZLocalOrigin[iOrigin + 0];
         double DeltaY = mmmXYZTarget[iTarget + 1] - mmmXYZLocalOrigin[iOrigin + 1];
@@ -233,13 +426,13 @@ void ECEF2NEDFloat(const float* rrmLLALocalOrigin,
     float* mmmLocal)
 {
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
-    float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(float));
+    float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(float));
     geodetic2ECEFFloat(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         float DeltaX = mmmXYZTarget[iTarget + 0] - mmmXYZLocalOrigin[iOrigin + 0];
         float DeltaY = mmmXYZTarget[iTarget + 1] - mmmXYZLocalOrigin[iOrigin + 1];
@@ -260,13 +453,13 @@ void ECEF2NEDDouble(const double* rrmLLALocalOrigin,
     double* mmmLocal)
 {
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
-    double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(double));
+    double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(double));
     geodetic2ECEFDouble(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         double DeltaX = mmmXYZTarget[iTarget + 0] - mmmXYZLocalOrigin[iOrigin + 0];
         double DeltaY = mmmXYZTarget[iTarget + 1] - mmmXYZLocalOrigin[iOrigin + 1];
@@ -287,7 +480,7 @@ void ECEF2NEDvFloat(const float* rrmLLALocalOrigin,
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmLocal[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
         mmmLocal[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1];
@@ -304,7 +497,7 @@ void ECEF2NEDvDouble(const double* rrmLLALocalOrigin,
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmLocal[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
         mmmLocal[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1];
@@ -321,7 +514,7 @@ void ECEF2ENUvFloat(const float* rrmLLALocalOrigin,
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmLocal[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1];
         mmmLocal[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
@@ -338,7 +531,7 @@ void ECEF2ENUvDouble(const double* rrmLLALocalOrigin,
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmLocal[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1];
         mmmLocal[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmXYZTarget[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmXYZTarget[iTarget + 2];
@@ -355,7 +548,7 @@ void ENU2ECEFvFloat(const float* rrmLLALocalOrigin,
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
         mmmXYZTarget[iTarget + 1] = cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
@@ -372,7 +565,7 @@ void NED2ECEFvFloat(const float* rrmLLALocalOrigin,
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
         mmmXYZTarget[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
@@ -389,7 +582,7 @@ void NED2ECEFvDouble(const double* rrmLLALocalOrigin,
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
         mmmXYZTarget[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
@@ -406,7 +599,7 @@ void ENU2ECEFvDouble(const double* rrmLLALocalOrigin,
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
         mmmXYZTarget[iTarget + 1] = cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2];
@@ -436,12 +629,12 @@ void NED2ECEFFloat(const float* rrmLLALocalOrigin,
     float* mmmXYZTarget)
 {
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
-    float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(float));
+    float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(float));
     geodetic2ECEFFloat(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 0];
         mmmXYZTarget[iTarget + 1] = -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 1];
@@ -472,12 +665,12 @@ void NED2ECEFDouble(const double* rrmLLALocalOrigin,
     double* mmmXYZTarget)
 {
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
-    double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(double));
+    double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(double));
     geodetic2ECEFDouble(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cos(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 0];
         mmmXYZTarget[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + -cos(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 1];
@@ -508,12 +701,12 @@ void ENU2ECEFFloat(const float* rrmLLALocalOrigin,
     float* mmmXYZTarget)
 {
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
-    float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(float));
+    float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(float));
     geodetic2ECEFFloat(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         mmmXYZTarget[iTarget + 0] = -sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 0];
         mmmXYZTarget[iTarget + 1] = cosf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sinf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cosf(rrmLLALocalOrigin[iOrigin + 0]) * sinf(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 1];
@@ -544,13 +737,13 @@ void ENU2ECEFDouble(const double* rrmLLALocalOrigin,
     double* mmmXYZTarget)
 {
     int nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
-    double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSINPOINT * sizeof(double));
+    double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(double));
     geodetic2ECEFDouble(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     int iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
-        int iTarget = iPoint * NCOORDSINPOINT;
+        int iTarget = iPoint * NCOORDSIN3D;
         int iOrigin = iTarget * isOriginSizeOfTargets;
         // mmmXYZTarget[iTarget + 0] = -sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + mmmXYZLocalOrigin[iOrigin + 0];
         // mmmXYZTarget[iTarget + 1] = -sin(rrmLLALocalOrigin[iOrigin + 0]) * cos(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 0] + -sin(rrmLLALocalOrigin[iOrigin + 0]) * sin(rrmLLALocalOrigin[iOrigin + 1]) * mmmTargetLocal[iTarget + 1] + cos(rrmLLALocalOrigin[iOrigin + 0]) * mmmTargetLocal[iTarget + 2] + mmmXYZLocalOrigin[iOrigin + 1];
@@ -578,7 +771,7 @@ void NED2AERFloat(const float* mmmENU, int nPoints, float* rrmAER)
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSIN3D;
         rrmAER[i + 0] = atan2f(mmmENU[i + 1], mmmENU[i + 0]);
         if (rrmAER[i + 0] < 0)
             rrmAER[i + 0] = rrmAER[i + 0] + (2.0f * PIf);
@@ -603,7 +796,7 @@ void NED2AERDouble(const double* mmmNED, int nPoints, double* rrmAER)
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSIN3D;
         rrmAER[i + 0] = atan2(mmmNED[i + 1], mmmNED[i + 0]);
         if (rrmAER[i + 0] < 0)
             rrmAER[i + 0] = rrmAER[i + 0] + 2.0 * PI;
@@ -628,7 +821,7 @@ void ENU2AERFloat(const float* mmmNED, int nPoints, float* rrmAER)
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSIN3D;
         rrmAER[i + 0] = atan2f(mmmNED[i + 0], mmmNED[i + 1]);
         if (rrmAER[i + 0] < 0)
             rrmAER[i + 0] = rrmAER[i + 0] + (2.0f * PIf);
@@ -652,7 +845,7 @@ void ENU2AERDouble(const double* mmmENU, int nPoints, double* rrmAER)
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSIN3D;
         rrmAER[i + 0] = atan2(mmmENU[i + 0], mmmENU[i + 1]);
         if (rrmAER[i + 0] < 0)
             rrmAER[i + 0] = rrmAER[i + 0] + 2.0 * PI;
@@ -675,7 +868,7 @@ void AER2NEDFloat(const float* rrmAER, int nPoints, float* mmmNED)
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSIN3D;
         mmmNED[i + 0] = cosf(rrmAER[i + 1]) * cosf(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmNED[i + 1] = cosf(rrmAER[i + 1]) * sinf(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmNED[i + 2] = -sinf(rrmAER[i + 1]) * rrmAER[i + 2];
@@ -696,7 +889,7 @@ void AER2NEDDouble(const double* rrmAER, int nPoints, double* mmmNED)
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSIN3D;
         mmmNED[i + 0] = cos(rrmAER[i + 1]) * cos(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmNED[i + 1] = cos(rrmAER[i + 1]) * sin(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmNED[i + 2] = -sin(rrmAER[i + 1]) * rrmAER[i + 2];
@@ -717,7 +910,7 @@ void AER2ENUFloat(const float* rrmAER, int nPoints, float* mmmENU)
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSIN3D;
         mmmENU[i + 0] = cosf(rrmAER[i + 1]) * sinf(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmENU[i + 1] = cosf(rrmAER[i + 1]) * cosf(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmENU[i + 2] = sinf(rrmAER[i + 1]) * rrmAER[i + 2];
@@ -738,11 +931,173 @@ void AER2ENUDouble(const double* rrmAER, int nPoints, double* mmmENU)
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSIN3D;
         mmmENU[i + 0] = cos(rrmAER[i + 1]) * sin(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmENU[i + 1] = cos(rrmAER[i + 1]) * cos(rrmAER[i + 0]) * rrmAER[i + 2];
         mmmENU[i + 2] = sin(rrmAER[i + 1]) * rrmAER[i + 2];
     }
+}
+
+static PyObject*
+geodetic2UTMWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject* rrmLLA;
+    double a, b;
+
+    // checks
+    if (!PyArg_ParseTuple(args, "O!dd", &PyArray_Type, &rrmLLA, &a, &b))
+        return NULL;
+    if (!(PyArray_ISCONTIGUOUS(rrmLLA))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
+        return NULL;
+    }
+    if ((PyArray_SIZE(rrmLLA) % NCOORDSIN3D) != 0) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
+        return NULL;
+    }
+
+    PyArrayObject* inArray;
+    if (PyArray_ISINTEGER(rrmLLA) == 0)
+        inArray = rrmLLA;
+    else {
+        inArray = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(rrmLLA), PyArray_SHAPE(rrmLLA), NPY_DOUBLE);
+        if (inArray == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArray, rrmLLA) < 0) {
+            Py_DECREF(inArray);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArray))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSIN3D;
+    PyArrayObject* result_array;
+    if ((nPoints == 1) && (PyArray_NDIM(inArray) == 2)) {
+        npy_intp dims[2] = { 2, 1 };
+        result_array = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(inArray), dims, PyArray_TYPE(inArray));
+    } else if ((nPoints == 1) && (PyArray_NDIM(inArray) == 3)) {
+        npy_intp dims[3] = { 1, 2, 1 };
+        result_array = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(inArray), dims, PyArray_TYPE(inArray));
+    } else if (nPoints > 1) {
+        npy_intp dims[3] = { nPoints, 2, 1 };
+        result_array = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(inArray), dims, PyArray_TYPE(inArray));
+    } else {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output array.");
+        return NULL;
+    }
+    if (result_array == NULL)
+        return NULL;
+
+    // run function
+    switch (PyArray_TYPE(result_array)) {
+    case NPY_DOUBLE:
+        geodetic2UTMDouble((double*)PyArray_DATA(inArray), nPoints, a, b, (double*)PyArray_DATA(result_array));
+        break;
+    case NPY_FLOAT:
+        geodetic2UTMFloat((float*)PyArray_DATA(inArray), nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+    return (PyObject*)result_array;
+}
+
+static PyObject*
+UTM2geodeticWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject* mmUTM;
+    double a, b;
+    PyObject* ZoneNumberPy;
+    char* ZoneLetter;
+
+    // checks
+    if (!PyArg_ParseTuple(args, "O!Osdd", &PyArray_Type, &mmUTM, &ZoneNumberPy, &ZoneLetter, &a, &b))
+        return NULL;
+    if (!PyLong_Check(ZoneNumberPy)) {
+        PyErr_SetString(PyExc_TypeError, "Zone number must be an integer");
+        return NULL;
+    }
+    long ZoneNumber = PyLong_AsLong(ZoneNumberPy);
+    if (PyErr_Occurred()) {
+        return NULL; // Conversion failed
+    }
+    if (!(PyArray_ISCONTIGUOUS(mmUTM))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
+        return NULL;
+    }
+    if ((PyArray_SIZE(mmUTM) % NCOORDSIN2D) != 0) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 2.");
+        return NULL;
+    }
+
+    PyArrayObject* inArray;
+    if (PyArray_ISINTEGER(mmUTM) == 0)
+        inArray = mmUTM;
+    else {
+        inArray = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mmUTM), PyArray_SHAPE(mmUTM), NPY_DOUBLE);
+        if (inArray == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArray, mmUTM) < 0) {
+            Py_DECREF(inArray);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArray))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSIN2D;
+    PyArrayObject* result_array;
+    if ((nPoints == 1) && (PyArray_NDIM(inArray) == 2)) {
+        npy_intp dims[2] = { 3, 1 };
+        result_array = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(inArray), dims, PyArray_TYPE(inArray));
+    } else if ((nPoints == 1) && (PyArray_NDIM(inArray) == 3)) {
+        npy_intp dims[3] = { 1, 3, 1 };
+        result_array = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(inArray), dims, PyArray_TYPE(inArray));
+    } else if (nPoints > 1) {
+        npy_intp dims[3] = { nPoints, 3, 1 };
+        result_array = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(inArray), dims, PyArray_TYPE(inArray));
+    } else {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output array.");
+        return NULL;
+    }
+    if (result_array == NULL)
+        return NULL;
+
+    // run function
+    switch (PyArray_TYPE(result_array)) {
+    case NPY_DOUBLE:
+        UTM2geodeticDouble((double*)PyArray_DATA(inArray), ZoneNumber, ZoneLetter, nPoints, a, b, (double*)PyArray_DATA(result_array));
+        break;
+    case NPY_FLOAT:
+        UTM2geodeticFloat((float*)PyArray_DATA(inArray), ZoneNumber, ZoneLetter, nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+    return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -758,7 +1113,7 @@ geodetic2ECEFWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if ((PyArray_SIZE(rrmLLA) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(rrmLLA) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
@@ -789,7 +1144,7 @@ geodetic2ECEFWrapper(PyObject* self, PyObject* args)
         PyArray_NDIM(inArray), PyArray_SHAPE(inArray), PyArray_TYPE(inArray));
     if (result_array == NULL)
         return NULL;
-    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSIN3D;
 
     // run function
     switch (PyArray_TYPE(result_array)) {
@@ -820,7 +1175,7 @@ ECEF2geodeticWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if ((PyArray_SIZE(mmmXYZ) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(mmmXYZ) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
@@ -851,7 +1206,7 @@ ECEF2geodeticWrapper(PyObject* self, PyObject* args)
         PyArray_NDIM(inArray), PyArray_SHAPE(inArray), PyArray_TYPE(inArray));
     if (result_array == NULL)
         return NULL;
-    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSIN3D;
 
     // run function
     switch (PyArray_TYPE(result_array)) {
@@ -889,13 +1244,13 @@ ECEF2ENUWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSIN3D) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
         return NULL;
     }
-    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSINPOINT) != 0 || (PyArray_SIZE(mmmXYZTarget) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSIN3D) != 0 || (PyArray_SIZE(mmmXYZTarget) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
@@ -945,7 +1300,7 @@ ECEF2ENUWrapper(PyObject* self, PyObject* args)
         PyArray_TYPE(inArrayLocal));
     if (result_array == NULL)
         return NULL;
-    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSIN3D;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
 
     // run function
@@ -986,13 +1341,13 @@ ECEF2NEDWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSIN3D) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
         return NULL;
     }
-    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSINPOINT) != 0 || (PyArray_SIZE(mmmXYZTarget) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSIN3D) != 0 || (PyArray_SIZE(mmmXYZTarget) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
@@ -1042,7 +1397,7 @@ ECEF2NEDWrapper(PyObject* self, PyObject* args)
         PyArray_TYPE(inArrayLocal));
     if (result_array == NULL)
         return NULL;
-    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSIN3D;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
 
     // run function
@@ -1080,13 +1435,13 @@ ECEF2NEDvWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSIN3D) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
         return NULL;
     }
-    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSINPOINT) != 0 || (PyArray_SIZE(mmmXYZTarget) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSIN3D) != 0 || (PyArray_SIZE(mmmXYZTarget) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
@@ -1136,7 +1491,7 @@ ECEF2NEDvWrapper(PyObject* self, PyObject* args)
         PyArray_TYPE(inArrayLocal));
     if (result_array == NULL)
         return NULL;
-    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSIN3D;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
 
     // run function
@@ -1174,13 +1529,13 @@ ECEF2ENUvWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmXYZTarget)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmXYZTarget)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSIN3D) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmXYZTarget))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
         return NULL;
     }
-    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSINPOINT) != 0 || (PyArray_SIZE(mmmXYZTarget) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSIN3D) != 0 || (PyArray_SIZE(mmmXYZTarget) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
@@ -1230,7 +1585,7 @@ ECEF2ENUvWrapper(PyObject* self, PyObject* args)
         PyArray_TYPE(inArrayLocal));
     if (result_array == NULL)
         return NULL;
-    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSIN3D;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
 
     // run function
@@ -1271,13 +1626,13 @@ NED2ECEFWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSIN3D) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
         return NULL;
     }
-    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSINPOINT) != 0 || (PyArray_SIZE(mmmLocal) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSIN3D) != 0 || (PyArray_SIZE(mmmLocal) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
@@ -1326,7 +1681,7 @@ NED2ECEFWrapper(PyObject* self, PyObject* args)
         PyArray_NDIM(inArrayLocal), PyArray_SHAPE(inArrayLocal), PyArray_TYPE(inArrayLocal));
     if (result_array == NULL)
         return NULL;
-    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSIN3D;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
 
     // run function
@@ -1367,13 +1722,13 @@ ENU2ECEFWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSIN3D) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
         return NULL;
     }
-    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSINPOINT) != 0 || (PyArray_SIZE(mmmLocal) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSIN3D) != 0 || (PyArray_SIZE(mmmLocal) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
@@ -1422,7 +1777,7 @@ ENU2ECEFWrapper(PyObject* self, PyObject* args)
         PyArray_NDIM(inArrayLocal), PyArray_SHAPE(inArrayLocal), PyArray_TYPE(inArrayLocal));
     if (result_array == NULL)
         return NULL;
-    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSIN3D;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
 
     // run function
@@ -1460,13 +1815,13 @@ ENU2ECEFvWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSIN3D) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
         return NULL;
     }
-    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSINPOINT) != 0 || (PyArray_SIZE(mmmLocal) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSIN3D) != 0 || (PyArray_SIZE(mmmLocal) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
@@ -1515,7 +1870,7 @@ ENU2ECEFvWrapper(PyObject* self, PyObject* args)
         PyArray_NDIM(inArrayLocal), PyArray_SHAPE(inArrayLocal), PyArray_TYPE(inArrayLocal));
     if (result_array == NULL)
         return NULL;
-    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSIN3D;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
 
     // run function
@@ -1553,13 +1908,13 @@ NED2ECEFvWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSINPOINT) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
+    if (!((PyArray_NDIM(rrmLLALocalOrigin) == PyArray_NDIM(mmmLocal)) && (PyArray_SIZE(rrmLLALocalOrigin) == PyArray_SIZE(mmmLocal)) || ((PyArray_Size((PyObject*)rrmLLALocalOrigin) == NCOORDSIN3D) && (PyArray_SIZE(rrmLLALocalOrigin) < PyArray_SIZE(mmmLocal))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the origin must be of size three.");
         return NULL;
     }
-    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSINPOINT) != 0 || (PyArray_SIZE(mmmLocal) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(rrmLLALocalOrigin) % NCOORDSIN3D) != 0 || (PyArray_SIZE(mmmLocal) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
@@ -1608,7 +1963,7 @@ NED2ECEFvWrapper(PyObject* self, PyObject* args)
         PyArray_NDIM(inArrayLocal), PyArray_SHAPE(inArrayLocal), PyArray_TYPE(inArrayLocal));
     if (result_array == NULL)
         return NULL;
-    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(inArrayLocal) / NCOORDSIN3D;
     int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayOrigin) == PyArray_Size((PyObject*)inArrayLocal));
 
     // run function
@@ -1641,7 +1996,7 @@ ENU2AERWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if ((PyArray_SIZE(mmmENU) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(mmmENU) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
@@ -1672,7 +2027,7 @@ ENU2AERWrapper(PyObject* self, PyObject* args)
         PyArray_NDIM(inArray), PyArray_SHAPE(inArray), PyArray_TYPE(inArray));
     if (result_array == NULL)
         return NULL;
-    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSIN3D;
 
     // run function
     switch (PyArray_TYPE(result_array)) {
@@ -1702,7 +2057,7 @@ NED2AERWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if ((PyArray_SIZE(mmmNED) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(mmmNED) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
@@ -1733,7 +2088,7 @@ NED2AERWrapper(PyObject* self, PyObject* args)
         PyArray_NDIM(inArray), PyArray_SHAPE(inArray), PyArray_TYPE(inArray));
     if (result_array == NULL)
         return NULL;
-    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSIN3D;
 
     // run function
     switch (PyArray_TYPE(result_array)) {
@@ -1763,7 +2118,7 @@ AER2NEDWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if ((PyArray_SIZE(rrmAER) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(rrmAER) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
@@ -1794,7 +2149,7 @@ AER2NEDWrapper(PyObject* self, PyObject* args)
         PyArray_NDIM(inArray), PyArray_SHAPE(inArray), PyArray_TYPE(inArray));
     if (result_array == NULL)
         return NULL;
-    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSIN3D;
 
     // run function
     switch (PyArray_TYPE(result_array)) {
@@ -1824,7 +2179,7 @@ AER2ENUWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if ((PyArray_SIZE(rrmAER) % NCOORDSINPOINT) != 0) {
+    if ((PyArray_SIZE(rrmAER) % NCOORDSIN3D) != 0) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a multiple of 3.");
         return NULL;
     }
@@ -1855,7 +2210,7 @@ AER2ENUWrapper(PyObject* self, PyObject* args)
         PyArray_NDIM(inArray), PyArray_SHAPE(inArray), PyArray_TYPE(inArray));
     if (result_array == NULL)
         return NULL;
-    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(inArray) / NCOORDSIN3D;
 
     // run function
     switch (PyArray_TYPE(result_array)) {
@@ -1901,6 +2256,14 @@ static PyMethodDef MyMethods[] = {
     { "ECEF2NEDv", ECEF2NEDvWrapper, METH_VARARGS, "Convert ECEF to NED velocity." },
     { "NED2AER", NED2AERWrapper, METH_VARARGS, "Convert NED to AER velocity." },
     { "AER2NED", AER2NEDWrapper, METH_VARARGS, "Convert AER to NED velocity." },
+    { "geodetic2UTM",
+        geodetic2UTMWrapper,
+        METH_VARARGS,
+        "Convert geodetic coordinate system to UTM." },
+    { "UTM2geodetic",
+        UTM2geodeticWrapper,
+        METH_VARARGS,
+        "Convert UTM to geodetic." },
     { NULL, NULL, 0, NULL }
 };
 

@@ -129,7 +129,7 @@ void XXM2YYMDouble(const double* rrmPoint,
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSIN3D;
         ddmPoint[i + 0] = rrmPoint[i + 0] * transform;
         ddmPoint[i + 1] = rrmPoint[i + 1] * transform;
         ddmPoint[i + 2] = rrmPoint[i + 2];
@@ -151,7 +151,7 @@ void XXM2YYMFloat(const float* rrmPoint,
     int iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSINPOINT;
+        int i = iPoint * NCOORDSIN3D;
         ddmPoint[i + 0] = rrmPoint[i + 0] * transform;
         ddmPoint[i + 1] = rrmPoint[i + 1] * transform;
         ddmPoint[i + 2] = rrmPoint[i + 2];
@@ -643,7 +643,7 @@ RRM2DDMWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    int nPoints = (int)PyArray_SIZE(in_array) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(in_array) / NCOORDSIN3D;
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
         XXM2YYMDouble(
             (double*)PyArray_DATA(in_array), nPoints, 180.0 / PI, (double*)PyArray_DATA(result_array));
@@ -699,7 +699,7 @@ DDM2RRMWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Could not create output array.");
         return NULL;
     }
-    int nPoints = (int)PyArray_SIZE(in_array) / NCOORDSINPOINT;
+    int nPoints = (int)PyArray_SIZE(in_array) / NCOORDSIN3D;
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
         XXM2YYMDouble(
             (double*)PyArray_DATA(in_array), nPoints, PI / 180.0, (double*)PyArray_DATA(result_array));
