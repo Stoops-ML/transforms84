@@ -38,8 +38,8 @@ void UTM2geodeticDouble(const double* mmUTM,
         int iUTM = iPoint * NCOORDSIN2D;
         double x = mmUTM[iUTM + 0] - 500000.0;
         double y = mmUTM[iUTM + 1];
-        if (ZoneLetter < 'N')
-            y -= 10000000.0;
+        // if (ZoneLetter < 'N')
+        //     y -= 10000000.0;
         double m = y / k0;
         double mu = m / (a * (1 - e2 / 4.0 - 3.0 * pow(e, 4) / 64.0 - 5.0 * pow(e, 6) / 256.0));
         double j1 = 3.0 * e1 / 2 - 27.0 * pow(e1, 3) / 32.0;
@@ -96,8 +96,8 @@ void UTM2geodeticFloat(const float* mmUTM,
         int iUTM = iPoint * NCOORDSIN2D;
         float x = mmUTM[iUTM + 0] - 500000.0f;
         float y = mmUTM[iUTM + 1];
-        if (ZoneLetter < 'N')
-            y -= 10000000.0f;
+        // if (ZoneLetter < 'N')
+        //     y -= 10000000.0f;
         float m = y / k0;
         float mu = m / (a * (1 - e2 / 4.0f - 3.0f * powf(e, 4) / 64.0f - 5.0f * powf(e, 6) / 256.0f));
         float j1 = 3.0f * e1 / 2 - 27.0f * powf(e1, 3) / 32.0f;
@@ -1020,10 +1020,10 @@ UTM2geodeticWrapper(PyObject* self, PyObject* args)
     PyArrayObject* mmUTM;
     double a, b;
     // PyObject* ZoneNumberPy;
-    char ZoneLetter;
+    // char ZoneLetter;
 
     // checks
-    if (!PyArg_ParseTuple(args, "O!sdd", &PyArray_Type, &mmUTM, &ZoneLetter, &a, &b)) //&ZoneNumberPy,
+    if (!PyArg_ParseTuple(args, "O!dd", &PyArray_Type, &mmUTM, &a, &b)) //&ZoneNumberPy,
         return NULL;
     // if (!PyLong_Check(ZoneNumberPy)) {
     //     PyErr_SetString(PyExc_TypeError, "Zone number must be an integer");
@@ -1087,10 +1087,10 @@ UTM2geodeticWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        UTM2geodeticDouble((double*)PyArray_DATA(inArray), 36, ZoneLetter, nPoints, a, b, (double*)PyArray_DATA(result_array));
+        UTM2geodeticDouble((double*)PyArray_DATA(inArray), 36, 'R', nPoints, a, b, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        UTM2geodeticFloat((float*)PyArray_DATA(inArray), 36, ZoneLetter, nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
+        UTM2geodeticFloat((float*)PyArray_DATA(inArray), 36, 'R', nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
         break;
     default:
         PyErr_SetString(PyExc_ValueError,
