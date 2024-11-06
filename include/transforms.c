@@ -19,7 +19,7 @@ height (h) [rad, rad, m]
 */
 void UTM2geodeticDouble(const double* mmUTM,
     long ZoneNumber,
-    char *ZoneLetter,
+    char* ZoneLetter,
     int nPoints,
     double a,
     double b,
@@ -77,7 +77,7 @@ height (h) [rad, rad, m]
 */
 void UTM2geodeticFloat(const float* mmUTM,
     long ZoneNumber,
-    char *ZoneLetter,
+    char* ZoneLetter,
     int nPoints,
     float a,
     float b,
@@ -1020,7 +1020,7 @@ UTM2geodeticWrapper(PyObject* self, PyObject* args)
     PyArrayObject* mmUTM;
     double a, b;
     PyObject* ZoneNumberPy;
-    char *ZoneLetter;
+    char* ZoneLetter;
 
     // checks
     if (!PyArg_ParseTuple(args, "O!Odsd", &PyArray_Type, &mmUTM, *ZoneLetter, &ZoneNumberPy, &a, &b))
