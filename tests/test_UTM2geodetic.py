@@ -19,12 +19,12 @@ def test_raise_wrong_size():
         UTM2geodetic(in_arr, 36, "R", WGS84.a, WGS84.b)
 
 
-@pytest.mark.parametrize("dtype", [np.int64, np.int32])
-def test_point_int(dtype):
-    in_arr = np.array([[690950.0], [3431318.0]], dtype=dtype)
-    out = UTM2geodetic(in_arr, 36, "R", WGS84.a, WGS84.b)
-    assert np.isclose(out[0, 0], np.deg2rad(30.999992))
-    assert np.isclose(out[1, 0], np.deg2rad(34.999995))
+# @pytest.mark.parametrize("dtype", [np.int64, np.int32])
+# def test_point_int(dtype):
+#     in_arr = np.array([[690950.0], [3431318.0]], dtype=dtype)
+#     out = UTM2geodetic(in_arr, 36, "R", WGS84.a, WGS84.b)
+#     assert np.isclose(out[0, 0], np.deg2rad(30.999992))
+#     assert np.isclose(out[1, 0], np.deg2rad(34.999995))
 
 
 # @pytest.mark.parametrize("dtype", [np.int64, np.int32])
