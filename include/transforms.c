@@ -148,12 +148,12 @@ void geodetic2UTMFloat(const float* rrmLLA,
         long i = iPoint * NCOORDSIN3D;
         long iUTM = iPoint * NCOORDSIN2D;
         int zone = (rrmLLA[i + 1] * 180.0 / PI + 180) / 6 + 1;
-        float radCentralMeridian = ((float)(zone) * 6.0f - 183.0f) * PI / 180.0f;
+        float radCentralMeridian = ((float)(zone) * 6.0f - 183.0f) * PIf / 180.0f;
         float N = a / sqrtf(1 - e2 * powf(sinf(rrmLLA[i + 0]), 2));
         float T = powf(tanf(rrmLLA[i + 0]), 2);
         float C = (e2 * powf(cosf(rrmLLA[i + 0]), 2)) / (1 - e2);
         float A = cosf(rrmLLA[i + 0]) * (rrmLLA[i + 1] - radCentralMeridian);
-        float M = a * ((1 - powf(e, 2) / 4.0f - 3.0 * powf(e, 4) / 64.0f - 5.0f * powf(e, 6) / 256.0f) * rrmLLA[i + 0] - (3.0f * powf(e, 2) / 8.0f + 3.0f * powf(e, 4) / 32.0f + 45.0f * powf(e, 6) / 1024.0f) * sinf(2.0f * rrmLLA[i + 0]) + (15.0f * powf(e, 4) / 256.0f + 45 * powf(e, 6) / 1024.0f) * sinf(4.0f * rrmLLA[i + 0]) - (35.0f * powf(e, 6) / 3072.0f) * sinf(6.0f * rrmLLA[i + 0]));
+        float M = a * ((1.0f - powf(e, 2) / 4.0f - 3.0f * powf(e, 4) / 64.0f - 5.0f * powf(e, 6) / 256.0f) * rrmLLA[i + 0] - (3.0f * powf(e, 2) / 8.0f + 3.0f * powf(e, 4) / 32.0f + 45.0f * powf(e, 6) / 1024.0f) * sinf(2.0f * rrmLLA[i + 0]) + (15.0f * powf(e, 4) / 256.0f + 45.0f * powf(e, 6) / 1024.0f) * sinf(4.0f * rrmLLA[i + 0]) - (35.0f * powf(e, 6) / 3072.0f) * sinf(6.0f * rrmLLA[i + 0]));
         mmUTM[iUTM + 0] = k0 * N * (A + (1.0f - T + C) * powf(A, 3) / 6.0f + (5.0f - 18.0f * T + powf(T, 2) + 72.0f * C - 58.0f * powf(e, 2)) * powf(A, 5) / 120.0f) + 500000.0f; // easting
         mmUTM[iUTM + 1] = k0 * (M + N * tanf(rrmLLA[i + 0]) * (powf(A, 2) / 2.0f + powf(A, 4) / 24.0f * (5.0f - T + 9.0f * C + 4.0f * powf(C, 2)) + powf(A, 6) / 720.0f * (61.0f - 58.0f * T + powf(T, 2) + 600.0f * C - 330.0f * powf(e, 2)))); // northing
         if (rrmLLA[i + 0] < 0.0f)
