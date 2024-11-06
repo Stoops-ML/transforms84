@@ -1023,7 +1023,7 @@ UTM2geodeticWrapper(PyObject* self, PyObject* args)
     // char ZoneLetter;
 
     // checks
-    if (!PyArg_ParseTuple(args, "O!dd", &PyArray_Type, &mmUTM, &ZoneNumberPy, &a, &b)) //&ZoneNumberPy,
+    if (!PyArg_ParseTuple(args, "O!Odd", &PyArray_Type, &mmUTM, &ZoneNumberPy, &a, &b)) //&ZoneNumberPy,
         return NULL;
     if (!PyLong_Check(ZoneNumberPy)) {
         PyErr_SetString(PyExc_TypeError, "Zone number must be an integer");
