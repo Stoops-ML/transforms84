@@ -1019,20 +1019,20 @@ UTM2geodeticWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject* mmUTM;
     double a, b;
-    PyObject* ZoneNumberPy;
+    // PyObject* ZoneNumberPy;
     char ZoneLetter;
 
     // checks
-    if (!PyArg_ParseTuple(args, "O!Osdd", &PyArray_Type, &mmUTM, &ZoneNumberPy, &ZoneLetter, &a, &b))
+    if (!PyArg_ParseTuple(args, "O!sdd", &PyArray_Type, &mmUTM, &ZoneLetter, &a, &b)) //&ZoneNumberPy, 
         return NULL;
-    if (!PyLong_Check(ZoneNumberPy)) {
-        PyErr_SetString(PyExc_TypeError, "Zone number must be an integer");
-        return NULL;
-    }
-    long ZoneNumber = PyLong_AsLong(ZoneNumberPy);
-    if (PyErr_Occurred()) {
-        return NULL; // Conversion failed
-    }
+    // if (!PyLong_Check(ZoneNumberPy)) {
+    //     PyErr_SetString(PyExc_TypeError, "Zone number must be an integer");
+    //     return NULL;
+    // }
+    // long ZoneNumber = 36; // PyLong_AsLong(ZoneNumberPy);
+    // if (PyErr_Occurred()) {
+    //     return NULL; // Conversion failed
+    // }
     if (!(PyArray_ISCONTIGUOUS(mmUTM))) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
@@ -1087,10 +1087,10 @@ UTM2geodeticWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        UTM2geodeticDouble((double*)PyArray_DATA(inArray), ZoneNumber, ZoneLetter, nPoints, a, b, (double*)PyArray_DATA(result_array));
+        UTM2geodeticDouble((double*)PyArray_DATA(inArray), 36, ZoneLetter, nPoints, a, b, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        UTM2geodeticFloat((float*)PyArray_DATA(inArray), ZoneNumber, ZoneLetter, nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
+        UTM2geodeticFloat((float*)PyArray_DATA(inArray), 36, ZoneLetter, nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
         break;
     default:
         PyErr_SetString(PyExc_ValueError,

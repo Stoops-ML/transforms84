@@ -10,19 +10,19 @@ from transforms84.transforms import UTM2geodetic
 def test_raise_wrong_dtype():
     in_arr = np.array([[np.deg2rad(30)], [np.deg2rad(25)]], dtype=np.float16)
     with pytest.raises(ValueError):
-        UTM2geodetic(in_arr, 36, "R", WGS84.a, WGS84.b)  # type: ignore
+        UTM2geodetic(in_arr, "R", WGS84.a, WGS84.b)  # type: ignore
 
 
 def test_raise_wrong_size():
     in_arr = np.array([[np.deg2rad(30)], [np.deg2rad(25)], [10]], dtype=np.float64)
     with pytest.raises(ValueError):
-        UTM2geodetic(in_arr, 36, "R", WGS84.a, WGS84.b)
+        UTM2geodetic(in_arr, "R", WGS84.a, WGS84.b)
 
 
 @pytest.mark.parametrize("dtype", [np.int64, np.int32])
 def test_point_int(dtype):
     in_arr = np.array([[690950.0], [3431318.0]], dtype=dtype)
-    out = UTM2geodetic(in_arr, 36, "R", WGS84.a, WGS84.b)
+    out = UTM2geodetic(in_arr, "R", WGS84.a, WGS84.b)
     assert np.isclose(out[0, 0], np.deg2rad(30.999992))
     assert np.isclose(out[1, 0], np.deg2rad(34.999995))
 
@@ -36,7 +36,7 @@ def test_points_int(dtype):
         ],
         dtype=dtype,
     )
-    out = UTM2geodetic(in_arr, 36, "R", WGS84.a, WGS84.b)
+    out = UTM2geodetic(in_arr, "R", WGS84.a, WGS84.b)
     assert np.all(np.isclose(out[:, 0, 0], np.deg2rad(30.999992)))
     assert np.all(np.isclose(out[:, 1, 0], np.deg2rad(34.999995)))
 
@@ -44,7 +44,7 @@ def test_points_int(dtype):
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
 def test_point(dtype):
     in_arr = np.array([[690950.46], [3431318.84]], dtype=dtype)
-    out = UTM2geodetic(in_arr, 36, "R", WGS84.a, WGS84.b)
+    out = UTM2geodetic(in_arr, "R", WGS84.a, WGS84.b)
     assert np.all(np.isclose(out[0, 0], np.deg2rad(31.0)))
     assert np.all(np.isclose(out[1, 0], np.deg2rad(35.0)))
 
@@ -58,7 +58,7 @@ def test_points(dtype):
         ],
         dtype=dtype,
     )
-    out = UTM2geodetic(in_arr, 36, "R", WGS84.a, WGS84.b)
+    out = UTM2geodetic(in_arr, "R", WGS84.a, WGS84.b)
     assert np.all(np.isclose(out[:, 0, 0], np.deg2rad(31.0)))
     assert np.all(np.isclose(out[:, 1, 0], np.deg2rad(35.0)))
 
@@ -70,6 +70,6 @@ def test_parallel(dtype):
             (-1, 2, 1)
         )
     )
-    out = UTM2geodetic(in_arr, 36, "R", WGS84.a, WGS84.b)
+    out = UTM2geodetic(in_arr, "R", WGS84.a, WGS84.b)
     assert np.all(np.isclose(out[:, 0, 0], np.deg2rad(31.0)))
     assert np.all(np.isclose(out[:, 1, 0], np.deg2rad(35.0)))
