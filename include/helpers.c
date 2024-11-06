@@ -12,7 +12,7 @@ Calculate the angular difference between two numbers of double precision.
 smallestAngle is false.
 @param double *AngleEnd array of size n angles. This is the end angle if
 smallestAngle is false.
-@param int nAngles Number of angles in array
+@param long nAngles Number of angles in array
 @param int smallestAngle Whether to calculate the angular difference between
 the start and end angles or the smallest angle.
 @param double Difference Angular difference
@@ -38,7 +38,7 @@ Calculate the angular difference between two numbers of float precision.
 false.
 @param float AngleEnd angle. This is the end angle if smallestAngle is false.
 @param float MaxValue angle.
-@param int nAngles Number of angles in array
+@param long nAngles Number of angles in array
 @param int smallestAngle Whether to calculate the angular difference between
 the start and end angles or the smallest angle.
 @param float Difference Angular difference
@@ -63,18 +63,18 @@ Calculate the angular difference between two numbers of float precision.
 smallestAngle is false.
 @param float *AngleEnd array of size n angles. This is the end angle if
 smallestAngle is false.
-@param int nAngles Number of angles in array
+@param long nAngles Number of angles in array
 @param int smallestAngle Whether to calculate the angular difference between
 the start and end angles or the smallest angle.
 @param float Difference Angular difference */
 void AngularDifferencesFloat(const float* AngleStart,
     const float* AngleEnd,
     const float MaxValue,
-    int nAngles,
+    long nAngles,
     int smallestAngle,
     float* Difference)
 {
-    int i;
+    long i;
 #pragma omp parallel for if (nAngles > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (i = 0; i < nAngles; ++i) {
         Difference[i] = fmodf(fabsf(AngleStart[i] - AngleEnd[i]), MaxValue);
@@ -92,18 +92,18 @@ Calculate the angular difference between two numbers of float precision.
 smallestAngle is false.
 @param double *AngleEnd array of size n angles. This is the end angle if
 smallestAngle is false.
-@param int nAngles Number of angles in array
+@param long nAngles Number of angles in array
 @param int smallestAngle Whether to calculate the angular difference between
 the start and end angles or the smallest angle.
 @param double Difference Angular difference */
 void AngularDifferencesDouble(const double* AngleStart,
     const double* AngleEnd,
     const double MaxValue,
-    int nAngles,
+    long nAngles,
     int smallestAngle,
     double* Difference)
 {
-    int i;
+    long i;
 #pragma omp parallel for if (nAngles > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (i = 0; i < nAngles; ++i) {
         Difference[i] = fmod(fabs(AngleStart[i] - AngleEnd[i]), MaxValue);
@@ -118,18 +118,18 @@ void AngularDifferencesDouble(const double* AngleStart,
 Convert a point from X, X, m to Y, Y, m in double precision
 
 @param double *ddmPoint array of size nx3
-@param int nPoints Number of angles in array
+@param long nPoints Number of angles in array
 @param double *rrmPoint array of size nx3
 */
 void XXM2YYMDouble(const double* rrmPoint,
-    int nPoints,
+    long nPoints,
     const double transform,
     double* ddmPoint)
 {
-    int iPoint;
+    long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSIN3D;
+        long i = iPoint * NCOORDSIN3D;
         ddmPoint[i + 0] = rrmPoint[i + 0] * transform;
         ddmPoint[i + 1] = rrmPoint[i + 1] * transform;
         ddmPoint[i + 2] = rrmPoint[i + 2];
@@ -140,18 +140,18 @@ void XXM2YYMDouble(const double* rrmPoint,
 Convert a point from X, X, m to Y, Y, m in float precision
 
 @param float *ddmPoint array of size nx3
-@param int nPoints Number of angles in array
+@param long nPoints Number of angles in array
 @param float *rrmPoint array of size nx3
 */
 void XXM2YYMFloat(const float* rrmPoint,
-    int nPoints,
+    long nPoints,
     const float transform,
     float* ddmPoint)
 {
-    int iPoint;
+    long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int i = iPoint * NCOORDSIN3D;
+        long i = iPoint * NCOORDSIN3D;
         ddmPoint[i + 0] = rrmPoint[i + 0] * transform;
         ddmPoint[i + 1] = rrmPoint[i + 1] * transform;
         ddmPoint[i + 2] = rrmPoint[i + 2];
@@ -164,10 +164,10 @@ Wrap a point between two numbers
 void WrapsFloat3(const float* val,
     const float* maxVal,
     const float* minVal,
-    int nPoints,
+    long nPoints,
     float* boundedVal)
 {
-    int iPoint;
+    long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         boundedVal[iPoint] = fmodf(val[iPoint] - minVal[iPoint], maxVal[iPoint] - minVal[iPoint]) + minVal[iPoint];
@@ -182,10 +182,10 @@ Wrap a point between two numbers
 void WrapsDouble3(const double* val,
     const double* maxVal,
     const double* minVal,
-    int nPoints,
+    long nPoints,
     double* boundedVal)
 {
-    int iPoint;
+    long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         boundedVal[iPoint] = fmod(val[iPoint] - minVal[iPoint], maxVal[iPoint] - minVal[iPoint]) + minVal[iPoint];
@@ -200,10 +200,10 @@ Wrap a point between two numbers
 void WrapsFloat1(const float* val,
     const float maxVal,
     const float minVal,
-    int nPoints,
+    long nPoints,
     float* boundedVal)
 {
-    int iPoint;
+    long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         boundedVal[iPoint] = fmodf(val[iPoint] - minVal, maxVal - minVal) + minVal;
@@ -218,10 +218,10 @@ Wrap a point between two numbers
 void WrapsDouble1(const double* val,
     const double maxVal,
     const double minVal,
-    int nPoints,
+    long nPoints,
     double* boundedVal)
 {
-    int iPoint;
+    long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         boundedVal[iPoint] = fmod(val[iPoint] - minVal, maxVal - minVal) + minVal;
@@ -304,7 +304,7 @@ WrapWrapper(PyObject* self, PyObject* args)
             return NULL;
         }
 
-        int nPoints = (int)PyArray_SIZE(val);
+        long nPoints = (int)PyArray_SIZE(val);
         double minVal, maxVal;
         if (PyLong_Check(arg2))
             minVal = PyLong_AsDouble(arg2);
@@ -367,11 +367,11 @@ WrapWrapper(PyObject* self, PyObject* args)
             return NULL;
         }
 
-        int nPoints = (int)PyArray_SIZE(val);
+        long nPoints = (int)PyArray_SIZE(val);
         if (PyArray_TYPE(val) == NPY_DOUBLE) {
             double* maxVals = (double*)PyArray_DATA(maxVal);
             double* minVals = (double*)PyArray_DATA(minVal);
-            for (npy_intp i = 0; i < nPoints; i++) {
+            for (long i = 0; i < nPoints; i++) {
                 if (minVals[i] > maxVals[i]) {
                     PyErr_SetString(PyExc_ValueError, "All maximum values must be larger than all minimum values.");
                     return NULL;
@@ -381,7 +381,7 @@ WrapWrapper(PyObject* self, PyObject* args)
         } else if (PyArray_TYPE(val) == NPY_FLOAT) {
             float* maxVals = (float*)PyArray_DATA(maxVal);
             float* minVals = (float*)PyArray_DATA(minVal);
-            for (npy_intp i = 0; i < nPoints; i++) {
+            for (long i = 0; i < nPoints; i++) {
                 if (minVals[i] > maxVals[i]) {
                     PyErr_SetString(PyExc_ValueError, "All maximum values must be larger than all minimum values.");
                     return NULL;
@@ -447,7 +447,7 @@ RadAngularDifferenceWrapper(PyObject* self, PyObject* args)
             return NULL;
         }
 
-        int nPoints = (int)PyArray_SIZE(radAngleStart);
+        long nPoints = (int)PyArray_SIZE(radAngleStart);
         if (PyArray_TYPE(radAngleEnd) == NPY_DOUBLE) {
             AngularDifferencesDouble((double*)PyArray_DATA(radAngleStart), (double*)PyArray_DATA(radAngleEnd), 2.0 * PI, nPoints, smallestAngle, (double*)PyArray_DATA(result_array));
         } else if (PyArray_TYPE(radAngleEnd) == NPY_FLOAT) {
@@ -548,7 +548,7 @@ DegAngularDifferenceWrapper(PyObject* self, PyObject* args)
             return NULL;
         }
 
-        int nPoints = (int)PyArray_SIZE(degAngleStart);
+        long nPoints = (int)PyArray_SIZE(degAngleStart);
         if (PyArray_TYPE(degAngleEnd) == NPY_DOUBLE) {
             AngularDifferencesDouble((double*)PyArray_DATA(degAngleStart), (double*)PyArray_DATA(degAngleEnd), DEGCIRCLE, nPoints, smallestAngle, (double*)PyArray_DATA(result_array));
         } else if (PyArray_TYPE(degAngleEnd) == NPY_FLOAT) {
@@ -643,7 +643,7 @@ RRM2DDMWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    int nPoints = (int)PyArray_SIZE(in_array) / NCOORDSIN3D;
+    long nPoints = (int)PyArray_SIZE(in_array) / NCOORDSIN3D;
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
         XXM2YYMDouble(
             (double*)PyArray_DATA(in_array), nPoints, 180.0 / PI, (double*)PyArray_DATA(result_array));
@@ -699,7 +699,7 @@ DDM2RRMWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Could not create output array.");
         return NULL;
     }
-    int nPoints = (int)PyArray_SIZE(in_array) / NCOORDSIN3D;
+    long nPoints = (int)PyArray_SIZE(in_array) / NCOORDSIN3D;
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
         XXM2YYMDouble(
             (double*)PyArray_DATA(in_array), nPoints, PI / 180.0, (double*)PyArray_DATA(result_array));

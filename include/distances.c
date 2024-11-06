@@ -12,23 +12,23 @@ https://en.wikipedia.org/wiki/Haversine_formula#Formulation
 range [rad, rad, m]
 @param float *rrmEnd array of size nx3 of start point azimuth, elevation, range
 [rad, rad, m]
-@param size_t nPoints Number of target points
+@param long nPoints Number of target points
 @param double mRadiusSphere Radius of sphere in metres
 @param float *mRadiusSphere array of size nx3 of distance between start and end
 points
 */
 void HaversineDouble(const double* rrmStart,
     const double* rrmEnd,
-    int nPoints,
+    long nPoints,
     int isArraysSizeEqual,
     double mRadiusSphere,
     double* mDistance)
 {
-    int iPoint;
+    long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int iPointEnd = iPoint * NCOORDSIN3D;
-        int iPointStart = iPointEnd * isArraysSizeEqual;
+        long iPointEnd = iPoint * NCOORDSIN3D;
+        long iPointStart = iPointEnd * isArraysSizeEqual;
         mDistance[iPoint] = 2.0 * mRadiusSphere * asin(sqrt((1.0 - cos(rrmEnd[iPointEnd] - rrmStart[iPointStart]) + cos(rrmStart[iPointStart]) * cos(rrmEnd[iPointEnd]) * (1.0 - cos(rrmEnd[iPointEnd + 1] - rrmStart[iPointStart + 1]))) / 2.0));
     }
 }
@@ -41,23 +41,23 @@ https://en.wikipedia.org/wiki/Haversine_formula#Formulation
 range [rad, rad, m]
 @param float *rrmEnd array of size nx3 of start point azimuth, elevation, range
 [rad, rad, m]
-@param size_t nPoints Number of target points
+@param long nPoints Number of target points
 @param double mRadiusSphere Radius of sphere in metres
 @param float *mRadiusSphere array of size nx3 of distance between start and end
 points
 */
 void HaversineFloat(const float* rrmStart,
     const float* rrmEnd,
-    int nPoints,
+    long nPoints,
     int isArraysSizeEqual,
     float mRadiusSphere,
     float* mDistance)
 {
-    int iPoint;
+    long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        int iPointEnd = iPoint * NCOORDSIN3D;
-        int iPointStart = iPointEnd * isArraysSizeEqual;
+        long iPointEnd = iPoint * NCOORDSIN3D;
+        long iPointStart = iPointEnd * isArraysSizeEqual;
         mDistance[iPoint] = (float)(2.0) * mRadiusSphere * asinf(sqrtf(((float)(1.0) - cosf(rrmEnd[iPointEnd] - rrmStart[iPointStart]) + cosf(rrmStart[iPointStart]) * cosf(rrmEnd[iPointEnd]) * ((float)(1.0) - cosf(rrmEnd[iPointEnd + 1] - rrmStart[iPointStart + 1]))) / (float)(2.0)));
     }
 }
@@ -144,11 +144,11 @@ HaversineWrapper(PyObject* self, PyObject* args)
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
         HaversineDouble(
-            (double*)PyArray_DATA(inArrayStart), (double*)PyArray_DATA(inArrayEnd), (int)nPoints, isArraysSizeEqual, mRadiusSphere, (double*)PyArray_DATA(result_array));
+            (double*)PyArray_DATA(inArrayStart), (double*)PyArray_DATA(inArrayEnd), (long)nPoints, isArraysSizeEqual, mRadiusSphere, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
         HaversineFloat(
-            (float*)PyArray_DATA(inArrayStart), (float*)PyArray_DATA(inArrayEnd), (int)nPoints, isArraysSizeEqual, (float)(mRadiusSphere), (float*)PyArray_DATA(result_array));
+            (float*)PyArray_DATA(inArrayStart), (float*)PyArray_DATA(inArrayEnd), (long)nPoints, isArraysSizeEqual, (float)(mRadiusSphere), (float*)PyArray_DATA(result_array));
         break;
     default:
         PyErr_SetString(PyExc_ValueError,
