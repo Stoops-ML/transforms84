@@ -76,7 +76,7 @@ height (h) [rad, rad, m]
 @param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
 */
 void UTM2geodeticFloat(const float* mmUTM,
-    int ZoneNumber,
+    long ZoneNumber,
     char ZoneLetter,
     int nPoints,
     float a,
@@ -1019,20 +1019,20 @@ UTM2geodeticWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject* mmUTM;
     double a, b;
-    // PyObject* ZoneNumberPy;
+    PyObject* ZoneNumberPy;
     char ZoneLetter;
 
     // checks
-    if (!PyArg_ParseTuple(args, "O!Osdd", &PyArray_Type, &mmUTM, &ZoneLetter, &a, &b)) // &ZoneNumberPy,
+    if (!PyArg_ParseTuple(args, "O!Osdd", &PyArray_Type, &mmUTM, &ZoneNumberPy, &ZoneLetter, &a, &b))
         return NULL;
     if (!PyLong_Check(ZoneNumberPy)) {
         PyErr_SetString(PyExc_TypeError, "Zone number must be an integer");
         return NULL;
     }
-    long ZoneNumber = 36; // PyLong_AsLong(ZoneNumberPy);
-    // if (PyErr_Occurred()) {
-    //     return NULL; // Conversion failed
-    // }
+    long ZoneNumber = PyLong_AsLong(ZoneNumberPy);
+    if (PyErr_Occurred()) {
+        return NULL; // Conversion failed
+    }
     if (!(PyArray_ISCONTIGUOUS(mmUTM))) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
