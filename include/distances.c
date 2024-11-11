@@ -81,7 +81,7 @@ HaversineWrapper(PyObject* self, PyObject* args)
         PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
         return NULL;
     }
-    if (!((PyArray_NDIM(rrmStart) == PyArray_NDIM(rrmEnd)) && (PyArray_SIZE(rrmStart) == PyArray_SIZE(rrmEnd)) || ((PyArray_SIZE(rrmStart) == NCOORDSIN3D) && (PyArray_SIZE(rrmStart) < PyArray_SIZE(rrmEnd))))) {
+    if (!((PyArray_NDIM(rrmStart) == PyArray_NDIM(rrmEnd)) && (PyArray_SIZE(rrmStart) == PyArray_SIZE(rrmEnd)) || ((PyArray_SIZE(rrmStart) == NCOORDSIN3D) && (PyArray_SIZE(rrmStart) <= PyArray_SIZE(rrmEnd))))) {
         PyErr_SetString(PyExc_ValueError,
             "Input arrays must have matching size and dimensions or "
             "the start point must be of size three.");
@@ -155,7 +155,12 @@ HaversineWrapper(PyObject* self, PyObject* args)
             "Only 32 and 64 bit float types or all integer are accepted.");
         return NULL;
     }
-    return (PyObject*)result_array;
+    if ((nPoints == 1) && (PyArray_NDIM(rrmEnd) == 2) && (PyArray_TYPE(result_array) == NPY_DOUBLE))
+        return Py_BuildValue("d", *((double*)PyArray_DATA(result_array)));
+    else if ((nPoints == 1) && (PyArray_NDIM(rrmEnd) == 2) && (PyArray_TYPE(result_array) == NPY_FLOAT))
+        return Py_BuildValue("f", *((float*)PyArray_DATA(result_array)));
+    else
+        return (PyObject*)result_array;
 }
 
 // Method definition object for this extension, these argumens mean:

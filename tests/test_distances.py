@@ -155,7 +155,8 @@ def test_Haversine_parallel(dtype):
 @pytest.mark.parametrize(
     "dtype0,dtype1", [(np.float64, np.float32), (np.float32, np.float64)]
 )
-def test_Haversine_different_dtypes(dtype0, dtype1):
+def test_Haversine_point_2D_different_dtypes(dtype0, dtype1):
+    """output for 2D arrays end point should be a float"""
     rrm_start_with_height = np.array(
         [[np.deg2rad(33)], [np.deg2rad(34)], [100000]], dtype=dtype0
     )
@@ -165,22 +166,91 @@ def test_Haversine_different_dtypes(dtype0, dtype1):
     out1 = Haversine(rrm_start, rrm_end, WGS84.mean_radius)
     out2 = Haversine(rrm_end, rrm_start_with_height, WGS84.mean_radius)
     out3 = Haversine(rrm_end, rrm_start, WGS84.mean_radius)
+    assert isinstance(out0, float)
+    assert isinstance(out1, float)
+    assert isinstance(out2, float)
+    assert isinstance(out3, float)
+    assert np.isclose(out0, 391225.574516907)
+    assert np.isclose(out1, out0)
+    assert np.isclose(out1, 391225.574516907)
+    assert np.isclose(out2, 391225.574516907)
+    assert np.isclose(out3, 391225.574516907)
+    assert np.isclose(out1, out3)
+
+
+@pytest.mark.parametrize(
+    "dtype0,dtype1", [(np.float64, np.float32), (np.float32, np.float64)]
+)
+def test_Haversine_point_3D_end_point_different_dtypes(dtype0, dtype1):
+    """output for a 3D array end point should be an array"""
+    rrm_start_with_height = np.array(
+        [[np.deg2rad(33)], [np.deg2rad(34)], [100000]], dtype=dtype0
+    )
+    rrm_start = np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=dtype0)
+    rrm_end = np.array([[np.deg2rad(32)], [np.deg2rad(38)], [0]], dtype=dtype1)
+    out0 = Haversine(rrm_start_with_height, rrm_end[None, :], WGS84.mean_radius)
+    out1 = Haversine(rrm_start, rrm_end[None, :], WGS84.mean_radius)
+    out2 = Haversine(rrm_end, rrm_start_with_height[None, :], WGS84.mean_radius)
+    out3 = Haversine(rrm_end, rrm_start[None, :], WGS84.mean_radius)
+    assert isinstance(out0, np.ndarray)
+    assert isinstance(out1, np.ndarray)
+    assert isinstance(out2, np.ndarray)
+    assert isinstance(out3, np.ndarray)
     assert out0.dtype == np.float64
     assert out1.dtype == np.float64
     assert out2.dtype == np.float64
     assert out3.dtype == np.float64
     assert np.isclose(out0, 391225.574516907)
-    assert np.isclose(
-        out1,
-        out0,
-    )
+    assert np.isclose(out1, out0)
     assert np.isclose(out1, 391225.574516907)
     assert np.isclose(out2, 391225.574516907)
     assert np.isclose(out3, 391225.574516907)
-    assert np.isclose(
-        out1,
-        out3,
+    assert np.isclose(out1, out3)
+
+
+@pytest.mark.parametrize(
+    "dtype0,dtype1", [(np.float64, np.float32), (np.float32, np.float64)]
+)
+def test_Haversine_points_different_dtypes(dtype0, dtype1):
+    rrm_start_with_height = np.array(
+        [
+            [[np.deg2rad(33)], [np.deg2rad(34)], [100000]],
+            [[np.deg2rad(33)], [np.deg2rad(34)], [100000]],
+        ],
+        dtype=dtype0,
     )
+    rrm_start = np.array(
+        [
+            [[np.deg2rad(33)], [np.deg2rad(34)], [0]],
+            [[np.deg2rad(33)], [np.deg2rad(34)], [0]],
+        ],
+        dtype=dtype0,
+    )
+    rrm_end = np.array(
+        [
+            [[np.deg2rad(32)], [np.deg2rad(38)], [0]],
+            [[np.deg2rad(32)], [np.deg2rad(38)], [0]],
+        ],
+        dtype=dtype1,
+    )
+    out0 = Haversine(rrm_start_with_height, rrm_end, WGS84.mean_radius)
+    out1 = Haversine(rrm_start, rrm_end, WGS84.mean_radius)
+    out2 = Haversine(rrm_end, rrm_start_with_height, WGS84.mean_radius)
+    out3 = Haversine(rrm_end, rrm_start, WGS84.mean_radius)
+    assert isinstance(out0, np.ndarray)
+    assert isinstance(out1, np.ndarray)
+    assert isinstance(out2, np.ndarray)
+    assert isinstance(out3, np.ndarray)
+    assert out0.dtype == np.float64
+    assert out1.dtype == np.float64
+    assert out2.dtype == np.float64
+    assert out3.dtype == np.float64
+    assert np.all(np.isclose(out0, 391225.574516907))
+    assert np.all(np.isclose(out1, out0))
+    assert np.all(np.isclose(out1, 391225.574516907))
+    assert np.all(np.isclose(out2, 391225.574516907))
+    assert np.all(np.isclose(out3, 391225.574516907))
+    assert np.all(np.isclose(out1, out3))
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])

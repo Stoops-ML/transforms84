@@ -11,6 +11,7 @@ def Haversine(
         Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
     ],
     m_radius_sphere: float,
-) -> npt.NDArray[
-    Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+) -> Union[
+    float,
+    npt.NDArray[Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]],
 ]: ...
