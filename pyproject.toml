@@ -1,6 +1,6 @@
 
 [build-system]
-requires = ["setuptools", "setuptools-scm", "numpy", "wheel", "build"]
+requires = ["setuptools", "setuptools-scm", "numpy>=1.0.0,<3.0.0", "wheel", "build"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -28,7 +28,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Physics",
 ]
-dependencies = ["numpy"]
+dependencies = ["numpy>=1.0.0,<3.0.0"]
 dynamic = ["version"]
 
 [project.optional-dependencies]
