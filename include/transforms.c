@@ -17,7 +17,1054 @@ height (h) [rad, rad, m]
 @param double b semi-minor axis
 @param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
 */
-void UTM2geodeticDouble(const double* mmUTM,
+void UTM2geodeticDoubleUnrolled(const double* mUTMX,
+    const double* mUTMY,
+    long ZoneNumber,
+    char* ZoneLetter,
+    long nPoints,
+    double a,
+    double b,
+    double* radLat,
+    double* radLong,
+    double* mAlt)
+{
+    double k0 = 0.9996;
+    double e2 = 1.0 - (b * b) / (a * a);
+    double e = sqrt(e2);
+    double ed2 = ((a * a) - (b * b)) / (b * b);
+    double lon0 = (((double)ZoneNumber - 1.0) * 6.0 - 177.0) * PI / 180.0;
+    double e1 = (1.0 - sqrt(1.0 - e2)) / (1.0 + sqrt(1.0 - e2));
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        double x = mUTMX[iPoint] - 500000.0;
+        double y = mUTMY[iPoint];
+        if (ZoneLetter[0] < 'N')
+            y -= 10000000.0;
+        double m = y / k0;
+        double mu = m / (a * (1 - e2 / 4.0 - 3.0 * pow(e, 4) / 64.0 - 5.0 * pow(e, 6) / 256.0));
+        double j1 = 3.0 * e1 / 2 - 27.0 * pow(e1, 3) / 32.0;
+        double j2 = 21.0 * pow(e1, 2) / 16.0 - 55.0 * pow(e1, 4) / 32.0;
+        double j3 = 151.0 * pow(e1, 3) / 96.0;
+        double j4 = 1097.0 * pow(e1, 4) / 512.0;
+        double fp_lat = mu + j1 * sin(2.0 * mu) + j2 * sin(4.0 * mu) + j3 * sin(6.0 * mu) + j4 * sin(8.0 * mu);
+        double c1 = ed2 * pow(cos(fp_lat), 2);
+        double t1 = pow(tan(fp_lat), 2);
+        double r1 = a * (1 - e2) / pow((1 - e2 * pow(sin(fp_lat), 2)), 1.5);
+        double n1 = a / sqrt(1 - e2 * pow(sin(fp_lat), 2));
+        double d = x / (n1 * k0);
+        double q1 = n1 * tan(fp_lat) / r1;
+        double q2 = pow(d, 2) / 2.0;
+        double q3 = (5 + 3 * t1 + 10 * c1 - 4 * pow(c1, 2) - 9.0 * ed2) * pow(d, 4) / 24.0;
+        double q4 = (61.0 + 90.0 * t1 + 298.0 * c1 + 45.0 * pow(t1, 2) - 252.0 * ed2 - 3 * pow(c1, 2)) * pow(d, 6) / 720.0;
+        radLat[iPoint] = fp_lat - q1 * (q2 - q3 + q4);
+        double q5 = d;
+        double q6 = (1.0 + 2.0 * t1 + c1) * pow(d, 3) / 6.0;
+        double q7 = (5.0 - 2.0 * c1 + 28.0 * t1 - 3.0 * pow(c1, 2) + 8.0 * ed2 + 24.0 * pow(t1, 2)) * pow(d, 5) / 120.0;
+        radLong[iPoint] = lon0 + (q5 - q6 + q7) / cos(fp_lat);
+        mAlt[iPoint] = 0.0;
+    }
+}
+
+/*
+UTM to geodetic transformation of float precision.
+
+@param double *mmUTM array of size nx1 easting, northing[m, m]
+height (h) [rad, rad, m]
+@param long nPoints Number of LLA points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
+*/
+void UTM2geodeticFloatUnrolled(const float* mUTMX,
+    const float* mUTMY,
+    long ZoneNumber,
+    char* ZoneLetter,
+    long nPoints,
+    float a,
+    float b,
+    float* radLat,
+    float* radLong,
+    float* mAlt)
+{
+    float k0 = 0.9996f;
+    float e2 = 1.0f - (b * b) / (a * a);
+    float e = sqrtf(e2);
+    float ed2 = ((a * a) - (b * b)) / (b * b);
+    float lon0 = (((float)ZoneNumber - 1.0f) * 6.0f - 177.0f) * PIf / 180.0f;
+    float e1 = (1.0f - sqrtf(1.0f - e2)) / (1.0f + sqrtf(1.0f - e2));
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        float x = mUTMX[iPoint] - 500000.0f;
+        float y = mUTMY[iPoint];
+        if (ZoneLetter[0] < 'N')
+            y -= 10000000.0f;
+        float m = y / k0;
+        float mu = m / (a * (1 - e2 / 4.0f - 3.0f * powf(e, 4) / 64.0f - 5.0f * powf(e, 6) / 256.0f));
+        float j1 = 3.0f * e1 / 2 - 27.0f * powf(e1, 3) / 32.0f;
+        float j2 = 21.0f * powf(e1, 2) / 16.0f - 55.0f * powf(e1, 4) / 32.0f;
+        float j3 = 151.0f * powf(e1, 3) / 96.0f;
+        float j4 = 1097.0f * powf(e1, 4) / 512.0f;
+        float fp_lat = mu + j1 * sinf(2.0f * mu) + j2 * sinf(4.0f * mu) + j3 * sinf(6.0f * mu) + j4 * sinf(8.0f * mu);
+        float c1 = ed2 * powf(cosf(fp_lat), 2);
+        float t1 = powf(tanf(fp_lat), 2);
+        float r1 = a * (1 - e2) / powf((1 - e2 * powf(sinf(fp_lat), 2)), 1.5);
+        float n1 = a / sqrtf(1 - e2 * powf(sinf(fp_lat), 2));
+        float d = x / (n1 * k0);
+        float q1 = n1 * tanf(fp_lat) / r1;
+        float q2 = powf(d, 2) / 2.0f;
+        float q3 = (5 + 3 * t1 + 10 * c1 - 4 * powf(c1, 2) - 9.0f * ed2) * powf(d, 4) / 24.0f;
+        float q4 = (61.0f + 90.0f * t1 + 298.0f * c1 + 45.0f * powf(t1, 2) - 252.0f * ed2 - 3 * powf(c1, 2)) * powf(d, 6) / 720.0f;
+        radLat[iPoint] = fp_lat - q1 * (q2 - q3 + q4);
+        float q5 = d;
+        float q6 = (1.0f + 2.0f * t1 + c1) * powf(d, 3) / 6.0f;
+        float q7 = (5.0f - 2.0f * c1 + 28.0f * t1 - 3.0f * powf(c1, 2) + 8.0f * ed2 + 24.0f * powf(t1, 2)) * powf(d, 5) / 120.0f;
+        radLong[iPoint] = lon0 + (q5 - q6 + q7) / cosf(fp_lat);
+        mAlt[iPoint] = 0.0f;
+    }
+}
+
+/*
+Geodetic to UTM transformation of float precision.
+
+@param float *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
+height (h) [rad, rad, m]
+@param long nPoints Number of LLA points
+@param float a semi-major axis
+@param float b semi-minor axis
+@param float *mmUTM array of size nx1 easting, northing[m, m]
+*/
+void geodetic2UTMFloatUnrolled(const float* radLat,
+    const float* radLong,
+    const float* mAlt,
+    long nPoints,
+    float a,
+    float b,
+    float* mUTMX,
+    float* mUTMY)
+{
+    float k0 = 0.9996f;
+    float e2 = 1.0f - (b * b) / (a * a);
+    float e = sqrtf(e2);
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        int zone = (radLong[iPoint] * 180.0 / PI + 180) / 6 + 1;
+        float radCentralMeridian = ((float)(zone) * 6.0f - 183.0f) * PIf / 180.0f;
+        float N = a / sqrtf(1 - e2 * powf(sinf(radLat[iPoint]), 2));
+        float T = powf(tanf(radLat[iPoint]), 2);
+        float C = (e2 * powf(cosf(radLat[iPoint]), 2)) / (1 - e2);
+        float A = cosf(radLat[iPoint]) * (radLong[iPoint] - radCentralMeridian);
+        float M = a * ((1.0f - powf(e, 2) / 4.0f - 3.0f * powf(e, 4) / 64.0f - 5.0f * powf(e, 6) / 256.0f) * radLat[iPoint] - (3.0f * powf(e, 2) / 8.0f + 3.0f * powf(e, 4) / 32.0f + 45.0f * powf(e, 6) / 1024.0f) * sinf(2.0f * radLat[iPoint]) + (15.0f * powf(e, 4) / 256.0f + 45.0f * powf(e, 6) / 1024.0f) * sinf(4.0f * radLat[iPoint]) - (35.0f * powf(e, 6) / 3072.0f) * sinf(6.0f * radLat[iPoint]));
+        mUTMX[iPoint] = k0 * N * (A + (1.0f - T + C) * powf(A, 3) / 6.0f + (5.0f - 18.0f * T + powf(T, 2) + 72.0f * C - 58.0f * powf(e, 2)) * powf(A, 5) / 120.0f) + 500000.0f; // easting
+        mUTMY[iPoint] = k0 * (M + N * tanf(radLat[iPoint]) * (powf(A, 2) / 2.0f + powf(A, 4) / 24.0f * (5.0f - T + 9.0f * C + 4.0f * powf(C, 2)) + powf(A, 6) / 720.0f * (61.0f - 58.0f * T + powf(T, 2) + 600.0f * C - 330.0f * powf(e, 2)))); // northing
+        if (radLat[iPoint] < 0.0f)
+            mUTMY[iPoint] += 10000000.0f;
+    }
+}
+
+/*
+Geodetic to UTM transformation of double precision.
+
+@param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
+height (h) [rad, rad, m]
+@param long nPoints Number of LLA points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *mmUTM array of size nx1 easting, northing[m, m]
+*/
+void geodetic2UTMDoubleUnrolled(double* radLat,
+    double* radLong,
+    double* mAlt,
+    long nPoints,
+    double a,
+    double b,
+    double* mUTMX,
+    double* mUTMY)
+{
+    double k0 = 0.9996;
+    double e2 = 1.0 - (b * b) / (a * a);
+    double e = sqrt(e2);
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        int zone = (radLong[iPoint] * 180.0 / PI + 180) / 6 + 1;
+        double radCentralMeridian = ((double)(zone) * 6.0 - 183.0) * PI / 180.0;
+        double N = a / sqrt(1 - e2 * pow(sin(radLat[iPoint]), 2));
+        double T = pow(tan(radLat[iPoint]), 2);
+        double C = (e2 * pow(cos(radLat[iPoint]), 2)) / (1 - e2);
+        double A = cos(radLat[iPoint]) * (radLong[iPoint] - radCentralMeridian);
+        double M = a * ((1 - e2 / 4.0 - 3.0 * pow(e, 4) / 64.0 - 5.0 * pow(e, 6) / 256.0) * radLat[iPoint] - (3.0 * e2 / 8.0 + 3.0 * pow(e, 4) / 32.0 + 45.0 * pow(e, 6) / 1024.0) * sin(2.0 * radLat[iPoint]) + (15.0 * pow(e, 4) / 256.0 + 45 * pow(e, 6) / 1024.0) * sin(4.0 * radLat[iPoint]) - (35.0 * pow(e, 6) / 3072.0) * sin(6.0 * radLat[iPoint]));
+        mUTMX[iPoint] = k0 * N * (A + (1.0 - T + C) * pow(A, 3) / 6.0 + (5.0 - 18.0 * T + pow(T, 2) + 72.0 * C - 58.0 * e2) * pow(A, 5) / 120.0) + 500000.0; // easting
+        mUTMY[iPoint] = k0 * (M + N * tan(radLat[iPoint]) * (pow(A, 2) / 2.0 + pow(A, 4) / 24.0 * (5.0 - T + 9.0 * C + 4.0 * pow(C, 2)) + pow(A, 6) / 720.0 * (61.0 - 58.0 * T + pow(T, 2) + 600.0 * C - 330.0 * e2))); // northing
+        if (radLat[iPoint] < 0.0)
+            mUTMY[iPoint] += 10000000.0;
+    }
+}
+
+/*
+Geodetic to ECEF transformation of float precision.
+https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_geodetic_to_ECEF_coordinates
+
+@param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
+height (h) [rad, rad, m]
+@param long nPoints Number of LLA points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *mmmXYZ array of size nx3 X, Y, Z [rad, rad, m]
+*/
+void geodetic2ECEFFloatUnrolled(float* radLat,
+    float* radLong,
+    float* mAlt,
+    long nPoints,
+    float a,
+    float b,
+    float* mX,
+    float* mY,
+    float* mZ)
+{
+    float e2 = 1.0f - (b * b) / (a * a);
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        float N = a / sqrtf(1 - e2 * (sinf(radLat[iPoint]) * sinf(radLat[iPoint])));
+        mX[iPoint] = (N + mAlt[iPoint]) * cosf(radLat[iPoint]) * cosf(radLong[iPoint]);
+        mY[iPoint] = (N + mAlt[iPoint]) * cosf(radLat[iPoint]) * sinf(radLong[iPoint]);
+        mZ[iPoint] = ((1 - e2) * N + mAlt[iPoint]) * sinf(radLat[iPoint]);
+    }
+}
+
+/*
+Geodetic to ECEF transformation of double precision.
+https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_geodetic_to_ECEF_coordinates
+
+@param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
+height (h) [rad, rad, m]
+@param long nPoints Number of LLA points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *mmmXYZ array of size nx3 X, Y, Z [m, m, m]
+*/
+void geodetic2ECEFDoubleUnrolled(const double* radLat,
+    const double* radLong,
+    const double* mAlt,
+    long nPoints,
+    double a,
+    double b,
+    double* mX,
+    double* mY,
+    double* mZ)
+{
+    double e2 = 1.0 - (b * b) / (a * a);
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        double N = a / sqrt(1 - e2 * sin(radLat[iPoint]) * sin(radLat[iPoint]));
+        mX[iPoint] = (N + mAlt[iPoint]) * cos(radLat[iPoint]) * cos(radLong[iPoint]);
+        mY[iPoint] = (N + mAlt[iPoint]) * cos(radLat[iPoint]) * sin(radLong[iPoint]);
+        mZ[iPoint] = ((1 - e2) * N + mAlt[iPoint]) * sin(radLat[iPoint]);
+    }
+}
+
+/*
+ECEF to geodetic transformation of float precision.
+https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#The_application_of_Ferrari's_solution
+
+@param double *mmmXYZ array of size nx3 X, Y, Z [m, m, m]
+@param long nPoints Number of ECEF points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
+height (h) [rad, rad, m]
+*/
+void ECEF2geodeticFloatUnrolled(float* mX,
+    float* mY,
+    float* mZ,
+    long nPoints,
+    float a,
+    float b,
+    float* radLat,
+    float* radLong,
+    float* mAlt)
+{
+    long iPoint;
+    float half = 0.5;
+    float e2 = ((a * a) - (b * b)) / (a * a);
+    float ed2 = ((a * a) - (b * b)) / (b * b);
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        float p = sqrtf(mX[iPoint] * mX[iPoint] + mY[iPoint] * mY[iPoint]);
+        float F = 54 * b * b * mZ[iPoint] * mZ[iPoint];
+        float G = p * p + (1 - e2) * mZ[iPoint] * mZ[iPoint] - e2 * (a * a - b * b);
+        float c = e2 * e2 * F * p * p / (G * G * G);
+        float s = cbrtf(1 + c + sqrtf(c * c + 2 * c));
+        float k = s + 1 + 1 / s;
+        float P = F / (3 * k * k * G * G);
+        float Q = sqrtf(1 + 2 * e2 * e2 * P);
+        float r0 = -P * e2 * p / (1 + Q) + sqrtf(half * a * a * (1 + 1 / Q) - P * (1 - e2) * mZ[iPoint] * mZ[iPoint] / (Q * (1 + Q)) - half * P * p * p);
+        float U = sqrtf((p - e2 * r0) * (p - e2 * r0) + mZ[iPoint] * mZ[iPoint]);
+        float V = sqrtf((p - e2 * r0) * (p - e2 * r0) + (1 - e2) * mZ[iPoint] * mZ[iPoint]);
+        float z0 = b * b * mZ[iPoint] / (a * V);
+        radLat[iPoint] = atanf((mZ[iPoint] + ed2 * z0) / p);
+        radLong[iPoint] = atan2f(mY[iPoint], mX[iPoint]);
+        mAlt[iPoint] = U * (1 - b * b / (a * V));
+    }
+}
+
+/*
+ECEF to geodetic transformation of double precision.
+https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#The_application_of_Ferrari's_solution
+
+@param double *mmmXYZ array of size nx3 X, Y, Z [m, m, m]
+@param long nPoints Number of ECEF points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
+height (h) [rad, rad, m]
+*/
+void ECEF2geodeticDoubleUnrolled(const double* mX,
+    const double* mY,
+    const double* mZ,
+    long nPoints,
+    double a,
+    double b,
+    double* radLat,
+    double* radLong,
+    double* mAlt)
+{
+    double e2 = ((a * a) - (b * b)) / (a * a);
+    double ed2 = ((a * a) - (b * b)) / (b * b);
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        double p = sqrt(mX[iPoint] * mX[iPoint] + mY[iPoint] * mY[iPoint]);
+        double F = 54 * b * b * mZ[iPoint] * mZ[iPoint];
+        double G = p * p + (1 - e2) * mZ[iPoint] * mZ[iPoint] - e2 * (a * a - b * b);
+        double c = e2 * e2 * F * p * p / (G * G * G);
+        double s = cbrt(1 + c + sqrt(c * c + 2 * c));
+        double k = s + 1 + 1 / s;
+        double P = F / (3 * k * k * G * G);
+        double Q = sqrt(1 + 2 * e2 * e2 * P);
+        double r0 = -P * e2 * p / (1 + Q) + sqrt(0.5 * a * a * (1 + 1 / Q) - P * (1 - e2) * mZ[iPoint] * mZ[iPoint] / (Q * (1 + Q)) - 0.5 * P * p * p);
+        double U = sqrt((p - e2 * r0) * (p - e2 * r0) + mZ[iPoint] * mZ[iPoint]);
+        double V = sqrt((p - e2 * r0) * (p - e2 * r0) + (1 - e2) * mZ[iPoint] * mZ[iPoint]);
+        double z0 = b * b * mZ[iPoint] / (a * V);
+        radLat[iPoint] = atan((mZ[iPoint] + ed2 * z0) / p);
+        radLong[iPoint] = atan2(mY[iPoint], mX[iPoint]);
+        mAlt[iPoint] = U * (1 - b * b / (a * V));
+    }
+}
+
+/*
+ECEF to ENU transformation of float precision.
+https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ECEF_to_ENU
+
+@param double *rrmLLALocalOrigin array of size nx3 of local reference point X,
+Y, Z [m, m, m]
+@param double *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
+@param long nPoints Number of target points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+*/
+void ECEF2ENUFloatUnrolled(float* radLatOrigin,
+    float* radLongOrigin,
+    float* mAltLocalOrigin,
+    const float* mXTarget,
+    const float* mYTarget,
+    const float* mZTarget,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    float a,
+    float b,
+    float* mXLocal,
+    float* mYLocal,
+    float* mZLocal)
+{
+    long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
+    float* mXLocalOrigin = (float*)malloc(nOriginPoints * sizeof(float));
+    float* mYLocalOrigin = (float*)malloc(nOriginPoints * sizeof(float));
+    float* mZLocalOrigin = (float*)malloc(nOriginPoints * sizeof(float));
+    geodetic2ECEFFloatUnrolled(radLatOrigin, radLongOrigin, mAltLocalOrigin, nOriginPoints, (float)(a), (float)(b), mXLocalOrigin, mYLocalOrigin, mZLocalOrigin);
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        float DeltaX = mXTarget[iPoint] - mXLocalOrigin[iOrigin];
+        float DeltaY = mYTarget[iPoint] - mYLocalOrigin[iOrigin];
+        float DeltaZ = mZTarget[iPoint] - mZLocalOrigin[iOrigin];
+        mXLocal[iPoint] = -sinf(radLongOrigin[iPoint]) * DeltaX + cosf(radLongOrigin[iPoint]) * DeltaY;
+        mYLocal[iPoint] = -sinf(radLatOrigin[iPoint]) * cosf(radLongOrigin[iPoint]) * DeltaX + -sinf(radLatOrigin[iPoint]) * sinf(radLongOrigin[iPoint]) * DeltaY + cosf(radLatOrigin[iPoint]) * DeltaZ;
+        mZLocal[iPoint] = cosf(radLatOrigin[iPoint]) * cosf(radLongOrigin[iPoint]) * DeltaX + cosf(radLatOrigin[iPoint]) * sinf(radLongOrigin[iPoint]) * DeltaY + sinf(radLatOrigin[iPoint]) * DeltaZ;
+    }
+    free(mXLocalOrigin);
+    free(mYLocalOrigin);
+    free(mZLocalOrigin);
+}
+
+/*
+ECEF to ENU transformation of double precision.
+https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ECEF_to_ENU
+
+@param double *rrmLLALocalOrigin array of size nx3 of local reference point X,
+Y, Z [m, m, m]
+@param double *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
+@param long nPoints Number of target points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+*/
+void ECEF2ENUDoubleUnrolled(const double* radLatOrigin,
+    double* radLongOrigin,
+    double* mAltLocalOrigin,
+    const double* mXTarget,
+    const double* mYTarget,
+    const double* mZTarget,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    double a,
+    double b,
+    double* mXLocal,
+    double* mYLocal,
+    double* mZLocal)
+{
+    long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
+    double* mXLocalOrigin = (double*)malloc(nOriginPoints * sizeof(double));
+    double* mYLocalOrigin = (double*)malloc(nOriginPoints * sizeof(double));
+    double* mZLocalOrigin = (double*)malloc(nOriginPoints * sizeof(double));
+    geodetic2ECEFDoubleUnrolled(radLatOrigin, radLongOrigin, mAltLocalOrigin, nOriginPoints, a, b, mXLocalOrigin, mYLocalOrigin, mZLocalOrigin);
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        double DeltaX = mXTarget[iPoint] - mXLocalOrigin[iOrigin];
+        double DeltaY = mYTarget[iPoint] - mYLocalOrigin[iOrigin];
+        double DeltaZ = mZTarget[iPoint] - mZLocalOrigin[iOrigin];
+        mXLocal[iPoint] = -sin(radLongOrigin[iPoint]) * DeltaX + cos(radLongOrigin[iPoint]) * DeltaY;
+        mYLocal[iPoint] = -sin(radLatOrigin[iPoint]) * cos(radLongOrigin[iPoint]) * DeltaX + -sin(radLatOrigin[iPoint]) * sin(radLongOrigin[iPoint]) * DeltaY + cos(radLatOrigin[iPoint]) * DeltaZ;
+        mZLocal[iPoint] = cos(radLatOrigin[iPoint]) * cos(radLongOrigin[iPoint]) * DeltaX + cos(radLatOrigin[iPoint]) * sin(radLongOrigin[iPoint]) * DeltaY + sin(radLatOrigin[iPoint]) * DeltaZ;
+    }
+    free(mXLocalOrigin);
+    free(mYLocalOrigin);
+    free(mZLocalOrigin);
+}
+
+void ECEF2NEDFloatUnrolled(float* radLatOrigin,
+    float* radLongOrigin,
+    float* mAltLocalOrigin,
+    const float* mXTarget,
+    const float* mYTarget,
+    const float* mZTarget,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    float a,
+    float b,
+    float* mXLocal,
+    float* mYLocal,
+    float* mZLocal)
+{
+    long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
+    float* mXLocalOrigin = (float*)malloc(nOriginPoints * sizeof(float));
+    float* mYLocalOrigin = (float*)malloc(nOriginPoints * sizeof(float));
+    float* mZLocalOrigin = (float*)malloc(nOriginPoints * sizeof(float));
+    geodetic2ECEFFloatUnrolled(radLatOrigin, radLongOrigin, mAltLocalOrigin, nOriginPoints, (float)(a), (float)(b), mXLocalOrigin, mYLocalOrigin, mZLocalOrigin);
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        float DeltaX = mXTarget[iPoint] - mXLocalOrigin[iOrigin];
+        float DeltaY = mYTarget[iPoint] - mYLocalOrigin[iOrigin];
+        float DeltaZ = mZTarget[iPoint] - mZLocalOrigin[iOrigin];
+        mXLocal[iPoint] = -sinf(radLatOrigin[iPoint]) * cosf(radLongOrigin[iPoint]) * DeltaX + -sinf(radLatOrigin[iPoint]) * sinf(radLongOrigin[iPoint]) * DeltaY + cosf(radLatOrigin[iPoint]) * DeltaZ;
+        mYLocal[iPoint] = -sinf(radLongOrigin[iPoint]) * DeltaX + cosf(radLongOrigin[iPoint]) * DeltaY;
+        mZLocal[iPoint] = -cosf(radLatOrigin[iPoint]) * cosf(radLongOrigin[iPoint]) * DeltaX + -cosf(radLatOrigin[iPoint]) * sinf(radLongOrigin[iPoint]) * DeltaY + -sinf(radLatOrigin[iPoint]) * DeltaZ;
+    }
+    free(mXLocalOrigin);
+    free(mYLocalOrigin);
+    free(mZLocalOrigin);
+}
+
+void ECEF2NEDDoubleUnrolled(const double* radLatOrigin,
+    double* radLongOrigin,
+    double* mAltLocalOrigin,
+    const double* mXTarget,
+    const double* mYTarget,
+    const double* mZTarget,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    double a,
+    double b,
+    double* mXLocal,
+    double* mYLocal,
+    double* mZLocal)
+{
+    long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
+    double* mXLocalOrigin = (double*)malloc(nOriginPoints * sizeof(double));
+    double* mYLocalOrigin = (double*)malloc(nOriginPoints * sizeof(double));
+    double* mZLocalOrigin = (double*)malloc(nOriginPoints * sizeof(double));
+    geodetic2ECEFDoubleUnrolled(radLatOrigin, radLongOrigin, mAltLocalOrigin, nOriginPoints, a, b, mXLocalOrigin, mYLocalOrigin, mZLocalOrigin);
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        double DeltaX = mXLocal[iPoint] - mXLocalOrigin[iOrigin];
+        double DeltaY = mYLocal[iPoint] - mYLocalOrigin[iOrigin];
+        double DeltaZ = mZLocal[iPoint] - mZLocalOrigin[iOrigin];
+        mXLocal[iPoint] = -sin(radLatOrigin[iPoint]) * cos(radLongOrigin[iPoint]) * DeltaX + -sin(radLatOrigin[iPoint]) * sin(radLongOrigin[iPoint]) * DeltaY + cos(radLatOrigin[iPoint]) * DeltaZ;
+        mYLocal[iPoint] = -sin(radLongOrigin[iPoint]) * DeltaX + cos(radLongOrigin[iPoint]) * DeltaY;
+        mZLocal[iPoint] = -cos(radLatOrigin[iPoint]) * cos(radLongOrigin[iPoint]) * DeltaX + -cos(radLatOrigin[iPoint]) * sin(radLongOrigin[iPoint]) * DeltaY + -sin(radLatOrigin[iPoint]) * DeltaZ;
+    }
+    free(mXLocalOrigin);
+    free(mYLocalOrigin);
+    free(mZLocalOrigin);
+}
+
+void ECEF2NEDvFloatUnrolled(float* radLatOrigin,
+    float* radLongOrigin,
+    float* mAltLocalOrigin,
+    const float* mXTarget,
+    const float* mYTarget,
+    const float* mZTarget,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    float* mXLocal,
+    float* mYLocal,
+    float* mZLocal)
+{
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        mXLocal[iPoint] = -sinf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mXLocal[iPoint] + -sinf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mYLocal[iPoint] + cosf(radLatOrigin[iOrigin]) * mZLocal[iPoint];
+        mYLocal[iPoint] = -sinf(radLongOrigin[iOrigin]) * mXLocal[iPoint] + cosf(radLongOrigin[iOrigin]) * mYLocal[iPoint];
+        mZLocal[iPoint] = -cosf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mXLocal[iPoint] + -cosf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mYLocal[iPoint] + -sinf(radLatOrigin[iOrigin]) * mZLocal[iPoint];
+    }
+}
+
+void ECEF2NEDvDoubleUnrolled(const double* radLatOrigin,
+    double* radLongOrigin,
+    double* mAltLocalOrigin,
+    const double* mXTarget,
+    const double* mYTarget,
+    const double* mZTarget,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    double* mXLocal,
+    double* mYLocal,
+    double* mZLocal)
+{
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        mXLocal[iPoint] = -sin(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mXLocal[iPoint] + -sin(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mYTarget[iPoint] + cos(radLatOrigin[iOrigin]) * mZTarget[iPoint];
+        mYLocal[iPoint] = -sin(radLongOrigin[iOrigin]) * mXLocal[iPoint] + cos(radLongOrigin[iOrigin]) * mYTarget[iPoint];
+        mZLocal[iPoint] = -cos(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mXLocal[iPoint] + -cos(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mYTarget[iPoint] + -sin(radLatOrigin[iOrigin]) * mZTarget[iPoint];
+    }
+}
+
+void ECEF2ENUvFloatUnrolled(float* radLatOrigin,
+    float* radLongOrigin,
+    float* mAltLocalOrigin,
+    const float* mXTarget,
+    const float* mYTarget,
+    const float* mZTarget,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    float* mXLocal,
+    float* mYLocal,
+    float* mZLocal)
+{
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        mXLocal[iPoint] = -sinf(radLongOrigin[iOrigin]) * mXTarget[iPoint] + cosf(radLongOrigin[iOrigin]) * mYTarget[iPoint];
+        mYLocal[iPoint] = -sinf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mXTarget[iPoint] + -sinf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mYTarget[iPoint] + cosf(radLatOrigin[iOrigin]) * mZTarget[iPoint];
+        mZLocal[iPoint] = cosf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mXTarget[iPoint] + cosf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mYTarget[iPoint] + sinf(radLatOrigin[iOrigin]) * mZTarget[iPoint];
+    }
+}
+
+void ECEF2ENUvDoubleUnrolled(const double* radLatOrigin,
+    double* radLongOrigin,
+    double* mAltLocalOrigin,
+    const double* mXTarget,
+    const double* mYTarget,
+    const double* mZTarget,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    double* mXLocal,
+    double* mYLocal,
+    double* mZLocal)
+{
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        mXLocal[iPoint] = -sin(radLongOrigin[iOrigin]) * mXTarget[iPoint] + cos(radLongOrigin[iOrigin]) * mYTarget[iPoint];
+        mYLocal[iPoint] = -sin(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mXTarget[iPoint] + -sin(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mYTarget[iPoint] + cos(radLatOrigin[iOrigin]) * mZTarget[iPoint];
+        mZLocal[iPoint] = cos(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mXTarget[iPoint] + cos(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mYTarget[iPoint] + sin(radLatOrigin[iOrigin]) * mZTarget[iPoint];
+    }
+}
+
+void ENU2ECEFvFloatUnrolled(float* radLatOrigin,
+    float* radLongOrigin,
+    float* mAltLocalOrigin,
+    const float* mXTargetLocal,
+    const float* mYTargetLocal,
+    const float* mZTargetLocal,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    float* mXTarget,
+    float* mYTarget,
+    float* mZTarget)
+{
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        mXTarget[iPoint] = -sinf(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sinf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + cosf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint];
+        mYTarget[iPoint] = cosf(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sinf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + cosf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint];
+        mZTarget[iPoint] = cosf(radLatOrigin[iOrigin]) * mYTargetLocal[iPoint] + sinf(radLatOrigin[iOrigin]) * mZTargetLocal[iPoint];
+    }
+}
+
+void NED2ECEFvFloatUnrolled(float* radLatOrigin,
+    float* radLongOrigin,
+    float* mAltLocalOrigin,
+    const float* mXTargetLocal,
+    const float* mYTargetLocal,
+    const float* mZTargetLocal,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    float* mXTarget,
+    float* mYTarget,
+    float* mZTarget)
+{
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        mXTarget[iPoint] = -sinf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sinf(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + -cosf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint];
+        mYTarget[iPoint] = -sinf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + cosf(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + -cosf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint];
+        mZTarget[iPoint] = cosf(radLatOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sinf(radLatOrigin[iOrigin]) * mZTargetLocal[iPoint];
+    }
+}
+
+void NED2ECEFvDoubleUnrolled(const double* radLatOrigin,
+    double* radLongOrigin,
+    double* mAltLocalOrigin,
+    const float* mXTargetLocal,
+    const float* mYTargetLocal,
+    const float* mZTargetLocal,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    double* mXTarget,
+    double* mYTarget,
+    double* mZTarget)
+{
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        mXTarget[iPoint] = -sin(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sin(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + -cos(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint];
+        mYTarget[iPoint] = -sin(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + cos(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + -cos(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint];
+        mZTarget[iPoint] = cos(radLatOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sin(radLatOrigin[iOrigin]) * mZTargetLocal[iPoint];
+    }
+}
+
+void ENU2ECEFvDoubleUnrolled(const double* radLatOrigin,
+    double* radLongOrigin,
+    double* mAltLocalOrigin,
+    const float* mXTargetLocal,
+    const float* mYTargetLocal,
+    const float* mZTargetLocal,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    double* mXTarget,
+    double* mYTarget,
+    double* mZTarget)
+{
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        mXTarget[iPoint] = -sin(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sin(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + cos(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint];
+        mYTarget[iPoint] = cos(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sin(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + cos(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint];
+        mZTarget[iPoint] = cos(radLatOrigin[iOrigin]) * mYTargetLocal[iPoint] + sin(radLatOrigin[iOrigin]) * mZTargetLocal[iPoint];
+    }
+}
+
+/*
+ECEF to ENU transformation of float precision.
+https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ENU_to_ECEF
+https://www.lddgo.net/en/coordinate/ecef-enu
+
+@param double *rrmLLALocalOrigin array of size nx3 of local reference point
+latitude, longitude, height [rad, rad, m]
+@param float *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
+@param long nPoints Number of target points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+*/
+void NED2ECEFFloatUnrolled(float* radLatOrigin,
+    float* radLongOrigin,
+    float* mAltLocalOrigin,
+    const float* mXTargetLocal,
+    const float* mYTargetLocal,
+    const float* mZTargetLocal,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    float a,
+    float b,
+    float* mXTarget,
+    float* mYTarget,
+    float* mZTarget)
+{
+    long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
+    float* mXLocalOrigin = (float*)malloc(nOriginPoints * sizeof(float));
+    float* mYLocalOrigin = (float*)malloc(nOriginPoints * sizeof(float));
+    float* mZLocalOrigin = (float*)malloc(nOriginPoints * sizeof(float));
+    geodetic2ECEFFloatUnrolled(radLatOrigin, radLongOrigin, mAltLocalOrigin, nOriginPoints, a, b, mXLocalOrigin, mYLocalOrigin, mZLocalOrigin);
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        mXTarget[iPoint] = -sinf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sinf(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + -cosf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint] + mXLocalOrigin[iOrigin];
+        mYTarget[iPoint] = -sinf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + cosf(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + -cosf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint] + mYLocalOrigin[iOrigin];
+        mZTarget[iPoint] = cosf(radLatOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sinf(radLatOrigin[iOrigin]) * mZTargetLocal[iPoint] + mZLocalOrigin[iOrigin];
+    }
+    free(mXLocalOrigin);
+    free(mYLocalOrigin);
+    free(mZLocalOrigin);
+}
+
+/*
+ECEF to ENU transformation of float precision.
+https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ENU_to_ECEF
+https://www.lddgo.net/en/coordinate/ecef-enu
+
+@param double *rrmLLALocalOrigin array of size nx3 of local reference point
+latitude, longitude, height [rad, rad, m]
+@param float *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
+@param long nPoints Number of target points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+*/
+void NED2ECEFDoubleUnrolled(const double* radLatOrigin,
+    double* radLongOrigin,
+    double* mAltLocalOrigin,
+    const double* mXTargetLocal,
+    const double* mYTargetLocal,
+    const double* mZTargetLocal,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    double a,
+    double b,
+    double* mXTarget,
+    double* mYTarget,
+    double* mZTarget)
+{
+    long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
+    double* mXLocalOrigin = (double*)malloc(nOriginPoints * sizeof(double));
+    double* mYLocalOrigin = (double*)malloc(nOriginPoints * sizeof(double));
+    double* mZLocalOrigin = (double*)malloc(nOriginPoints * sizeof(double));
+    geodetic2ECEFDoubleUnrolled(radLatOrigin, radLongOrigin, mAltLocalOrigin, nOriginPoints, a, b, mXLocalOrigin, mYLocalOrigin, mZLocalOrigin);
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        mXTarget[iPoint] = -sin(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sin(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + -cos(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint] + mXLocalOrigin[iOrigin];
+        mYTarget[iPoint] = -sin(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + cos(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + -cos(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint] + mYLocalOrigin[iOrigin];
+        mZTarget[iPoint] = cos(radLatOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sin(radLatOrigin[iOrigin]) * mZTargetLocal[iPoint] + mZLocalOrigin[iOrigin];
+    }
+    free(mXLocalOrigin);
+    free(mYLocalOrigin);
+    free(mZLocalOrigin);
+}
+
+/*
+ECEF to ENU transformation of float precision.
+https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ENU_to_ECEF
+https://www.lddgo.net/en/coordinate/ecef-enu
+
+@param double *rrmLLALocalOrigin array of size nx3 of local reference point
+latitude, longitude, height [rad, rad, m]
+@param float *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
+@param long nPoints Number of target points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+*/
+void ENU2ECEFFloatUnrolled(float* radLatOrigin,
+    float* radLongOrigin,
+    float* mAltLocalOrigin,
+    const float* mXTargetLocal,
+    const float* mYTargetLocal,
+    const float* mZTargetLocal,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    float a,
+    float b,
+    float* mXTarget,
+    float* mYTarget,
+    float* mZTarget)
+{
+    long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
+    float* mXLocalOrigin = (float*)malloc(nOriginPoints * sizeof(float));
+    float* mYLocalOrigin = (float*)malloc(nOriginPoints * sizeof(float));
+    float* mZLocalOrigin = (float*)malloc(nOriginPoints * sizeof(float));
+    geodetic2ECEFFloatUnrolled(radLatOrigin, radLongOrigin, mAltLocalOrigin, nOriginPoints, a, b, mXLocalOrigin, mYLocalOrigin, mZLocalOrigin);
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        mXTarget[iPoint] = -sinf(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sinf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + cosf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint] + mXLocalOrigin[iOrigin];
+        mYTarget[iPoint] = cosf(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sinf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + cosf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint] + mYLocalOrigin[iOrigin];
+        mZTarget[iPoint] = cosf(radLatOrigin[iOrigin]) * mYTargetLocal[iPoint] + sinf(radLatOrigin[iOrigin]) * mZTargetLocal[iPoint] + mZLocalOrigin[iOrigin];
+    }
+    free(mXLocalOrigin);
+    free(mYLocalOrigin);
+    free(mZLocalOrigin);
+}
+
+/*
+ECEF to ENU transformation of double precision.
+https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#From_ENU_to_ECEF
+https://www.lddgo.net/en/coordinate/ecef-enu
+
+@param double *rrmLLALocalOrigin array of size nx3 of local reference point
+latitude, longitude, height [rad, rad, m]
+@param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+@param long nPoints Number of target points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
+*/
+void ENU2ECEFDoubleUnrolled(const double* radLatOrigin,
+    double* radLongOrigin,
+    double* mAltLocalOrigin,
+    const double* mXTargetLocal,
+    const double* mYTargetLocal,
+    const double* mZTargetLocal,
+    long nTargets,
+    int isOriginSizeOfTargets,
+    double a,
+    double b,
+    double* mXTarget,
+    double* mYTarget,
+    double* mZTarget)
+{
+    long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
+    double* mXLocalOrigin = (double*)malloc(nOriginPoints * sizeof(double));
+    double* mYLocalOrigin = (double*)malloc(nOriginPoints * sizeof(double));
+    double* mZLocalOrigin = (double*)malloc(nOriginPoints * sizeof(double));
+    geodetic2ECEFDoubleUnrolled(radLatOrigin, radLongOrigin, mAltLocalOrigin, nOriginPoints, a, b, mXLocalOrigin, mYLocalOrigin, mZLocalOrigin);
+    long iPoint;
+#pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nTargets; ++iPoint) {
+        long iOrigin = iPoint * isOriginSizeOfTargets;
+        // mXTarget[iPoint] = -sin(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + cos(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + mXLocalOrigin[iOrigin];
+        // mYTarget[iPoint] = -sin(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sin(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + cos(radLatOrigin[iOrigin]) * mZTargetLocal[iPoint] + mYLocalOrigin[iOrigin];
+        // mZTarget[iPoint] = cos(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + cos(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + sin(radLatOrigin[iOrigin]) * mZTargetLocal[iPoint] + mZLocalOrigin[iOrigin];
+        mXTarget[iPoint] = -sin(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sin(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + cos(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint] + mXLocalOrigin[iOrigin];
+        mYTarget[iPoint] = cos(radLongOrigin[iOrigin]) * mXTargetLocal[iPoint] + -sin(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mYTargetLocal[iPoint] + cos(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mZTargetLocal[iPoint] + mYLocalOrigin[iOrigin];
+        mZTarget[iPoint] = cos(radLatOrigin[iOrigin]) * mYTargetLocal[iPoint] + sin(radLatOrigin[iOrigin]) * mZTargetLocal[iPoint] + mZLocalOrigin[iOrigin];
+    }
+    free(mXLocalOrigin);
+    free(mYLocalOrigin);
+    free(mZLocalOrigin);
+}
+
+/*
+ENU to AER transformation of float precision.
+https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf <-
+includes additional errors and factors that could be implemented
+https://www.lddgo.net/en/coordinate/ecef-enu
+
+@param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+@param long nPoints Number of target points
+@param float *rrmAER array of size nx3 of target point azimuth, elevation,
+range [rad, rad, m]
+*/
+void NED2AERFloatUnrolled(const float* mN, const float* mE, const float* mD, long nPoints, float* radAz, float* radEl, float* mRange)
+{
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        radAz[iPoint] = atan2f(mE[iPoint], mN[iPoint]);
+        if (radAz[iPoint] < 0)
+            radAz[iPoint] = radAz[iPoint] + (2.0f * PIf);
+        mRange[iPoint] = sqrtf(mN[iPoint] * mN[iPoint] + mE[iPoint] * mE[iPoint] + mD[iPoint] * mD[iPoint]);
+        radEl[iPoint] = asinf(-mD[iPoint] / mRange[iPoint]);}
+}
+
+/*
+ENU to AER transformation of float precision.
+https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf <-
+includes additional errors and factors that could be implemented
+https://www.lddgo.net/en/coordinate/ecef-enu
+
+@param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+@param long nPoints Number of target points
+@param float *rrmAER array of size nx3 of target point azimuth, elevation,
+range [rad, rad, m]
+*/
+void NED2AERDoubleUnrolled(const double* mN, const double* mE, const double* mD, long nPoints, double* radAz, double* radEl, double* mRange)
+{
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        radAz[iPoint] = atan2(mE[iPoint], mN[iPoint]);
+        if (radAz[iPoint] < 0)
+            radAz[iPoint] = radAz[iPoint] + 2.0 * PI;
+        mRange[iPoint] = sqrt(mN[iPoint] * mN[iPoint] + mE[iPoint] * mE[iPoint] + mD[iPoint] * mD[iPoint]);
+        radEl[iPoint] = asin(-mD[iPoint] / mRange[iPoint]);
+    }
+}
+
+/*
+ENU to AER transformation of float precision.
+https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf <-
+includes additional errors and factors that could be implemented
+https://www.lddgo.net/en/coordinate/ecef-enu
+
+@param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+@param long nPoints Number of target points
+@param float *rrmAER array of size nx3 of target point azimuth, elevation,
+range [rad, rad, m]
+*/
+void ENU2AERFloatUnrolled(const float* mE, const float* mN, const float* mU, long nPoints, float* radAz, float* radEl, float* mRange)
+{
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        radAz[iPoint] = atan2f(mE[iPoint], mN[iPoint]);
+        if (radAz[iPoint] < 0)
+            radAz[iPoint] = radAz[iPoint] + (2.0f * PIf);
+        mRange[iPoint] = sqrtf(mE[iPoint] * mE[iPoint] + mN[iPoint] * mN[iPoint] + mU[iPoint] * mU[iPoint]);
+        radEl[iPoint] = asinf(mU[iPoint] / mRange[iPoint]);
+    }
+}
+
+/*
+ENU to AER transformation of double precision.
+https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf
+https://www.lddgo.net/en/coordinate/ecef-enu
+
+@param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+@param long nPoints Number of target points
+@param double *rrmAER array of size nx3 of target point azimuth, elevation,
+range [rad, rad, m]
+*/
+void ENU2AERDoubleUnrolled(const double* mE, const double* mN, const double* mU, long nPoints, double* radAz, double* radEl, double* mRange)
+{
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        radAz[iPoint] = atan2(mE[iPoint], mN[iPoint]);
+        if (radAz[iPoint] < 0)
+            radAz[iPoint] = radAz[iPoint] + 2.0 * PI;
+        mRange[iPoint] = sqrt(mE[iPoint] * mE[iPoint] + mN[iPoint] * mN[iPoint] + mU[iPoint] * mU[iPoint]);
+        radEl[iPoint] = asin(mU[iPoint] / mRange[iPoint]);
+    }
+}
+
+/*
+AER to ENU transformation of float precision.
+https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf
+
+@param float *rrmAER array of size nx3 of target point azimuth, elevation,
+range [rad, rad, m]
+@param long nPoints Number of target points
+@param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+*/
+void AER2NEDFloatUnrolled(const float* radAz, const float* radEl, const float* mRange, long nPoints, float* mN, float* mE, float* mD)
+{
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        mN[iPoint] = cosf(radEl[iPoint]) * cosf(radAz[iPoint]) * mRange[iPoint];
+        mE[iPoint] = cosf(radEl[iPoint]) * sinf(radAz[iPoint]) * mRange[iPoint];
+        mD[iPoint] = -sinf(radEl[iPoint]) * mRange[iPoint];
+    }
+}
+
+/*
+AER to ENU transformation of float precision.
+https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf
+
+@param float *rrmAER array of size nx3 of target point azimuth, elevation,
+range [rad, rad, m]
+@param long nPoints Number of target points
+@param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+*/
+void AER2NEDDoubleUnrolled(const double* radAz, const double* radEl, const double* mRange, long nPoints, double* mN, double* mE, double* mD)
+{
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        mN[iPoint] = cos(radEl[iPoint]) * cos(radAz[iPoint]) * mRange[iPoint];
+        mE[iPoint] = cos(radEl[iPoint]) * sin(radAz[iPoint]) * mRange[iPoint];
+        mD[iPoint] = -sin(radEl[iPoint]) * mRange[iPoint];
+    }
+}
+
+/*
+AER to ENU transformation of float precision.
+https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf
+
+@param float *rrmAER array of size nx3 of target point azimuth, elevation,
+range [rad, rad, m]
+@param long nPoints Number of target points
+@param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+*/
+void AER2ENUFloatUnrolled(const float* radAz, const float* radEl, const float* mRange, long nPoints, float* mE, float* mN, float* mU)
+{
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        mE[iPoint] = cosf(radEl[iPoint]) * sinf(radAz[iPoint]) * mRange[iPoint];
+        mN[iPoint] = cosf(radEl[iPoint]) * cosf(radAz[iPoint]) * mRange[iPoint];
+        mU[iPoint] = sinf(radEl[iPoint]) * mRange[iPoint];
+    }
+}
+
+/*
+AER to ENU transformation of double precision.
+https://x-lumin.com/wp-content/uploads/2020/09/Coordinate_Transforms.pdf
+
+@param double *rrmAER array of size nx3 of target point azimuth, elevation,
+range [rad, rad, m]
+@param long nPoints Number of target points
+@param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
+*/
+void AER2ENUDoubleUnrolled(const double* radAz, const double* radEl, const double* mRange, long nPoints, double* mE, double* mN, double* mU)
+{
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        mE[iPoint] = cos(radEl[iPoint]) * sin(radAz[iPoint]) * mRange[iPoint];
+        mN[iPoint] = cos(radEl[iPoint]) * cos(radAz[iPoint]) * mRange[iPoint];
+        mU[iPoint] = sin(radEl[iPoint]) * mRange[iPoint];
+    }
+}
+
+/*
+UTM to geodetic transformation of double precision.
+https://fypandroid.wordpress.com/2011/09/03/converting-utm-to-latitude-and-longitude-or-vice-versa/
+
+@param double *mmUTM array of size nx1 easting, northing[m, m]
+height (h) [rad, rad, m]
+@param long nPoints Number of LLA points
+@param double a semi-major axis
+@param double b semi-minor axis
+@param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
+*/
+void UTM2geodeticDoubleRolled(const double* mmUTM,
     long ZoneNumber,
     char* ZoneLetter,
     long nPoints,
@@ -75,7 +1122,7 @@ height (h) [rad, rad, m]
 @param double b semi-minor axis
 @param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
 */
-void UTM2geodeticFloat(const float* mmUTM,
+void UTM2geodeticFloatRolled(const float* mmUTM,
     long ZoneNumber,
     char* ZoneLetter,
     long nPoints,
@@ -133,7 +1180,7 @@ height (h) [rad, rad, m]
 @param float b semi-minor axis
 @param float *mmUTM array of size nx1 easting, northing[m, m]
 */
-void geodetic2UTMFloat(const float* rrmLLA,
+void geodetic2UTMFloatRolled(const float* rrmLLA,
     long nPoints,
     float a,
     float b,
@@ -171,7 +1218,7 @@ height (h) [rad, rad, m]
 @param double b semi-minor axis
 @param double *mmUTM array of size nx1 easting, northing[m, m]
 */
-void geodetic2UTMDouble(const double* rrmLLA,
+void geodetic2UTMDoubleRolled(const double* rrmLLA,
     long nPoints,
     double a,
     double b,
@@ -210,7 +1257,7 @@ height (h) [rad, rad, m]
 @param double b semi-minor axis
 @param double *mmmXYZ array of size nx3 X, Y, Z [rad, rad, m]
 */
-void geodetic2ECEFFloat(const float* rrmLLA,
+void geodetic2ECEFFloatRolled(const float* rrmLLA,
     long nPoints,
     float a,
     float b,
@@ -239,7 +1286,7 @@ height (h) [rad, rad, m]
 @param double b semi-minor axis
 @param double *mmmXYZ array of size nx3 X, Y, Z [m, m, m]
 */
-void geodetic2ECEFDouble(const double* rrmLLA,
+void geodetic2ECEFDoubleRolled(const double* rrmLLA,
     long nPoints,
     double a,
     double b,
@@ -268,7 +1315,7 @@ https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#The_application_o
 @param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
 height (h) [rad, rad, m]
 */
-void ECEF2geodeticFloat(const float* mmmXYZ,
+void ECEF2geodeticFRolledloat(const float* mmmXYZ,
     long nPoints,
     float a,
     float b,
@@ -310,7 +1357,7 @@ https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#The_application_o
 @param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
 height (h) [rad, rad, m]
 */
-void ECEF2geodeticDouble(const double* mmmXYZ,
+void ECEF2geodeticDoubleRolled(const double* mmmXYZ,
     long nPoints,
     double a,
     double b,
@@ -352,7 +1399,7 @@ Y, Z [m, m, m]
 @param double b semi-minor axis
 @param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void ECEF2ENUFloat(const float* rrmLLALocalOrigin,
+void ECEF2ENUFloatRolled(const float* rrmLLALocalOrigin,
     const float* mmmXYZTarget,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -362,7 +1409,7 @@ void ECEF2ENUFloat(const float* rrmLLALocalOrigin,
 {
     long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(float));
-    geodetic2ECEFFloat(rrmLLALocalOrigin, nOriginPoints, (float)(a), (float)(b), mmmXYZLocalOrigin);
+    geodetic2ECEFFloatRolled(rrmLLALocalOrigin, nOriginPoints, (float)(a), (float)(b), mmmXYZLocalOrigin);
     long iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
@@ -390,7 +1437,7 @@ Y, Z [m, m, m]
 @param double b semi-minor axis
 @param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void ECEF2ENUDouble(const double* rrmLLALocalOrigin,
+void ECEF2ENUDoubleRolled(const double* rrmLLALocalOrigin,
     const double* mmmXYZTarget,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -400,7 +1447,7 @@ void ECEF2ENUDouble(const double* rrmLLALocalOrigin,
 {
     long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(double));
-    geodetic2ECEFDouble(
+    geodetic2ECEFDoubleRolled(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     long iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
@@ -417,7 +1464,7 @@ void ECEF2ENUDouble(const double* rrmLLALocalOrigin,
     free(mmmXYZLocalOrigin);
 }
 
-void ECEF2NEDFloat(const float* rrmLLALocalOrigin,
+void ECEF2NEDFloatRolled(const float* rrmLLALocalOrigin,
     const float* mmmXYZTarget,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -427,7 +1474,7 @@ void ECEF2NEDFloat(const float* rrmLLALocalOrigin,
 {
     long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(float));
-    geodetic2ECEFFloat(
+    geodetic2ECEFFloatRolled(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     long iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
@@ -444,7 +1491,7 @@ void ECEF2NEDFloat(const float* rrmLLALocalOrigin,
     free(mmmXYZLocalOrigin);
 }
 
-void ECEF2NEDDouble(const double* rrmLLALocalOrigin,
+void ECEF2NEDDoubleRolled(const double* rrmLLALocalOrigin,
     const double* mmmXYZTarget,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -454,7 +1501,7 @@ void ECEF2NEDDouble(const double* rrmLLALocalOrigin,
 {
     long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(double));
-    geodetic2ECEFDouble(
+    geodetic2ECEFDoubleRolled(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     long iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
@@ -471,7 +1518,7 @@ void ECEF2NEDDouble(const double* rrmLLALocalOrigin,
     free(mmmXYZLocalOrigin);
 }
 
-void ECEF2NEDvFloat(const float* rrmLLALocalOrigin,
+void ECEF2NEDvFloatRolled(const float* rrmLLALocalOrigin,
     const float* mmmXYZTarget,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -488,7 +1535,7 @@ void ECEF2NEDvFloat(const float* rrmLLALocalOrigin,
     }
 }
 
-void ECEF2NEDvDouble(const double* rrmLLALocalOrigin,
+void ECEF2NEDvDoubleRolled(const double* rrmLLALocalOrigin,
     const double* mmmXYZTarget,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -505,7 +1552,7 @@ void ECEF2NEDvDouble(const double* rrmLLALocalOrigin,
     }
 }
 
-void ECEF2ENUvFloat(const float* rrmLLALocalOrigin,
+void ECEF2ENUvFloatRolled(const float* rrmLLALocalOrigin,
     const float* mmmXYZTarget,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -522,7 +1569,7 @@ void ECEF2ENUvFloat(const float* rrmLLALocalOrigin,
     }
 }
 
-void ECEF2ENUvDouble(const double* rrmLLALocalOrigin,
+void ECEF2ENUvDoubleRolled(const double* rrmLLALocalOrigin,
     const double* mmmXYZTarget,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -539,7 +1586,7 @@ void ECEF2ENUvDouble(const double* rrmLLALocalOrigin,
     }
 }
 
-void ENU2ECEFvFloat(const float* rrmLLALocalOrigin,
+void ENU2ECEFvFloatRolled(const float* rrmLLALocalOrigin,
     const float* mmmTargetLocal,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -556,7 +1603,7 @@ void ENU2ECEFvFloat(const float* rrmLLALocalOrigin,
     }
 }
 
-void NED2ECEFvFloat(const float* rrmLLALocalOrigin,
+void NED2ECEFvFloatRolled(const float* rrmLLALocalOrigin,
     const float* mmmTargetLocal,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -573,7 +1620,7 @@ void NED2ECEFvFloat(const float* rrmLLALocalOrigin,
     }
 }
 
-void NED2ECEFvDouble(const double* rrmLLALocalOrigin,
+void NED2ECEFvDoubleRolled(const double* rrmLLALocalOrigin,
     const double* mmmTargetLocal,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -590,7 +1637,7 @@ void NED2ECEFvDouble(const double* rrmLLALocalOrigin,
     }
 }
 
-void ENU2ECEFvDouble(const double* rrmLLALocalOrigin,
+void ENU2ECEFvDoubleRolled(const double* rrmLLALocalOrigin,
     const double* mmmTargetLocal,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -620,7 +1667,7 @@ latitude, longitude, height [rad, rad, m]
 @param double b semi-minor axis
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void NED2ECEFFloat(const float* rrmLLALocalOrigin,
+void NED2ECEFFloatRolled(const float* rrmLLALocalOrigin,
     const float* mmmTargetLocal,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -630,7 +1677,7 @@ void NED2ECEFFloat(const float* rrmLLALocalOrigin,
 {
     long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(float));
-    geodetic2ECEFFloat(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
+    geodetic2ECEFFloatRolled(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     long iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
@@ -656,7 +1703,7 @@ latitude, longitude, height [rad, rad, m]
 @param double b semi-minor axis
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void NED2ECEFDouble(const double* rrmLLALocalOrigin,
+void NED2ECEFDoubleRolled(const double* rrmLLALocalOrigin,
     const double* mmmTargetLocal,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -666,7 +1713,7 @@ void NED2ECEFDouble(const double* rrmLLALocalOrigin,
 {
     long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(double));
-    geodetic2ECEFDouble(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
+    geodetic2ECEFDoubleRolled(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     long iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
@@ -692,7 +1739,7 @@ latitude, longitude, height [rad, rad, m]
 @param double b semi-minor axis
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void ENU2ECEFFloat(const float* rrmLLALocalOrigin,
+void ENU2ECEFFloatRolled(const float* rrmLLALocalOrigin,
     const float* mmmTargetLocal,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -702,7 +1749,7 @@ void ENU2ECEFFloat(const float* rrmLLALocalOrigin,
 {
     long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     float* mmmXYZLocalOrigin = (float*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(float));
-    geodetic2ECEFFloat(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
+    geodetic2ECEFFloatRolled(rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     long iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
@@ -728,7 +1775,7 @@ latitude, longitude, height [rad, rad, m]
 @param double b semi-minor axis
 @param double *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
 */
-void ENU2ECEFDouble(const double* rrmLLALocalOrigin,
+void ENU2ECEFDoubleRolled(const double* rrmLLALocalOrigin,
     const double* mmmTargetLocal,
     long nTargets,
     int isOriginSizeOfTargets,
@@ -738,7 +1785,7 @@ void ENU2ECEFDouble(const double* rrmLLALocalOrigin,
 {
     long nOriginPoints = (nTargets - 1) * isOriginSizeOfTargets + 1;
     double* mmmXYZLocalOrigin = (double*)malloc(nOriginPoints * NCOORDSIN3D * sizeof(double));
-    geodetic2ECEFDouble(
+    geodetic2ECEFDoubleRolled(
         rrmLLALocalOrigin, nOriginPoints, a, b, mmmXYZLocalOrigin);
     long iPoint;
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
@@ -766,7 +1813,7 @@ https://www.lddgo.net/en/coordinate/ecef-enu
 @param float *rrmAER array of size nx3 of target point azimuth, elevation,
 range [rad, rad, m]
 */
-void NED2AERFloat(const float* mmmNED, long nPoints, float* rrmAER)
+void NED2AERFloatRolled(const float* mmmNED, long nPoints, float* rrmAER)
 {
     long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
@@ -791,7 +1838,7 @@ https://www.lddgo.net/en/coordinate/ecef-enu
 @param float *rrmAER array of size nx3 of target point azimuth, elevation,
 range [rad, rad, m]
 */
-void NED2AERDouble(const double* mmmNED, long nPoints, double* rrmAER)
+void NED2AERDoubleRolled(const double* mmmNED, long nPoints, double* rrmAER)
 {
     long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
@@ -816,7 +1863,7 @@ https://www.lddgo.net/en/coordinate/ecef-enu
 @param float *rrmAER array of size nx3 of target point azimuth, elevation,
 range [rad, rad, m]
 */
-void ENU2AERFloat(const float* mmmENU, long nPoints, float* rrmAER)
+void ENU2AERFloatRolled(const float* mmmENU, long nPoints, float* rrmAER)
 {
     long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
@@ -840,7 +1887,7 @@ https://www.lddgo.net/en/coordinate/ecef-enu
 @param double *rrmAER array of size nx3 of target point azimuth, elevation,
 range [rad, rad, m]
 */
-void ENU2AERDouble(const double* mmmENU, long nPoints, double* rrmAER)
+void ENU2AERDoubleRolled(const double* mmmENU, long nPoints, double* rrmAER)
 {
     long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
@@ -863,7 +1910,7 @@ range [rad, rad, m]
 @param long nPoints Number of target points
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void AER2NEDFloat(const float* rrmAER, long nPoints, float* mmmNED)
+void AER2NEDFloatRolled(const float* rrmAER, long nPoints, float* mmmNED)
 {
     long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
@@ -884,7 +1931,7 @@ range [rad, rad, m]
 @param long nPoints Number of target points
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void AER2NEDDouble(const double* rrmAER, long nPoints, double* mmmNED)
+void AER2NEDDoubleRolled(const double* rrmAER, long nPoints, double* mmmNED)
 {
     long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
@@ -905,7 +1952,7 @@ range [rad, rad, m]
 @param long nPoints Number of target points
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void AER2ENUFloat(const float* rrmAER, long nPoints, float* mmmENU)
+void AER2ENUFloatRolled(const float* rrmAER, long nPoints, float* mmmENU)
 {
     long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
@@ -926,7 +1973,7 @@ range [rad, rad, m]
 @param long nPoints Number of target points
 @param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void AER2ENUDouble(const double* rrmAER, long nPoints, double* mmmENU)
+void AER2ENUDoubleRolled(const double* rrmAER, long nPoints, double* mmmENU)
 {
     long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
@@ -1001,10 +2048,10 @@ geodetic2UTMWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        geodetic2UTMDouble((double*)PyArray_DATA(inArray), nPoints, a, b, (double*)PyArray_DATA(result_array));
+        geodetic2UTMDoubleRolled((double*)PyArray_DATA(inArray), nPoints, a, b, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        geodetic2UTMFloat((float*)PyArray_DATA(inArray), nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
+        geodetic2UTMFloatRolled((float*)PyArray_DATA(inArray), nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
         break;
     default:
         PyErr_SetString(PyExc_ValueError,
@@ -1087,10 +2134,10 @@ UTM2geodeticWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        UTM2geodeticDouble((double*)PyArray_DATA(inArray), ZoneNumber, ZoneLetter, nPoints, a, b, (double*)PyArray_DATA(result_array));
+        UTM2geodeticDoubleRolled((double*)PyArray_DATA(inArray), ZoneNumber, ZoneLetter, nPoints, a, b, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        UTM2geodeticFloat((float*)PyArray_DATA(inArray), ZoneNumber, ZoneLetter, nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
+        UTM2geodeticFloatRolled((float*)PyArray_DATA(inArray), ZoneNumber, ZoneLetter, nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
         break;
     default:
         PyErr_SetString(PyExc_ValueError,
@@ -1149,10 +2196,10 @@ geodetic2ECEFWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        geodetic2ECEFDouble((double*)PyArray_DATA(inArray), nPoints, a, b, (double*)PyArray_DATA(result_array));
+        geodetic2ECEFDoubleRolled((double*)PyArray_DATA(inArray), nPoints, a, b, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        geodetic2ECEFFloat((float*)PyArray_DATA(inArray), nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
+        geodetic2ECEFFloatRolled((float*)PyArray_DATA(inArray), nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
         break;
     default:
         PyErr_SetString(PyExc_ValueError,
@@ -1211,7 +2258,7 @@ ECEF2geodeticWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        ECEF2geodeticDouble((double*)PyArray_DATA(inArray), nPoints, a, b, (double*)PyArray_DATA(result_array));
+        ECEF2geodeticDoubleRolled((double*)PyArray_DATA(inArray), nPoints, a, b, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
         ECEF2geodeticFloat((float*)PyArray_DATA(inArray), nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
@@ -1306,11 +2353,11 @@ ECEF2ENUWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        ECEF2ENUDouble(
+        ECEF2ENUDoubleRolled(
             (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, a, b, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        ECEF2ENUFloat(
+        ECEF2ENUFloatRolled(
             (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
         break;
     default:
@@ -1403,11 +2450,11 @@ ECEF2NEDWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        ECEF2NEDDouble(
+        ECEF2NEDDoubleRolled(
             (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, a, b, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        ECEF2NEDFloat(
+        ECEF2NEDFloatRolled(
             (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
         break;
     default:
@@ -1497,11 +2544,11 @@ ECEF2NEDvWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        ECEF2NEDvDouble(
+        ECEF2NEDvDoubleRolled(
             (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        ECEF2NEDvFloat(
+        ECEF2NEDvFloatRolled(
             (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float*)PyArray_DATA(result_array));
         break;
     default:
@@ -1591,11 +2638,11 @@ ECEF2ENUvWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        ECEF2ENUvDouble(
+        ECEF2ENUvDoubleRolled(
             (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        ECEF2ENUvFloat(
+        ECEF2ENUvFloatRolled(
             (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float*)PyArray_DATA(result_array));
         break;
     default:
@@ -1687,11 +2734,11 @@ NED2ECEFWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        NED2ECEFDouble(
+        NED2ECEFDoubleRolled(
             (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, a, b, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        NED2ECEFFloat(
+        NED2ECEFFloatRolled(
             (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
         break;
     default:
@@ -1783,11 +2830,11 @@ ENU2ECEFWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        ENU2ECEFDouble(
+        ENU2ECEFDoubleRolled(
             (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, a, b, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        ENU2ECEFFloat(
+        ENU2ECEFFloatRolled(
             (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float)a, (float)b, (float*)PyArray_DATA(result_array));
         break;
     default:
@@ -1876,11 +2923,11 @@ ENU2ECEFvWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        ENU2ECEFvDouble(
+        ENU2ECEFvDoubleRolled(
             (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        ENU2ECEFvFloat(
+        ENU2ECEFvFloatRolled(
             (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float*)PyArray_DATA(result_array));
         break;
     default:
@@ -1969,11 +3016,11 @@ NED2ECEFvWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        NED2ECEFvDouble(
+        NED2ECEFvDoubleRolled(
             (double*)PyArray_DATA(inArrayOrigin), (double*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        NED2ECEFvFloat(
+        NED2ECEFvFloatRolled(
             (float*)PyArray_DATA(inArrayOrigin), (float*)PyArray_DATA(inArrayLocal), nPoints, isOriginSizeOfTargets, (float*)PyArray_DATA(result_array));
         break;
     default:
@@ -2032,10 +3079,10 @@ ENU2AERWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        ENU2AERDouble((double*)PyArray_DATA(inArray), nPoints, (double*)PyArray_DATA(result_array));
+        ENU2AERDoubleRolled((double*)PyArray_DATA(inArray), nPoints, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        ENU2AERFloat((float*)PyArray_DATA(inArray), nPoints, (float*)PyArray_DATA(result_array));
+        ENU2AERFloatRolled((float*)PyArray_DATA(inArray), nPoints, (float*)PyArray_DATA(result_array));
         break;
     default:
         PyErr_SetString(PyExc_ValueError,
@@ -2093,10 +3140,10 @@ NED2AERWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        NED2AERDouble((double*)PyArray_DATA(inArray), nPoints, (double*)PyArray_DATA(result_array));
+        NED2AERDoubleRolled((double*)PyArray_DATA(inArray), nPoints, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        NED2AERFloat((float*)PyArray_DATA(inArray), nPoints, (float*)PyArray_DATA(result_array));
+        NED2AERFloatRolled((float*)PyArray_DATA(inArray), nPoints, (float*)PyArray_DATA(result_array));
         break;
     default:
         PyErr_SetString(PyExc_ValueError,
@@ -2154,10 +3201,10 @@ AER2NEDWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        AER2NEDDouble((double*)PyArray_DATA(inArray), nPoints, (double*)PyArray_DATA(result_array));
+        AER2NEDDoubleRolled((double*)PyArray_DATA(inArray), nPoints, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        AER2NEDFloat((float*)PyArray_DATA(inArray), nPoints, (float*)PyArray_DATA(result_array));
+        AER2NEDFloatRolled((float*)PyArray_DATA(inArray), nPoints, (float*)PyArray_DATA(result_array));
         break;
     default:
         PyErr_SetString(PyExc_ValueError,
@@ -2215,10 +3262,10 @@ AER2ENUWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        AER2ENUDouble((double*)PyArray_DATA(inArray), nPoints, (double*)PyArray_DATA(result_array));
+        AER2ENUDoubleRolled((double*)PyArray_DATA(inArray), nPoints, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        AER2ENUFloat((float*)PyArray_DATA(inArray), nPoints, (float*)PyArray_DATA(result_array));
+        AER2ENUFloatRolled((float*)PyArray_DATA(inArray), nPoints, (float*)PyArray_DATA(result_array));
         break;
     default:
         PyErr_SetString(PyExc_ValueError,

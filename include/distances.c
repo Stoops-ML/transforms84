@@ -17,7 +17,72 @@ range [rad, rad, m]
 @param float *mRadiusSphere array of size nx3 of distance between start and end
 points
 */
-void HaversineDouble(const double* rrmStart,
+void HaversineDoubleUnrolled(const double* radLatStart,
+    const double* radLongStart,
+    const double* mAltStart,
+    const double* radLatEnd,
+    const double* radLongEnd,
+    const double* mAltEnd,
+    long nPoints,
+    int isArraysSizeEqual,
+    double mRadiusSphere,
+    double* mDistance)
+{
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        long iPointStart = iPoint * isArraysSizeEqual;
+        mDistance[iPoint] = 2.0 * mRadiusSphere * asin(sqrt((1.0 - cos(radLatEnd[iPoint] - radLatStart[iPoint]) + cos(radLatStart[iPoint]) * cos(radLatEnd[iPoint]) * (1.0 - cos(radLongEnd[iPoint] - radLongStart[iPoint]))) / 2.0));
+    }
+}
+
+/*
+Calculate the Haversine distance between two points in float precision.
+https://en.wikipedia.org/wiki/Haversine_formula#Formulation
+
+@param float *rrmStart array of size nx3 of start point azimuth, elevation,
+range [rad, rad, m]
+@param float *rrmEnd array of size nx3 of start point azimuth, elevation, range
+[rad, rad, m]
+@param long nPoints Number of target points
+@param double mRadiusSphere Radius of sphere in metres
+@param float *mRadiusSphere array of size nx3 of distance between start and end
+points
+*/
+void HaversineFloatUnrolled(const float* radLatStart,
+    const float* radLongStart,
+    const float* mAltStart,
+    const float* radLatEnd,
+    const float* radLongEnd,
+    const float* mAltEnd,
+    long nPoints,
+    int isArraysSizeEqual,
+    float mRadiusSphere,
+    float* mDistance)
+{
+    long iPoint;
+#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
+    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
+        long iPointEnd = iPoint * NCOORDSIN3D;
+        long iPointStart = iPointEnd * isArraysSizeEqual;
+        mDistance[iPoint] = (float)(2.0) * mRadiusSphere * asinf(sqrtf(((float)(1.0) - cosf(radLatEnd[iPoint] - radLatStart[iPoint]) + cosf(radLatStart[iPoint]) * cosf(radLatEnd[iPoint]) * ((float)(1.0) - cosf(radLongEnd[iPoint] - radLongStart[iPoint]))) / (float)(2.0)));
+    }
+}
+
+/*
+Calculate the Haversine distance between two points in double precision.
+https://en.wikipedia.org/wiki/Haversine_formula#Formulation
+
+@param float *rrmStart array of size nx3 of start point azimuth, elevation,
+range [rad, rad, m]
+@param float *rrmEnd array of size nx3 of start point azimuth, elevation, range
+[rad, rad, m]
+@param long nPoints Number of target points
+@param double mRadiusSphere Radius of sphere in metres
+@param float *mRadiusSphere array of size nx3 of distance between start and end
+points
+*/
+void HaversineDoubleRolled(const double* rrmStart,
     const double* rrmEnd,
     long nPoints,
     int isArraysSizeEqual,
@@ -46,7 +111,7 @@ range [rad, rad, m]
 @param float *mRadiusSphere array of size nx3 of distance between start and end
 points
 */
-void HaversineFloat(const float* rrmStart,
+void HaversineFloatRolled(const float* rrmStart,
     const float* rrmEnd,
     long nPoints,
     int isArraysSizeEqual,
@@ -143,11 +208,11 @@ HaversineWrapper(PyObject* self, PyObject* args)
     // run function
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
-        HaversineDouble(
+        HaversineDoubleRolled(
             (double*)PyArray_DATA(inArrayStart), (double*)PyArray_DATA(inArrayEnd), (long)nPoints, isArraysSizeEqual, mRadiusSphere, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        HaversineFloat(
+        HaversineFloatRolled(
             (float*)PyArray_DATA(inArrayStart), (float*)PyArray_DATA(inArrayEnd), (long)nPoints, isArraysSizeEqual, (float)(mRadiusSphere), (float*)PyArray_DATA(result_array));
         break;
     default:
