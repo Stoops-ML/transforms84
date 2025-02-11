@@ -2,6 +2,7 @@
 ![PyPI - Version](https://img.shields.io/pypi/v/transforms84)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/transforms84)
 ![Codecov](https://img.shields.io/codecov/c/gh/Stoops-ML/transforms84)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/transforms84)
 ![PyPI - License](https://img.shields.io/pypi/l/transforms84)
 
 Python library for geographic system transformations with additional helper functions.
