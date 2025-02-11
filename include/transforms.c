@@ -766,17 +766,17 @@ https://www.lddgo.net/en/coordinate/ecef-enu
 @param float *rrmAER array of size nx3 of target point azimuth, elevation,
 range [rad, rad, m]
 */
-void NED2AERFloat(const float* mmmENU, long nPoints, float* rrmAER)
+void NED2AERFloat(const float* mmmNED, long nPoints, float* rrmAER)
 {
     long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         long i = iPoint * NCOORDSIN3D;
-        rrmAER[i + 0] = atan2f(mmmENU[i + 1], mmmENU[i + 0]);
+        rrmAER[i + 0] = atan2f(mmmNED[i + 1], mmmNED[i + 0]);
         if (rrmAER[i + 0] < 0)
             rrmAER[i + 0] = rrmAER[i + 0] + (2.0f * PIf);
-        rrmAER[i + 2] = sqrtf(mmmENU[i + 0] * mmmENU[i + 0] + mmmENU[i + 1] * mmmENU[i + 1] + mmmENU[i + 2] * mmmENU[i + 2]);
-        rrmAER[i + 1] = asinf(-mmmENU[i + 2] / rrmAER[i + 2]);
+        rrmAER[i + 2] = sqrtf(mmmNED[i + 0] * mmmNED[i + 0] + mmmNED[i + 1] * mmmNED[i + 1] + mmmNED[i + 2] * mmmNED[i + 2]);
+        rrmAER[i + 1] = asinf(-mmmNED[i + 2] / rrmAER[i + 2]);
     }
 }
 
@@ -816,17 +816,17 @@ https://www.lddgo.net/en/coordinate/ecef-enu
 @param float *rrmAER array of size nx3 of target point azimuth, elevation,
 range [rad, rad, m]
 */
-void ENU2AERFloat(const float* mmmNED, long nPoints, float* rrmAER)
+void ENU2AERFloat(const float* mmmENU, long nPoints, float* rrmAER)
 {
     long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
         long i = iPoint * NCOORDSIN3D;
-        rrmAER[i + 0] = atan2f(mmmNED[i + 0], mmmNED[i + 1]);
+        rrmAER[i + 0] = atan2f(mmmENU[i + 0], mmmENU[i + 1]);
         if (rrmAER[i + 0] < 0)
             rrmAER[i + 0] = rrmAER[i + 0] + (2.0f * PIf);
-        rrmAER[i + 2] = sqrtf(mmmNED[i + 0] * mmmNED[i + 0] + mmmNED[i + 1] * mmmNED[i + 1] + mmmNED[i + 2] * mmmNED[i + 2]);
-        rrmAER[i + 1] = asinf(mmmNED[i + 2] / rrmAER[i + 2]);
+        rrmAER[i + 2] = sqrtf(mmmENU[i + 0] * mmmENU[i + 0] + mmmENU[i + 1] * mmmENU[i + 1] + mmmENU[i + 2] * mmmENU[i + 2]);
+        rrmAER[i + 1] = asinf(mmmENU[i + 2] / rrmAER[i + 2]);
     }
 }
 

@@ -2,6 +2,7 @@
 ![PyPI - Version](https://img.shields.io/pypi/v/transforms84)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/transforms84)
 ![Codecov](https://img.shields.io/codecov/c/gh/Stoops-ML/transforms84)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/transforms84)
 ![PyPI - License](https://img.shields.io/pypi/l/transforms84)
 
 Python library for geographic system transformations with additional helper functions.
@@ -114,5 +115,3 @@ True
 PRs are always welcome and appreciated!
 
 After forking the repo install the dev requirements: `pip install -e .[dev]`.
-
-Pre-commit hooks may be installed: `pre-commit install --hook-type pre-commit --hook-type pre-push`. This isn't required as pull requests are checked with tox and apply lint automatically.
