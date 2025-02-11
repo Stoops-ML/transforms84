@@ -115,5 +115,3 @@ True
 PRs are always welcome and appreciated!
 
 After forking the repo install the dev requirements: `pip install -e .[dev]`.
-
-Pre-commit hooks may be installed: `pre-commit install --hook-type pre-commit --hook-type pre-push`. This isn't required as pull requests are checked with tox and apply lint automatically.
