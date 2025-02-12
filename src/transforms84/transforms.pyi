@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Tuple, Union, overload
 
 import numpy as np
 import numpy.typing as npt
@@ -23,6 +23,7 @@ def UTM2geodetic(
 ) -> npt.NDArray[
     Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
 ]: ...
+@overload
 def geodetic2ECEF(
     rrmLLA: npt.NDArray[
         Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
@@ -31,6 +32,24 @@ def geodetic2ECEF(
     m_semi_minor_axis: float,
 ) -> npt.NDArray[
     Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+]: ...
+@overload
+def geodetic2ECEF(
+    radLat: npt.NDArray[
+        Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+    ],
+    radLon: npt.NDArray[
+        Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+    ],
+    mAlt: npt.NDArray[
+        Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+    ],
+    m_semi_major_axis: float,
+    m_semi_minor_axis: float,
+) -> Tuple[
+    npt.NDArray[Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]],
+    npt.NDArray[Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]],
+    npt.NDArray[Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]],
 ]: ...
 def ECEF2geodetic(
     mmmXYZ: npt.NDArray[

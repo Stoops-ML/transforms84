@@ -1315,7 +1315,7 @@ https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#The_application_o
 @param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
 height (h) [rad, rad, m]
 */
-void ECEF2geodeticFRolledloat(const float* mmmXYZ,
+void ECEF2geodeticFloatRolled(const float* mmmXYZ,
     long nPoints,
     float a,
     float b,
@@ -2148,7 +2148,7 @@ UTM2geodeticWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-geodetic2ECEFWrapper(PyObject* self, PyObject* args)
+geodetic2ECEFRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject* rrmLLA;
     double a, b;
@@ -2210,6 +2210,139 @@ geodetic2ECEFWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
+geodetic2ECEFUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *radLat, *radLon, *mAlt;
+    double a, b;
+
+    // checks
+    if (!PyArg_ParseTuple(args, "O!O!O!dd", &PyArray_Type, &radLat, &PyArray_Type, &radLon, &PyArray_Type, &mAlt, &a, &b))
+        return NULL;
+    if (!((PyArray_ISCONTIGUOUS(radLat)) && (PyArray_ISCONTIGUOUS(radLon)) && (PyArray_ISCONTIGUOUS(mAlt)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(radLat) == PyArray_SIZE(radLon)) && (PyArray_SIZE(radLat) == PyArray_SIZE(mAlt)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be the same size.");
+        return NULL;
+    }
+
+    PyArrayObject *inArrayLat, *inArrayLon, *inArrayAlt;
+    if (PyArray_ISINTEGER(radLat) == 0)
+        inArrayLat = radLat;
+    else {
+        inArrayLat = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLat), PyArray_SHAPE(radLat), NPY_DOUBLE);
+        if (inArrayLat == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLat, radLat) < 0) {
+            Py_DECREF(inArrayLat);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLat))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLon) == 0)
+        inArrayLon = radLon;
+    else {
+        inArrayLon = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLon), PyArray_SHAPE(radLon), NPY_DOUBLE);
+        if (inArrayLon == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLon, radLon) < 0) {
+            Py_DECREF(inArrayLon);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLon))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mAlt) == 0)
+        inArrayAlt = mAlt;
+    else {
+        inArrayAlt = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mAlt), PyArray_SHAPE(mAlt), NPY_DOUBLE);
+        if (inArrayAlt == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayAlt, mAlt) < 0) {
+            Py_DECREF(inArrayAlt);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayAlt))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    // prepare inputs
+    PyArrayObject *outX, *outY, *outZ;
+    outX = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayLat), PyArray_SHAPE(inArrayLat), PyArray_TYPE(inArrayLat));
+    outY = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayLat), PyArray_SHAPE(inArrayLat), PyArray_TYPE(inArrayLat));
+    outZ = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayLat), PyArray_SHAPE(inArrayLat), PyArray_TYPE(inArrayLat));
+    if ((outX == NULL) || (outY == NULL) || (outZ == NULL))
+        return NULL;
+    long nPoints = (int)PyArray_SIZE(inArrayLat);
+
+    // run function
+    switch (PyArray_TYPE(outX)) {
+    case NPY_DOUBLE:
+        geodetic2ECEFDoubleUnrolled((double*)PyArray_DATA(inArrayLat), (double*)PyArray_DATA(inArrayLon), (double*)PyArray_DATA(inArrayAlt), nPoints, a, b, (double*)PyArray_DATA(outX), (double*)PyArray_DATA(outY), (double*)PyArray_DATA(outZ));
+        break;
+    case NPY_FLOAT:
+        geodetic2ECEFFloatUnrolled((float*)PyArray_DATA(inArrayLat), (float*)PyArray_DATA(inArrayLon), (float*)PyArray_DATA(inArrayAlt), nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(outX), (float*)PyArray_DATA(outY), (float*)PyArray_DATA(outZ));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+
+    // output
+    PyObject* tuple = PyTuple_New(3);
+    if (!tuple){
+        Py_DECREF(inArrayLat);
+        Py_DECREF(inArrayLon);
+        Py_DECREF(inArrayAlt);
+        Py_DECREF(outX);
+        Py_DECREF(outY);
+        Py_DECREF(outZ);
+        return NULL;
+    }
+    PyTuple_SetItem(tuple, 0, (PyObject*)outX);
+    PyTuple_SetItem(tuple, 1, (PyObject*)outY);
+    PyTuple_SetItem(tuple, 2, (PyObject*)outZ);
+    return tuple;
+}
+
+static PyObject*
+geodetic2ECEFWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 3)
+        return geodetic2ECEFRolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 5)
+        return geodetic2ECEFUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either three or five NumPy array inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
 ECEF2geodeticWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject* mmmXYZ;
@@ -2261,7 +2394,7 @@ ECEF2geodeticWrapper(PyObject* self, PyObject* args)
         ECEF2geodeticDoubleRolled((double*)PyArray_DATA(inArray), nPoints, a, b, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
-        ECEF2geodeticFloat((float*)PyArray_DATA(inArray), nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
+        ECEF2geodeticFloatRolled((float*)PyArray_DATA(inArray), nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(result_array));
         break;
     default:
         PyErr_SetString(PyExc_ValueError,
