@@ -13,6 +13,12 @@ def test_NED2AER_raise_wrong_dtype():
         NED2AER(NED)  # type: ignore
 
 
+def test_NED2AER_raise_wrong_dtype_unrolled():
+    NED = np.array([[-9.1013], [4.1617], [4.2812]], dtype=np.float16)
+    with pytest.raises(ValueError):
+        NED2AER(NED[0], NED[1], NED[2])  # type: ignore
+
+
 @pytest.mark.skip(reason="Get check data")
 @pytest.mark.parametrize(
     "dtype,tol", [(np.int64, tol_double_atol), (np.int32, tol_float_atol)]
@@ -52,6 +58,17 @@ def test_NED2AER_points_int(dtype, tol):
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
+def test_NED2AER_point_unrolled(dtype, tol):
+    NED = np.array([[-9.1013], [4.1617], [4.2812]], dtype=dtype)
+    a, e, r = NED2AER(NED[0], NED[1], NED[2])
+    assert np.isclose(a, np.deg2rad(155.4271), atol=tol)
+    assert np.isclose(e, np.deg2rad(-23.1609), atol=tol)
+    assert np.isclose(r, 10.8849, atol=tol)
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
 def test_NED2AER_point(dtype, tol):
     NED = np.array([[-9.1013], [4.1617], [4.2812]], dtype=dtype)
     assert np.all(
@@ -61,6 +78,27 @@ def test_NED2AER_point(dtype, tol):
             atol=tol,
         ),
     )
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_NED2AER_points_unrolled(dtype, tol):
+    NED = np.array(
+        [
+            [[-9.1013], [4.1617], [4.2812]],
+            [[-9.1013], [4.1617], [4.2812]],
+        ],
+        dtype=dtype,
+    )
+    a, e, r = NED2AER(
+        np.ascontiguousarray(NED[:, 0, 0]),
+        np.ascontiguousarray(NED[:, 1, 0]),
+        np.ascontiguousarray(NED[:, 2, 0]),
+    )
+    assert np.all(np.isclose(a, np.deg2rad(155.4271), atol=tol))
+    assert np.all(np.isclose(e, np.deg2rad(-23.1609), atol=tol))
+    assert np.all(np.isclose(r, 10.8849, atol=tol))
 
 
 @pytest.mark.parametrize(
@@ -92,10 +130,11 @@ def test_NED2AER_parallel(dtype, tol):
             (-1, 3, 1)
         )
     )
-    assert np.all(
-        np.isclose(
-            NED2AER(NED),
-            DDM2RRM(np.array([[155.4271], [-23.1609], [10.8849]], dtype=dtype)),
-            atol=tol,
-        ),
+    a, e, r = NED2AER(
+        np.ascontiguousarray(NED[:, 0, 0]),
+        np.ascontiguousarray(NED[:, 1, 0]),
+        np.ascontiguousarray(NED[:, 2, 0]),
     )
+    assert np.all(np.isclose(a, np.deg2rad(155.4271), atol=tol))
+    assert np.all(np.isclose(e, np.deg2rad(-23.1609), atol=tol))
+    assert np.all(np.isclose(r, 10.8849, atol=tol))

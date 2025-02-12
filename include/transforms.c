@@ -174,9 +174,9 @@ height (h) [rad, rad, m]
 @param double b semi-minor axis
 @param double *mmUTM array of size nx1 easting, northing[m, m]
 */
-void geodetic2UTMDoubleUnrolled(double* radLat,
-    double* radLong,
-    double* mAlt,
+void geodetic2UTMDoubleUnrolled(const double* radLat,
+    const double* radLong,
+    const double* mAlt,
     long nPoints,
     double a,
     double b,
@@ -214,9 +214,9 @@ height (h) [rad, rad, m]
 @param double b semi-minor axis
 @param double *mmmXYZ array of size nx3 X, Y, Z [rad, rad, m]
 */
-void geodetic2ECEFFloatUnrolled(float* radLat,
-    float* radLong,
-    float* mAlt,
+void geodetic2ECEFFloatUnrolled(const float* radLat,
+    const float* radLong,
+    const float* mAlt,
     long nPoints,
     float a,
     float b,
@@ -278,9 +278,9 @@ https://en.wikipedia.org/wiki/Geographic_coordinate_conversion#The_application_o
 @param double *rrmLLA array of size nx3 latitude (phi), longitude (gamma),
 height (h) [rad, rad, m]
 */
-void ECEF2geodeticFloatUnrolled(float* mX,
-    float* mY,
-    float* mZ,
+void ECEF2geodeticFloatUnrolled(const float* mX,
+    const float* mY,
+    const float* mZ,
     long nPoints,
     float a,
     float b,
@@ -369,8 +369,8 @@ Y, Z [m, m, m]
 @param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
 void ECEF2ENUFloatUnrolled(float* radLatOrigin,
-    float* radLongOrigin,
-    float* mAltLocalOrigin,
+    const float* radLongOrigin,
+    const float* mAltLocalOrigin,
     const float* mXTarget,
     const float* mYTarget,
     const float* mZTarget,
@@ -394,9 +394,9 @@ void ECEF2ENUFloatUnrolled(float* radLatOrigin,
         float DeltaX = mXTarget[iPoint] - mXLocalOrigin[iOrigin];
         float DeltaY = mYTarget[iPoint] - mYLocalOrigin[iOrigin];
         float DeltaZ = mZTarget[iPoint] - mZLocalOrigin[iOrigin];
-        mXLocal[iPoint] = -sinf(radLongOrigin[iPoint]) * DeltaX + cosf(radLongOrigin[iPoint]) * DeltaY;
-        mYLocal[iPoint] = -sinf(radLatOrigin[iPoint]) * cosf(radLongOrigin[iPoint]) * DeltaX + -sinf(radLatOrigin[iPoint]) * sinf(radLongOrigin[iPoint]) * DeltaY + cosf(radLatOrigin[iPoint]) * DeltaZ;
-        mZLocal[iPoint] = cosf(radLatOrigin[iPoint]) * cosf(radLongOrigin[iPoint]) * DeltaX + cosf(radLatOrigin[iPoint]) * sinf(radLongOrigin[iPoint]) * DeltaY + sinf(radLatOrigin[iPoint]) * DeltaZ;
+        mXLocal[iPoint] = -sinf(radLongOrigin[iOrigin]) * DeltaX + cosf(radLongOrigin[iOrigin]) * DeltaY;
+        mYLocal[iPoint] = -sinf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * DeltaX + -sinf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * DeltaY + cosf(radLatOrigin[iOrigin]) * DeltaZ;
+        mZLocal[iPoint] = cosf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * DeltaX + cosf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * DeltaY + sinf(radLatOrigin[iOrigin]) * DeltaZ;
     }
     free(mXLocalOrigin);
     free(mYLocalOrigin);
@@ -416,8 +416,8 @@ Y, Z [m, m, m]
 @param double *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
 void ECEF2ENUDoubleUnrolled(const double* radLatOrigin,
-    double* radLongOrigin,
-    double* mAltLocalOrigin,
+    const double* radLongOrigin,
+    const double* mAltLocalOrigin,
     const double* mXTarget,
     const double* mYTarget,
     const double* mZTarget,
@@ -441,9 +441,9 @@ void ECEF2ENUDoubleUnrolled(const double* radLatOrigin,
         double DeltaX = mXTarget[iPoint] - mXLocalOrigin[iOrigin];
         double DeltaY = mYTarget[iPoint] - mYLocalOrigin[iOrigin];
         double DeltaZ = mZTarget[iPoint] - mZLocalOrigin[iOrigin];
-        mXLocal[iPoint] = -sin(radLongOrigin[iPoint]) * DeltaX + cos(radLongOrigin[iPoint]) * DeltaY;
-        mYLocal[iPoint] = -sin(radLatOrigin[iPoint]) * cos(radLongOrigin[iPoint]) * DeltaX + -sin(radLatOrigin[iPoint]) * sin(radLongOrigin[iPoint]) * DeltaY + cos(radLatOrigin[iPoint]) * DeltaZ;
-        mZLocal[iPoint] = cos(radLatOrigin[iPoint]) * cos(radLongOrigin[iPoint]) * DeltaX + cos(radLatOrigin[iPoint]) * sin(radLongOrigin[iPoint]) * DeltaY + sin(radLatOrigin[iPoint]) * DeltaZ;
+        mXLocal[iPoint] = -sin(radLongOrigin[iOrigin]) * DeltaX + cos(radLongOrigin[iOrigin]) * DeltaY;
+        mYLocal[iPoint] = -sin(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * DeltaX + -sin(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * DeltaY + cos(radLatOrigin[iOrigin]) * DeltaZ;
+        mZLocal[iPoint] = cos(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * DeltaX + cos(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * DeltaY + sin(radLatOrigin[iOrigin]) * DeltaZ;
     }
     free(mXLocalOrigin);
     free(mYLocalOrigin);
@@ -451,8 +451,8 @@ void ECEF2ENUDoubleUnrolled(const double* radLatOrigin,
 }
 
 void ECEF2NEDFloatUnrolled(float* radLatOrigin,
-    float* radLongOrigin,
-    float* mAltLocalOrigin,
+    const float* radLongOrigin,
+    const float* mAltLocalOrigin,
     const float* mXTarget,
     const float* mYTarget,
     const float* mZTarget,
@@ -476,9 +476,9 @@ void ECEF2NEDFloatUnrolled(float* radLatOrigin,
         float DeltaX = mXTarget[iPoint] - mXLocalOrigin[iOrigin];
         float DeltaY = mYTarget[iPoint] - mYLocalOrigin[iOrigin];
         float DeltaZ = mZTarget[iPoint] - mZLocalOrigin[iOrigin];
-        mXLocal[iPoint] = -sinf(radLatOrigin[iPoint]) * cosf(radLongOrigin[iPoint]) * DeltaX + -sinf(radLatOrigin[iPoint]) * sinf(radLongOrigin[iPoint]) * DeltaY + cosf(radLatOrigin[iPoint]) * DeltaZ;
-        mYLocal[iPoint] = -sinf(radLongOrigin[iPoint]) * DeltaX + cosf(radLongOrigin[iPoint]) * DeltaY;
-        mZLocal[iPoint] = -cosf(radLatOrigin[iPoint]) * cosf(radLongOrigin[iPoint]) * DeltaX + -cosf(radLatOrigin[iPoint]) * sinf(radLongOrigin[iPoint]) * DeltaY + -sinf(radLatOrigin[iPoint]) * DeltaZ;
+        mXLocal[iPoint] = -sinf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * DeltaX + -sinf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * DeltaY + cosf(radLatOrigin[iOrigin]) * DeltaZ;
+        mYLocal[iPoint] = -sinf(radLongOrigin[iOrigin]) * DeltaX + cosf(radLongOrigin[iOrigin]) * DeltaY;
+        mZLocal[iPoint] = -cosf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * DeltaX + -cosf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * DeltaY + -sinf(radLatOrigin[iOrigin]) * DeltaZ;
     }
     free(mXLocalOrigin);
     free(mYLocalOrigin);
@@ -486,8 +486,8 @@ void ECEF2NEDFloatUnrolled(float* radLatOrigin,
 }
 
 void ECEF2NEDDoubleUnrolled(const double* radLatOrigin,
-    double* radLongOrigin,
-    double* mAltLocalOrigin,
+    const double* radLongOrigin,
+    const double* mAltLocalOrigin,
     const double* mXTarget,
     const double* mYTarget,
     const double* mZTarget,
@@ -508,12 +508,12 @@ void ECEF2NEDDoubleUnrolled(const double* radLatOrigin,
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         long iOrigin = iPoint * isOriginSizeOfTargets;
-        double DeltaX = mXLocal[iPoint] - mXLocalOrigin[iOrigin];
-        double DeltaY = mYLocal[iPoint] - mYLocalOrigin[iOrigin];
-        double DeltaZ = mZLocal[iPoint] - mZLocalOrigin[iOrigin];
-        mXLocal[iPoint] = -sin(radLatOrigin[iPoint]) * cos(radLongOrigin[iPoint]) * DeltaX + -sin(radLatOrigin[iPoint]) * sin(radLongOrigin[iPoint]) * DeltaY + cos(radLatOrigin[iPoint]) * DeltaZ;
-        mYLocal[iPoint] = -sin(radLongOrigin[iPoint]) * DeltaX + cos(radLongOrigin[iPoint]) * DeltaY;
-        mZLocal[iPoint] = -cos(radLatOrigin[iPoint]) * cos(radLongOrigin[iPoint]) * DeltaX + -cos(radLatOrigin[iPoint]) * sin(radLongOrigin[iPoint]) * DeltaY + -sin(radLatOrigin[iPoint]) * DeltaZ;
+        double DeltaX = mXTarget[iPoint] - mXLocalOrigin[iOrigin];
+        double DeltaY = mYTarget[iPoint] - mYLocalOrigin[iOrigin];
+        double DeltaZ = mZTarget[iPoint] - mZLocalOrigin[iOrigin];
+        mXLocal[iPoint] = -sin(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * DeltaX + -sin(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * DeltaY + cos(radLatOrigin[iOrigin]) * DeltaZ;
+        mYLocal[iPoint] = -sin(radLongOrigin[iOrigin]) * DeltaX + cos(radLongOrigin[iOrigin]) * DeltaY;
+        mZLocal[iPoint] = -cos(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * DeltaX + -cos(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * DeltaY + -sin(radLatOrigin[iOrigin]) * DeltaZ;
     }
     free(mXLocalOrigin);
     free(mYLocalOrigin);
@@ -521,8 +521,8 @@ void ECEF2NEDDoubleUnrolled(const double* radLatOrigin,
 }
 
 void ECEF2NEDvFloatUnrolled(float* radLatOrigin,
-    float* radLongOrigin,
-    float* mAltLocalOrigin,
+    const float* radLongOrigin,
+    const float* mAltLocalOrigin,
     const float* mXTarget,
     const float* mYTarget,
     const float* mZTarget,
@@ -536,15 +536,15 @@ void ECEF2NEDvFloatUnrolled(float* radLatOrigin,
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         long iOrigin = iPoint * isOriginSizeOfTargets;
-        mXLocal[iPoint] = -sinf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mXLocal[iPoint] + -sinf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mYLocal[iPoint] + cosf(radLatOrigin[iOrigin]) * mZLocal[iPoint];
-        mYLocal[iPoint] = -sinf(radLongOrigin[iOrigin]) * mXLocal[iPoint] + cosf(radLongOrigin[iOrigin]) * mYLocal[iPoint];
-        mZLocal[iPoint] = -cosf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mXLocal[iPoint] + -cosf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mYLocal[iPoint] + -sinf(radLatOrigin[iOrigin]) * mZLocal[iPoint];
+        mXLocal[iPoint] = -sinf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mXTarget[iPoint] + -sinf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mYTarget[iPoint] + cosf(radLatOrigin[iOrigin]) * mZTarget[iPoint];
+        mYLocal[iPoint] = -sinf(radLongOrigin[iOrigin]) * mXTarget[iPoint] + cosf(radLongOrigin[iOrigin]) * mYTarget[iPoint];
+        mZLocal[iPoint] = -cosf(radLatOrigin[iOrigin]) * cosf(radLongOrigin[iOrigin]) * mXTarget[iPoint] + -cosf(radLatOrigin[iOrigin]) * sinf(radLongOrigin[iOrigin]) * mYTarget[iPoint] + -sinf(radLatOrigin[iOrigin]) * mZTarget[iPoint];
     }
 }
 
 void ECEF2NEDvDoubleUnrolled(const double* radLatOrigin,
-    double* radLongOrigin,
-    double* mAltLocalOrigin,
+    const double* radLongOrigin,
+    const double* mAltLocalOrigin,
     const double* mXTarget,
     const double* mYTarget,
     const double* mZTarget,
@@ -558,15 +558,15 @@ void ECEF2NEDvDoubleUnrolled(const double* radLatOrigin,
 #pragma omp parallel for if (nTargets > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nTargets; ++iPoint) {
         long iOrigin = iPoint * isOriginSizeOfTargets;
-        mXLocal[iPoint] = -sin(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mXLocal[iPoint] + -sin(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mYTarget[iPoint] + cos(radLatOrigin[iOrigin]) * mZTarget[iPoint];
-        mYLocal[iPoint] = -sin(radLongOrigin[iOrigin]) * mXLocal[iPoint] + cos(radLongOrigin[iOrigin]) * mYTarget[iPoint];
-        mZLocal[iPoint] = -cos(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mXLocal[iPoint] + -cos(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mYTarget[iPoint] + -sin(radLatOrigin[iOrigin]) * mZTarget[iPoint];
+        mXLocal[iPoint] = -sin(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mXTarget[iPoint] + -sin(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mYTarget[iPoint] + cos(radLatOrigin[iOrigin]) * mZTarget[iPoint];
+        mYLocal[iPoint] = -sin(radLongOrigin[iOrigin]) * mXTarget[iPoint] + cos(radLongOrigin[iOrigin]) * mYTarget[iPoint];
+        mZLocal[iPoint] = -cos(radLatOrigin[iOrigin]) * cos(radLongOrigin[iOrigin]) * mXTarget[iPoint] + -cos(radLatOrigin[iOrigin]) * sin(radLongOrigin[iOrigin]) * mYTarget[iPoint] + -sin(radLatOrigin[iOrigin]) * mZTarget[iPoint];
     }
 }
 
-void ECEF2ENUvFloatUnrolled(float* radLatOrigin,
-    float* radLongOrigin,
-    float* mAltLocalOrigin,
+void ECEF2ENUvFloatUnrolled(const float* radLatOrigin,
+    const float* radLongOrigin,
+    const float* mAltLocalOrigin,
     const float* mXTarget,
     const float* mYTarget,
     const float* mZTarget,
@@ -587,8 +587,8 @@ void ECEF2ENUvFloatUnrolled(float* radLatOrigin,
 }
 
 void ECEF2ENUvDoubleUnrolled(const double* radLatOrigin,
-    double* radLongOrigin,
-    double* mAltLocalOrigin,
+    const double* radLongOrigin,
+    const double* mAltLocalOrigin,
     const double* mXTarget,
     const double* mYTarget,
     const double* mZTarget,
@@ -608,9 +608,9 @@ void ECEF2ENUvDoubleUnrolled(const double* radLatOrigin,
     }
 }
 
-void ENU2ECEFvFloatUnrolled(float* radLatOrigin,
-    float* radLongOrigin,
-    float* mAltLocalOrigin,
+void ENU2ECEFvFloatUnrolled(const float* radLatOrigin,
+    const float* radLongOrigin,
+    const float* mAltLocalOrigin,
     const float* mXTargetLocal,
     const float* mYTargetLocal,
     const float* mZTargetLocal,
@@ -630,9 +630,9 @@ void ENU2ECEFvFloatUnrolled(float* radLatOrigin,
     }
 }
 
-void NED2ECEFvFloatUnrolled(float* radLatOrigin,
-    float* radLongOrigin,
-    float* mAltLocalOrigin,
+void NED2ECEFvFloatUnrolled(const float* radLatOrigin,
+    const float* radLongOrigin,
+    const float* mAltLocalOrigin,
     const float* mXTargetLocal,
     const float* mYTargetLocal,
     const float* mZTargetLocal,
@@ -653,11 +653,11 @@ void NED2ECEFvFloatUnrolled(float* radLatOrigin,
 }
 
 void NED2ECEFvDoubleUnrolled(const double* radLatOrigin,
-    double* radLongOrigin,
-    double* mAltLocalOrigin,
-    const float* mXTargetLocal,
-    const float* mYTargetLocal,
-    const float* mZTargetLocal,
+    const double* radLongOrigin,
+    const double* mAltLocalOrigin,
+    const double* mXTargetLocal,
+    const double* mYTargetLocal,
+    const double* mZTargetLocal,
     long nTargets,
     int isOriginSizeOfTargets,
     double* mXTarget,
@@ -675,11 +675,11 @@ void NED2ECEFvDoubleUnrolled(const double* radLatOrigin,
 }
 
 void ENU2ECEFvDoubleUnrolled(const double* radLatOrigin,
-    double* radLongOrigin,
-    double* mAltLocalOrigin,
-    const float* mXTargetLocal,
-    const float* mYTargetLocal,
-    const float* mZTargetLocal,
+    const double* radLongOrigin,
+    const double* mAltLocalOrigin,
+    const double* mXTargetLocal,
+    const double* mYTargetLocal,
+    const double* mZTargetLocal,
     long nTargets,
     int isOriginSizeOfTargets,
     double* mXTarget,
@@ -709,9 +709,9 @@ latitude, longitude, height [rad, rad, m]
 @param double b semi-minor axis
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void NED2ECEFFloatUnrolled(float* radLatOrigin,
-    float* radLongOrigin,
-    float* mAltLocalOrigin,
+void NED2ECEFFloatUnrolled(const float* radLatOrigin,
+    const float* radLongOrigin,
+    const float* mAltLocalOrigin,
     const float* mXTargetLocal,
     const float* mYTargetLocal,
     const float* mZTargetLocal,
@@ -755,8 +755,8 @@ latitude, longitude, height [rad, rad, m]
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
 void NED2ECEFDoubleUnrolled(const double* radLatOrigin,
-    double* radLongOrigin,
-    double* mAltLocalOrigin,
+    const double* radLongOrigin,
+    const double* mAltLocalOrigin,
     const double* mXTargetLocal,
     const double* mYTargetLocal,
     const double* mZTargetLocal,
@@ -799,9 +799,9 @@ latitude, longitude, height [rad, rad, m]
 @param double b semi-minor axis
 @param float *mmmLocal array of size nx3 X, Y, Z [m, m, m]
 */
-void ENU2ECEFFloatUnrolled(float* radLatOrigin,
-    float* radLongOrigin,
-    float* mAltLocalOrigin,
+void ENU2ECEFFloatUnrolled(const float* radLatOrigin,
+    const float* radLongOrigin,
+    const float* mAltLocalOrigin,
     const float* mXTargetLocal,
     const float* mYTargetLocal,
     const float* mZTargetLocal,
@@ -845,8 +845,8 @@ latitude, longitude, height [rad, rad, m]
 @param double *mmmXYZTarget array of size nx3 of target point X, Y, Z [m, m, m]
 */
 void ENU2ECEFDoubleUnrolled(const double* radLatOrigin,
-    double* radLongOrigin,
-    double* mAltLocalOrigin,
+    const double* radLongOrigin,
+    const double* mAltLocalOrigin,
     const double* mXTargetLocal,
     const double* mYTargetLocal,
     const double* mZTargetLocal,
@@ -1986,7 +1986,7 @@ void AER2ENUDoubleRolled(const double* rrmAER, long nPoints, double* mmmENU)
 }
 
 static PyObject*
-geodetic2UTMWrapper(PyObject* self, PyObject* args)
+geodetic2UTMRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject* rrmLLA;
     double a, b;
@@ -2062,7 +2062,137 @@ geodetic2UTMWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-UTM2geodeticWrapper(PyObject* self, PyObject* args)
+geodetic2UTMUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *radLat, *radLon, *mAlt;
+    double a, b;
+
+    // checks
+    if (!PyArg_ParseTuple(args, "O!O!O!dd", &PyArray_Type, &radLat, &PyArray_Type, &radLon, &PyArray_Type, &mAlt, &a, &b))
+        return NULL;
+    if (!((PyArray_ISCONTIGUOUS(radLat)) && (PyArray_ISCONTIGUOUS(radLon)) && (PyArray_ISCONTIGUOUS(mAlt)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(radLat) == PyArray_SIZE(radLon)) && (PyArray_SIZE(radLat) == PyArray_SIZE(mAlt)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be the same size.");
+        return NULL;
+    }
+
+    PyArrayObject *inArrayLat, *inArrayLon, *inArrayAlt;
+    if (PyArray_ISINTEGER(radLat) == 0)
+        inArrayLat = radLat;
+    else {
+        inArrayLat = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLat), PyArray_SHAPE(radLat), NPY_DOUBLE);
+        if (inArrayLat == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLat, radLat) < 0) {
+            Py_DECREF(inArrayLat);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLat))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLon) == 0)
+        inArrayLon = radLon;
+    else {
+        inArrayLon = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLon), PyArray_SHAPE(radLon), NPY_DOUBLE);
+        if (inArrayLon == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLon, radLon) < 0) {
+            Py_DECREF(inArrayLon);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLon))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mAlt) == 0)
+        inArrayAlt = mAlt;
+    else {
+        inArrayAlt = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mAlt), PyArray_SHAPE(mAlt), NPY_DOUBLE);
+        if (inArrayAlt == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayAlt, mAlt) < 0) {
+            Py_DECREF(inArrayAlt);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayAlt))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    PyArrayObject *outX, *outY;
+    outX = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayLat), PyArray_SHAPE(inArrayLat), PyArray_TYPE(inArrayLat));
+    outY = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayLat), PyArray_SHAPE(inArrayLat), PyArray_TYPE(inArrayLat));
+    if ((outX == NULL) || (outY == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+        return NULL;
+    }
+    long nPoints = (int)PyArray_SIZE(inArrayLat);
+
+    // run function
+    switch (PyArray_TYPE(inArrayLat)) {
+    case NPY_DOUBLE:
+        geodetic2UTMDoubleUnrolled((double*)PyArray_DATA(inArrayLat), (double*)PyArray_DATA(inArrayLon), (double*)PyArray_DATA(inArrayAlt), nPoints, a, b, (double*)PyArray_DATA(outX), (double*)PyArray_DATA(outY));
+        break;
+    case NPY_FLOAT:
+        geodetic2UTMFloatUnrolled((float*)PyArray_DATA(inArrayLat), (float*)PyArray_DATA(inArrayLon), (float*)PyArray_DATA(inArrayAlt), nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(outX), (float*)PyArray_DATA(outY));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+
+    // output
+    PyObject* tuple = PyTuple_New(2);
+    if (!tuple){
+        Py_DECREF(inArrayLat);
+        Py_DECREF(inArrayLon);
+        Py_DECREF(inArrayAlt);
+        Py_DECREF(outX);
+        Py_DECREF(outY);
+        return NULL;
+    }
+    PyTuple_SetItem(tuple, 0, (PyObject*)outX);
+    PyTuple_SetItem(tuple, 1, (PyObject*)outY);
+    return tuple;
+}
+
+static PyObject*
+geodetic2UTMWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 3)
+        return geodetic2UTMRolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 5)
+        return geodetic2UTMUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either three or five inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
+UTM2geodeticRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject* mmUTM;
     double a, b;
@@ -2148,6 +2278,126 @@ UTM2geodeticWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
+UTM2geodeticUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *mX, *mY;
+    double a, b;
+    PyObject* ZoneNumberPy;
+    char* ZoneLetter;
+
+    // checks
+    if (!PyArg_ParseTuple(args, "O!O!Osdd", &PyArray_Type, &mX, &PyArray_Type, &mY, &ZoneNumberPy, &ZoneLetter, &a, &b))
+        return NULL;
+    if (!PyLong_Check(ZoneNumberPy)) {
+        PyErr_SetString(PyExc_TypeError, "Zone number must be an integer");
+        return NULL;
+    }
+    long ZoneNumber = PyLong_AsLong(ZoneNumberPy);
+    if (PyErr_Occurred()) {
+        return NULL; // Conversion failed
+    }
+    if (!((PyArray_ISCONTIGUOUS(mX)) && (PyArray_ISCONTIGUOUS(mY)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+
+    PyArrayObject *inArrayX, *inArrayY;
+    if (PyArray_ISINTEGER(mX) == 0)
+        inArrayX = mX;
+    else {
+        inArrayX = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mX), PyArray_SHAPE(mX), NPY_DOUBLE);
+        if (inArrayX == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayX, mX) < 0) {
+            Py_DECREF(inArrayX);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayX))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mY) == 0)
+        inArrayY = mY;
+    else {
+        inArrayY = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mY), PyArray_SHAPE(mY), NPY_DOUBLE);
+        if (inArrayY == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayY, mY) < 0) {
+            Py_DECREF(inArrayY);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayY))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    PyArrayObject *radLat, *radLon, *mAlt;
+    radLat = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayX), PyArray_SHAPE(inArrayX), PyArray_TYPE(inArrayX));
+    radLon = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayX), PyArray_SHAPE(inArrayX), PyArray_TYPE(inArrayX));
+    mAlt = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayX), PyArray_SHAPE(inArrayX), PyArray_TYPE(inArrayX));
+    if ((radLat == NULL) || (radLon == NULL) || (mAlt == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+        return NULL;
+    }
+
+    // run function
+    long nPoints = (int)PyArray_SIZE(inArrayX);
+    switch (PyArray_TYPE(radLat)) {
+    case NPY_DOUBLE:
+        UTM2geodeticDoubleUnrolled((double*)PyArray_DATA(inArrayX), (double*)PyArray_DATA(inArrayY), ZoneNumber, ZoneLetter, nPoints, a, b, (double*)PyArray_DATA(radLat), (double*)PyArray_DATA(radLon), (double*)PyArray_DATA(mAlt));
+        break;
+    case NPY_FLOAT:
+        UTM2geodeticFloatUnrolled((float*)PyArray_DATA(inArrayX), (float*)PyArray_DATA(inArrayY), ZoneNumber, ZoneLetter, nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(radLat), (float*)PyArray_DATA(radLon), (float*)PyArray_DATA(mAlt));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+
+    // output
+    PyObject* tuple = PyTuple_New(3);
+    if (!tuple){
+        Py_DECREF(radLat);
+        Py_DECREF(radLon);
+        Py_DECREF(mAlt);
+        Py_DECREF(inArrayX);
+        Py_DECREF(inArrayY);
+        return NULL;
+    }
+    PyTuple_SetItem(tuple, 0, (PyObject*)radLat);
+    PyTuple_SetItem(tuple, 1, (PyObject*)radLon);
+    PyTuple_SetItem(tuple, 2, (PyObject*)mAlt);
+    return tuple;
+}
+
+static PyObject*
+UTM2geodeticWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 5)
+        return UTM2geodeticRolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 6)
+        return UTM2geodeticUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either five or six inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
 geodetic2ECEFRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject* rrmLLA;
@@ -2227,6 +2477,7 @@ geodetic2ECEFUnrolledWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
+    // ensure matching floating point types
     PyArrayObject *inArrayLat, *inArrayLon, *inArrayAlt;
     if (PyArray_ISINTEGER(radLat) == 0)
         inArrayLat = radLat;
@@ -2294,8 +2545,10 @@ geodetic2ECEFUnrolledWrapper(PyObject* self, PyObject* args)
         PyArray_NDIM(inArrayLat), PyArray_SHAPE(inArrayLat), PyArray_TYPE(inArrayLat));
     outZ = (PyArrayObject*)PyArray_SimpleNew(
         PyArray_NDIM(inArrayLat), PyArray_SHAPE(inArrayLat), PyArray_TYPE(inArrayLat));
-    if ((outX == NULL) || (outY == NULL) || (outZ == NULL))
+    if ((outX == NULL) || (outY == NULL) || (outZ == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
         return NULL;
+    }
     long nPoints = (int)PyArray_SIZE(inArrayLat);
 
     // run function
@@ -2337,13 +2590,135 @@ geodetic2ECEFWrapper(PyObject* self, PyObject* args)
     else if (PyTuple_Size(args) == 5)
         return geodetic2ECEFUnrolledWrapper(self, args);
     else {
-        PyErr_SetString(PyExc_TypeError, "Function accepts either three or five NumPy array inputs");
+        PyErr_SetString(PyExc_TypeError, "Function accepts either three or five inputs");
         return NULL;
     }
 }
 
 static PyObject*
-ECEF2geodeticWrapper(PyObject* self, PyObject* args)
+ECEF2geodeticUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *mX, *mY, *mZ;
+    double a, b;
+
+    // checks
+    if (!PyArg_ParseTuple(args, "O!O!O!dd", &PyArray_Type, &mX, &PyArray_Type, &mY, &PyArray_Type, &mZ, &a, &b))
+        return NULL;
+    if (!((PyArray_ISCONTIGUOUS(mX)) && (PyArray_ISCONTIGUOUS(mY)) && (PyArray_ISCONTIGUOUS(mZ)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(mX) == PyArray_SIZE(mY)) && (PyArray_SIZE(mX) == PyArray_SIZE(mZ)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be the same size.");
+        return NULL;
+    }
+
+    PyArrayObject *inArrayX, *inArrayY, *inArrayZ;
+    if (PyArray_ISINTEGER(mX) == 0)
+        inArrayX = mX;
+    else {
+        inArrayX = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mX), PyArray_SHAPE(mX), NPY_DOUBLE);
+        if (inArrayX == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayX, mX) < 0) {
+            Py_DECREF(inArrayX);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayX))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mY) == 0)
+        inArrayY = mY;
+    else {
+        inArrayY = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mY), PyArray_SHAPE(mY), NPY_DOUBLE);
+        if (inArrayY == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayY, mY) < 0) {
+            Py_DECREF(inArrayY);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayY))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mZ) == 0)
+        inArrayZ = mZ;
+    else {
+        inArrayZ = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mZ), PyArray_SHAPE(mZ), NPY_DOUBLE);
+        if (inArrayZ == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayZ, mZ) < 0) {
+            Py_DECREF(inArrayZ);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayZ))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+     // prepare inputs
+     PyArrayObject *radLat, *radLon, *mAlt;
+     radLat = (PyArrayObject*)PyArray_SimpleNew(
+         PyArray_NDIM(inArrayX), PyArray_SHAPE(inArrayX), PyArray_TYPE(inArrayX));
+     radLon = (PyArrayObject*)PyArray_SimpleNew(
+         PyArray_NDIM(inArrayX), PyArray_SHAPE(inArrayX), PyArray_TYPE(inArrayX));
+     mAlt = (PyArrayObject*)PyArray_SimpleNew(
+         PyArray_NDIM(inArrayX), PyArray_SHAPE(inArrayX), PyArray_TYPE(inArrayX));
+     if ((radLat == NULL) || (radLon == NULL) || (mAlt == NULL)) {
+         PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+         return NULL;
+     }
+     long nPoints = (int)PyArray_SIZE(inArrayX);
+ 
+    // run function
+    switch (PyArray_TYPE(radLat)) {
+    case NPY_DOUBLE:
+        ECEF2geodeticDoubleUnrolled((double*)PyArray_DATA(inArrayX), (double*)PyArray_DATA(inArrayY), (double*)PyArray_DATA(inArrayZ), nPoints, a, b, (double*)PyArray_DATA(radLat), (double*)PyArray_DATA(radLon), (double*)PyArray_DATA(mAlt));
+        break;
+    case NPY_FLOAT:
+        ECEF2geodeticFloatUnrolled((float*)PyArray_DATA(inArrayX), (float*)PyArray_DATA(inArrayY), (float*)PyArray_DATA(inArrayZ), nPoints, (float)(a), (float)(b), (float*)PyArray_DATA(radLat), (float*)PyArray_DATA(radLon), (float*)PyArray_DATA(mAlt));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+
+    // output
+    PyObject* tuple = PyTuple_New(3);
+    if (!tuple){
+        Py_DECREF(radLat);
+        Py_DECREF(radLon);
+        Py_DECREF(mAlt);
+        Py_DECREF(inArrayX);
+        Py_DECREF(inArrayY);
+        Py_DECREF(inArrayZ);
+        return NULL;
+    }
+    PyTuple_SetItem(tuple, 0, (PyObject*)radLat);
+    PyTuple_SetItem(tuple, 1, (PyObject*)radLon);
+    PyTuple_SetItem(tuple, 2, (PyObject*)mAlt);
+    return tuple;
+}
+
+static PyObject*
+ECEF2geodeticRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject* mmmXYZ;
     double a, b;
@@ -2405,7 +2780,229 @@ ECEF2geodeticWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-ECEF2ENUWrapper(PyObject* self, PyObject* args)
+ECEF2geodeticWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 3)
+        return ECEF2geodeticRolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 5)
+        return ECEF2geodeticUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either three or five inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
+ECEF2ENUUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *radLatOrigin, *radLonOrigin, *mAltOrigin, *mXTarget, *mYTarget, *mZTarget;
+    double a, b;
+
+    // checks
+    if (!PyArg_ParseTuple(args,
+            "O!O!O!O!O!O!dd",
+            &PyArray_Type,
+            &radLatOrigin,
+            &PyArray_Type,
+            &radLonOrigin,
+            &PyArray_Type,
+            &mAltOrigin,
+            &PyArray_Type,
+            &mXTarget,
+            &PyArray_Type,
+            &mYTarget,
+            &PyArray_Type,
+            &mZTarget,
+            &a,
+            &b))
+        return NULL;
+    if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mXTarget)) && (PyArray_ISCONTIGUOUS(mYTarget)) && (PyArray_ISCONTIGUOUS(mZTarget)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_TYPE(radLatOrigin) == PyArray_TYPE(radLonOrigin)) && (PyArray_TYPE(radLonOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mAltOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mXTarget) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mYTarget) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mZTarget) == PyArray_TYPE(radLatOrigin)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must of the same type.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(mXTarget) == PyArray_SIZE(mYTarget)) && (PyArray_SIZE(mXTarget) == PyArray_SIZE(mZTarget)))) {
+        PyErr_SetString(PyExc_ValueError, "Input target arrays must be the same size.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(radLatOrigin) == PyArray_SIZE(radLonOrigin)) && (PyArray_SIZE(radLatOrigin) == PyArray_SIZE(mAltOrigin)))) {
+        PyErr_SetString(PyExc_ValueError, "Input origin arrays must be the same size.");
+        return NULL;
+    }
+
+    // ensure floating point type
+    PyArrayObject *inArrayXTarget, *inArrayYTarget, *inArrayZTarget, *inArrayLatOrigin, *inArrayLonOrigin, *inArrayAltOrigin;
+    if (PyArray_ISINTEGER(mXTarget) == 0)
+        inArrayXTarget = mXTarget;
+    else {
+        inArrayXTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mXTarget), PyArray_SHAPE(mXTarget), NPY_DOUBLE);
+        if (inArrayXTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayXTarget, mXTarget) < 0) {
+            Py_DECREF(inArrayXTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayXTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mYTarget) == 0)
+        inArrayYTarget = mYTarget;
+    else {
+        inArrayYTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mYTarget), PyArray_SHAPE(mYTarget), NPY_DOUBLE);
+        if (inArrayYTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayYTarget, mYTarget) < 0) {
+            Py_DECREF(inArrayYTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayYTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mZTarget) == 0)
+        inArrayZTarget = mZTarget;
+    else {
+        inArrayZTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mZTarget), PyArray_SHAPE(mZTarget), NPY_DOUBLE);
+        if (inArrayZTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayZTarget, mZTarget) < 0) {
+            Py_DECREF(inArrayZTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayZTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLatOrigin) == 0)
+        inArrayLatOrigin = radLatOrigin;
+    else {
+        inArrayLatOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLatOrigin), PyArray_SHAPE(radLatOrigin), NPY_DOUBLE);
+        if (inArrayLatOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLatOrigin, radLatOrigin) < 0) {
+            Py_DECREF(inArrayLatOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLatOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLonOrigin) == 0)
+        inArrayLonOrigin = radLonOrigin;
+    else {
+        inArrayLonOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLonOrigin), PyArray_SHAPE(radLonOrigin), NPY_DOUBLE);
+        if (inArrayLonOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLonOrigin, radLonOrigin) < 0) {
+            Py_DECREF(inArrayLonOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLonOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mAltOrigin) == 0)
+        inArrayAltOrigin = mAltOrigin;
+    else {
+        inArrayAltOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mAltOrigin), PyArray_SHAPE(mAltOrigin), NPY_DOUBLE);
+        if (inArrayAltOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayAltOrigin, mAltOrigin) < 0) {
+            Py_DECREF(inArrayAltOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayAltOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    // prepare inputs
+    PyArrayObject *mX, *mY, *mZ;
+    mX = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mY = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mZ = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    if ((mX == NULL) || (mY == NULL) || (mZ == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+        return NULL;
+    }
+    long nPoints = (int)PyArray_SIZE(inArrayXTarget);
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayXTarget) == PyArray_Size((PyObject*)inArrayAltOrigin));
+
+    // run function
+    switch (PyArray_TYPE(mX)) {
+    case NPY_DOUBLE:
+        ECEF2ENUDoubleUnrolled(
+            (double*)PyArray_DATA(inArrayLatOrigin), (double*)PyArray_DATA(inArrayLonOrigin), (double*)PyArray_DATA(inArrayAltOrigin), (double*)PyArray_DATA(inArrayXTarget), (double*)PyArray_DATA(inArrayYTarget), (double*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, a, b, (double*)PyArray_DATA(mX), (double*)PyArray_DATA(mY), (double*)PyArray_DATA(mZ));
+        break;
+    case NPY_FLOAT:
+        ECEF2ENUFloatUnrolled(
+            (float*)PyArray_DATA(inArrayLatOrigin), (float*)PyArray_DATA(inArrayLonOrigin), (float*)PyArray_DATA(inArrayAltOrigin), (float*)PyArray_DATA(inArrayXTarget), (float*)PyArray_DATA(inArrayYTarget), (float*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), (float*)PyArray_DATA(mX), (float*)PyArray_DATA(mY), (float*)PyArray_DATA(mZ));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+
+    // output
+    PyObject* tuple = PyTuple_New(3);
+    if (!tuple){
+        Py_DECREF(inArrayLatOrigin);
+        Py_DECREF(inArrayLonOrigin);
+        Py_DECREF(inArrayAltOrigin);
+        Py_DECREF(inArrayXTarget);
+        Py_DECREF(inArrayYTarget);
+        Py_DECREF(inArrayZTarget);
+        Py_DECREF(mX);
+        Py_DECREF(mY);
+        Py_DECREF(mZ);
+        return NULL;
+    }
+    PyTuple_SetItem(tuple, 0, (PyObject*)mX);
+    PyTuple_SetItem(tuple, 1, (PyObject*)mY);
+    PyTuple_SetItem(tuple, 2, (PyObject*)mZ);
+    return tuple;
+}
+
+static PyObject*
+ECEF2ENURolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject *rrmLLALocalOrigin, *mmmXYZTarget;
     double a, b;
@@ -2502,7 +3099,229 @@ ECEF2ENUWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-ECEF2NEDWrapper(PyObject* self, PyObject* args)
+ECEF2ENUWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 4)
+        return ECEF2ENURolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 8)
+        return ECEF2ENUUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either four or eight inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
+ECEF2NEDUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *radLatOrigin, *radLonOrigin, *mAltOrigin, *mXTarget, *mYTarget, *mZTarget;
+    double a, b;
+
+    // checks
+    if (!PyArg_ParseTuple(args,
+            "O!O!O!O!O!O!dd",
+            &PyArray_Type,
+            &radLatOrigin,
+            &PyArray_Type,
+            &radLonOrigin,
+            &PyArray_Type,
+            &mAltOrigin,
+            &PyArray_Type,
+            &mXTarget,
+            &PyArray_Type,
+            &mYTarget,
+            &PyArray_Type,
+            &mZTarget,
+            &a,
+            &b))
+        return NULL;
+    if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mXTarget)) && (PyArray_ISCONTIGUOUS(mYTarget)) && (PyArray_ISCONTIGUOUS(mZTarget)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_TYPE(radLatOrigin) == PyArray_TYPE(radLonOrigin)) && (PyArray_TYPE(radLonOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mAltOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mXTarget) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mYTarget) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mZTarget) == PyArray_TYPE(radLatOrigin)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must of the same type.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(mXTarget) == PyArray_SIZE(mYTarget)) && (PyArray_SIZE(mXTarget) == PyArray_SIZE(mZTarget)))) {
+        PyErr_SetString(PyExc_ValueError, "Input target arrays must be the same size.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(radLatOrigin) == PyArray_SIZE(radLonOrigin)) && (PyArray_SIZE(radLatOrigin) == PyArray_SIZE(mAltOrigin)))) {
+        PyErr_SetString(PyExc_ValueError, "Input origin arrays must be the same size.");
+        return NULL;
+    }
+
+    // ensure floating point type
+    PyArrayObject *inArrayXTarget, *inArrayYTarget, *inArrayZTarget, *inArrayLatOrigin, *inArrayLonOrigin, *inArrayAltOrigin;
+    if (PyArray_ISINTEGER(mXTarget) == 0)
+        inArrayXTarget = mXTarget;
+    else {
+        inArrayXTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mXTarget), PyArray_SHAPE(mXTarget), NPY_DOUBLE);
+        if (inArrayXTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayXTarget, mXTarget) < 0) {
+            Py_DECREF(inArrayXTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayXTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mYTarget) == 0)
+        inArrayYTarget = mYTarget;
+    else {
+        inArrayYTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mYTarget), PyArray_SHAPE(mYTarget), NPY_DOUBLE);
+        if (inArrayYTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayYTarget, mYTarget) < 0) {
+            Py_DECREF(inArrayYTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayYTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mZTarget) == 0)
+        inArrayZTarget = mZTarget;
+    else {
+        inArrayZTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mZTarget), PyArray_SHAPE(mZTarget), NPY_DOUBLE);
+        if (inArrayZTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayZTarget, mZTarget) < 0) {
+            Py_DECREF(inArrayZTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayZTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLatOrigin) == 0)
+        inArrayLatOrigin = radLatOrigin;
+    else {
+        inArrayLatOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLatOrigin), PyArray_SHAPE(radLatOrigin), NPY_DOUBLE);
+        if (inArrayLatOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLatOrigin, radLatOrigin) < 0) {
+            Py_DECREF(inArrayLatOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLatOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLonOrigin) == 0)
+        inArrayLonOrigin = radLonOrigin;
+    else {
+        inArrayLonOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLonOrigin), PyArray_SHAPE(radLonOrigin), NPY_DOUBLE);
+        if (inArrayLonOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLonOrigin, radLonOrigin) < 0) {
+            Py_DECREF(inArrayLonOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLonOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mAltOrigin) == 0)
+        inArrayAltOrigin = mAltOrigin;
+    else {
+        inArrayAltOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mAltOrigin), PyArray_SHAPE(mAltOrigin), NPY_DOUBLE);
+        if (inArrayAltOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayAltOrigin, mAltOrigin) < 0) {
+            Py_DECREF(inArrayAltOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayAltOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    // prepare inputs
+    PyArrayObject *mX, *mY, *mZ;
+    mX = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mY = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mZ = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    if ((mX == NULL) || (mY == NULL) || (mZ == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+        return NULL;
+    }
+    long nPoints = (int)PyArray_SIZE(inArrayXTarget);
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayXTarget) == PyArray_Size((PyObject*)inArrayAltOrigin));
+
+    // run function
+    switch (PyArray_TYPE(mX)) {
+    case NPY_DOUBLE:
+        ECEF2NEDDoubleUnrolled(
+            (double*)PyArray_DATA(inArrayLatOrigin), (double*)PyArray_DATA(inArrayLonOrigin), (double*)PyArray_DATA(inArrayAltOrigin), (double*)PyArray_DATA(inArrayXTarget), (double*)PyArray_DATA(inArrayYTarget), (double*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, a, b, (double*)PyArray_DATA(mX), (double*)PyArray_DATA(mY), (double*)PyArray_DATA(mZ));
+        break;
+    case NPY_FLOAT:
+        ECEF2NEDFloatUnrolled(
+            (float*)PyArray_DATA(inArrayLatOrigin), (float*)PyArray_DATA(inArrayLonOrigin), (float*)PyArray_DATA(inArrayAltOrigin), (float*)PyArray_DATA(inArrayXTarget), (float*)PyArray_DATA(inArrayYTarget), (float*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), (float*)PyArray_DATA(mX), (float*)PyArray_DATA(mY), (float*)PyArray_DATA(mZ));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+
+    // output
+    PyObject* tuple = PyTuple_New(3);
+    if (!tuple){
+        Py_DECREF(inArrayLatOrigin);
+        Py_DECREF(inArrayLonOrigin);
+        Py_DECREF(inArrayAltOrigin);
+        Py_DECREF(inArrayXTarget);
+        Py_DECREF(inArrayYTarget);
+        Py_DECREF(inArrayZTarget);
+        Py_DECREF(mX);
+        Py_DECREF(mY);
+        Py_DECREF(mZ);
+        return NULL;
+    }
+    PyTuple_SetItem(tuple, 0, (PyObject*)mX);
+    PyTuple_SetItem(tuple, 1, (PyObject*)mY);
+    PyTuple_SetItem(tuple, 2, (PyObject*)mZ);
+    return tuple;
+}
+
+static PyObject*
+ECEF2NEDRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject *rrmLLALocalOrigin, *mmmXYZTarget;
     double a, b;
@@ -2599,7 +3418,20 @@ ECEF2NEDWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-ECEF2NEDvWrapper(PyObject* self, PyObject* args)
+ECEF2NEDWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 4)
+        return ECEF2NEDRolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 8)
+        return ECEF2NEDUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either four or eight inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
+ECEF2NEDvRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject *rrmLLALocalOrigin, *mmmXYZTarget;
 
@@ -2693,7 +3525,226 @@ ECEF2NEDvWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-ECEF2ENUvWrapper(PyObject* self, PyObject* args)
+ECEF2NEDvUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *radLatOrigin, *radLonOrigin, *mAltOrigin, *mXTarget, *mYTarget, *mZTarget;
+
+    // checks
+    if (!PyArg_ParseTuple(args,
+            "O!O!O!O!O!O!",
+            &PyArray_Type,
+            &radLatOrigin,
+            &PyArray_Type,
+            &radLonOrigin,
+            &PyArray_Type,
+            &mAltOrigin,
+            &PyArray_Type,
+            &mXTarget,
+            &PyArray_Type,
+            &mYTarget,
+            &PyArray_Type,
+            &mZTarget))
+        return NULL;
+    if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mXTarget)) && (PyArray_ISCONTIGUOUS(mYTarget)) && (PyArray_ISCONTIGUOUS(mZTarget)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_TYPE(radLatOrigin) == PyArray_TYPE(radLonOrigin)) && (PyArray_TYPE(radLonOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mAltOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mXTarget) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mYTarget) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mZTarget) == PyArray_TYPE(radLatOrigin)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must of the same type.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(mXTarget) == PyArray_SIZE(mYTarget)) && (PyArray_SIZE(mXTarget) == PyArray_SIZE(mZTarget)))) {
+        PyErr_SetString(PyExc_ValueError, "Input target arrays must be the same size.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(radLatOrigin) == PyArray_SIZE(radLonOrigin)) && (PyArray_SIZE(radLatOrigin) == PyArray_SIZE(mAltOrigin)))) {
+        PyErr_SetString(PyExc_ValueError, "Input origin arrays must be the same size.");
+        return NULL;
+    }
+
+    // ensure floating point type
+    PyArrayObject *inArrayXTarget, *inArrayYTarget, *inArrayZTarget, *inArrayLatOrigin, *inArrayLonOrigin, *inArrayAltOrigin;
+    if (PyArray_ISINTEGER(mXTarget) == 0)
+        inArrayXTarget = mXTarget;
+    else {
+        inArrayXTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mXTarget), PyArray_SHAPE(mXTarget), NPY_DOUBLE);
+        if (inArrayXTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayXTarget, mXTarget) < 0) {
+            Py_DECREF(inArrayXTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayXTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mYTarget) == 0)
+        inArrayYTarget = mYTarget;
+    else {
+        inArrayYTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mYTarget), PyArray_SHAPE(mYTarget), NPY_DOUBLE);
+        if (inArrayYTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayYTarget, mYTarget) < 0) {
+            Py_DECREF(inArrayYTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayYTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mZTarget) == 0)
+        inArrayZTarget = mZTarget;
+    else {
+        inArrayZTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mZTarget), PyArray_SHAPE(mZTarget), NPY_DOUBLE);
+        if (inArrayZTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayZTarget, mZTarget) < 0) {
+            Py_DECREF(inArrayZTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayZTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLatOrigin) == 0)
+        inArrayLatOrigin = radLatOrigin;
+    else {
+        inArrayLatOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLatOrigin), PyArray_SHAPE(radLatOrigin), NPY_DOUBLE);
+        if (inArrayLatOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLatOrigin, radLatOrigin) < 0) {
+            Py_DECREF(inArrayLatOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLatOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLonOrigin) == 0)
+        inArrayLonOrigin = radLonOrigin;
+    else {
+        inArrayLonOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLonOrigin), PyArray_SHAPE(radLonOrigin), NPY_DOUBLE);
+        if (inArrayLonOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLonOrigin, radLonOrigin) < 0) {
+            Py_DECREF(inArrayLonOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLonOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mAltOrigin) == 0)
+        inArrayAltOrigin = mAltOrigin;
+    else {
+        inArrayAltOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mAltOrigin), PyArray_SHAPE(mAltOrigin), NPY_DOUBLE);
+        if (inArrayAltOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayAltOrigin, mAltOrigin) < 0) {
+            Py_DECREF(inArrayAltOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayAltOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    // prepare inputs
+    PyArrayObject *mX, *mY, *mZ;
+    mX = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mY = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mZ = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    if ((mX == NULL) || (mY == NULL) || (mZ == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+        return NULL;
+    }
+    long nPoints = (int)PyArray_SIZE(inArrayXTarget);
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayXTarget) == PyArray_Size((PyObject*)inArrayAltOrigin));
+
+    // run function
+    switch (PyArray_TYPE(mX)) {
+    case NPY_DOUBLE:
+        ECEF2NEDvDoubleUnrolled(
+            (double*)PyArray_DATA(inArrayLatOrigin), (double*)PyArray_DATA(inArrayLonOrigin), (double*)PyArray_DATA(inArrayAltOrigin), (double*)PyArray_DATA(inArrayXTarget), (double*)PyArray_DATA(inArrayYTarget), (double*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, (double*)PyArray_DATA(mX), (double*)PyArray_DATA(mY), (double*)PyArray_DATA(mZ));
+        break;
+    case NPY_FLOAT:
+        ECEF2NEDvFloatUnrolled(
+            (float*)PyArray_DATA(inArrayLatOrigin), (float*)PyArray_DATA(inArrayLonOrigin), (float*)PyArray_DATA(inArrayAltOrigin), (float*)PyArray_DATA(inArrayXTarget), (float*)PyArray_DATA(inArrayYTarget), (float*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, (float*)PyArray_DATA(mX), (float*)PyArray_DATA(mY), (float*)PyArray_DATA(mZ));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+
+    // output
+    PyObject* tuple = PyTuple_New(3);
+    if (!tuple){
+        Py_DECREF(inArrayLatOrigin);
+        Py_DECREF(inArrayLonOrigin);
+        Py_DECREF(inArrayAltOrigin);
+        Py_DECREF(inArrayXTarget);
+        Py_DECREF(inArrayYTarget);
+        Py_DECREF(inArrayZTarget);
+        Py_DECREF(mX);
+        Py_DECREF(mY);
+        Py_DECREF(mZ);
+        return NULL;
+    }
+    PyTuple_SetItem(tuple, 0, (PyObject*)mX);
+    PyTuple_SetItem(tuple, 1, (PyObject*)mY);
+    PyTuple_SetItem(tuple, 2, (PyObject*)mZ);
+    return tuple;
+}
+
+static PyObject*
+ECEF2NEDvWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 2)
+        return ECEF2NEDvRolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 6)
+        return ECEF2NEDvUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either two or four inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
+ECEF2ENUvRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject *rrmLLALocalOrigin, *mmmXYZTarget;
 
@@ -2787,7 +3838,435 @@ ECEF2ENUvWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-NED2ECEFWrapper(PyObject* self, PyObject* args)
+ECEF2ENUvUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *radLatOrigin, *radLonOrigin, *mAltOrigin, *mXTarget, *mYTarget, *mZTarget;
+
+    // checks
+    if (!PyArg_ParseTuple(args,
+            "O!O!O!O!O!O!",
+            &PyArray_Type,
+            &radLatOrigin,
+            &PyArray_Type,
+            &radLonOrigin,
+            &PyArray_Type,
+            &mAltOrigin,
+            &PyArray_Type,
+            &mXTarget,
+            &PyArray_Type,
+            &mYTarget,
+            &PyArray_Type,
+            &mZTarget))
+        return NULL;
+    if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mXTarget)) && (PyArray_ISCONTIGUOUS(mYTarget)) && (PyArray_ISCONTIGUOUS(mZTarget)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_TYPE(radLatOrigin) == PyArray_TYPE(radLonOrigin)) && (PyArray_TYPE(radLonOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mAltOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mXTarget) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mYTarget) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mZTarget) == PyArray_TYPE(radLatOrigin)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must of the same type.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(mXTarget) == PyArray_SIZE(mYTarget)) && (PyArray_SIZE(mXTarget) == PyArray_SIZE(mZTarget)))) {
+        PyErr_SetString(PyExc_ValueError, "Input target arrays must be the same size.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(radLatOrigin) == PyArray_SIZE(radLonOrigin)) && (PyArray_SIZE(radLatOrigin) == PyArray_SIZE(mAltOrigin)))) {
+        PyErr_SetString(PyExc_ValueError, "Input origin arrays must be the same size.");
+        return NULL;
+    }
+
+    // ensure floating point type
+    PyArrayObject *inArrayXTarget, *inArrayYTarget, *inArrayZTarget, *inArrayLatOrigin, *inArrayLonOrigin, *inArrayAltOrigin;
+    if (PyArray_ISINTEGER(mXTarget) == 0)
+        inArrayXTarget = mXTarget;
+    else {
+        inArrayXTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mXTarget), PyArray_SHAPE(mXTarget), NPY_DOUBLE);
+        if (inArrayXTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayXTarget, mXTarget) < 0) {
+            Py_DECREF(inArrayXTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayXTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mYTarget) == 0)
+        inArrayYTarget = mYTarget;
+    else {
+        inArrayYTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mYTarget), PyArray_SHAPE(mYTarget), NPY_DOUBLE);
+        if (inArrayYTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayYTarget, mYTarget) < 0) {
+            Py_DECREF(inArrayYTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayYTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mZTarget) == 0)
+        inArrayZTarget = mZTarget;
+    else {
+        inArrayZTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mZTarget), PyArray_SHAPE(mZTarget), NPY_DOUBLE);
+        if (inArrayZTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayZTarget, mZTarget) < 0) {
+            Py_DECREF(inArrayZTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayZTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLatOrigin) == 0)
+        inArrayLatOrigin = radLatOrigin;
+    else {
+        inArrayLatOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLatOrigin), PyArray_SHAPE(radLatOrigin), NPY_DOUBLE);
+        if (inArrayLatOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLatOrigin, radLatOrigin) < 0) {
+            Py_DECREF(inArrayLatOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLatOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLonOrigin) == 0)
+        inArrayLonOrigin = radLonOrigin;
+    else {
+        inArrayLonOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLonOrigin), PyArray_SHAPE(radLonOrigin), NPY_DOUBLE);
+        if (inArrayLonOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLonOrigin, radLonOrigin) < 0) {
+            Py_DECREF(inArrayLonOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLonOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mAltOrigin) == 0)
+        inArrayAltOrigin = mAltOrigin;
+    else {
+        inArrayAltOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mAltOrigin), PyArray_SHAPE(mAltOrigin), NPY_DOUBLE);
+        if (inArrayAltOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayAltOrigin, mAltOrigin) < 0) {
+            Py_DECREF(inArrayAltOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayAltOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    // prepare inputs
+    PyArrayObject *mX, *mY, *mZ;
+    mX = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mY = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mZ = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    if ((mX == NULL) || (mY == NULL) || (mZ == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+        return NULL;
+    }
+    long nPoints = (int)PyArray_SIZE(inArrayXTarget);
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayXTarget) == PyArray_Size((PyObject*)inArrayAltOrigin));
+
+    // run function
+    switch (PyArray_TYPE(mX)) {
+    case NPY_DOUBLE:
+        ECEF2ENUvDoubleUnrolled(
+            (double*)PyArray_DATA(inArrayLatOrigin), (double*)PyArray_DATA(inArrayLonOrigin), (double*)PyArray_DATA(inArrayAltOrigin), (double*)PyArray_DATA(inArrayXTarget), (double*)PyArray_DATA(inArrayYTarget), (double*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, (double*)PyArray_DATA(mX), (double*)PyArray_DATA(mY), (double*)PyArray_DATA(mZ));
+        break;
+    case NPY_FLOAT:
+        ECEF2ENUvFloatUnrolled(
+            (float*)PyArray_DATA(inArrayLatOrigin), (float*)PyArray_DATA(inArrayLonOrigin), (float*)PyArray_DATA(inArrayAltOrigin), (float*)PyArray_DATA(inArrayXTarget), (float*)PyArray_DATA(inArrayYTarget), (float*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, (float*)PyArray_DATA(mX), (float*)PyArray_DATA(mY), (float*)PyArray_DATA(mZ));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+
+    // output
+    PyObject* tuple = PyTuple_New(3);
+    if (!tuple){
+        Py_DECREF(inArrayLatOrigin);
+        Py_DECREF(inArrayLonOrigin);
+        Py_DECREF(inArrayAltOrigin);
+        Py_DECREF(inArrayXTarget);
+        Py_DECREF(inArrayYTarget);
+        Py_DECREF(inArrayZTarget);
+        Py_DECREF(mX);
+        Py_DECREF(mY);
+        Py_DECREF(mZ);
+        return NULL;
+    }
+    PyTuple_SetItem(tuple, 0, (PyObject*)mX);
+    PyTuple_SetItem(tuple, 1, (PyObject*)mY);
+    PyTuple_SetItem(tuple, 2, (PyObject*)mZ);
+    return tuple;
+}
+
+static PyObject*
+ECEF2ENUvWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 2)
+        return ECEF2ENUvRolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 6)
+        return ECEF2ENUvUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either two or four inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
+NED2ECEFUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *radLatOrigin, *radLonOrigin, *mAltOrigin, *mNLocal, *mELocal, *mDLocal;
+    double a, b;
+
+    // checks
+    if (!PyArg_ParseTuple(args,
+            "O!O!O!O!O!O!dd",
+            &PyArray_Type,
+            &radLatOrigin,
+            &PyArray_Type,
+            &radLonOrigin,
+            &PyArray_Type,
+            &mAltOrigin,
+            &PyArray_Type,
+            &mNLocal,
+            &PyArray_Type,
+            &mELocal,
+            &PyArray_Type,
+            &mDLocal,
+            &a,
+            &b))
+        return NULL;
+    if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mNLocal)) && (PyArray_ISCONTIGUOUS(mELocal)) && (PyArray_ISCONTIGUOUS(mDLocal)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_TYPE(radLatOrigin) == PyArray_TYPE(radLonOrigin)) && (PyArray_TYPE(radLonOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mAltOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mELocal) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mNLocal) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mDLocal) == PyArray_TYPE(radLatOrigin)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must of the same type.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(mELocal) == PyArray_SIZE(mNLocal)) && (PyArray_SIZE(mELocal) == PyArray_SIZE(mDLocal)))) {
+        PyErr_SetString(PyExc_ValueError, "Input target arrays must be the same size.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(radLatOrigin) == PyArray_SIZE(radLonOrigin)) && (PyArray_SIZE(radLatOrigin) == PyArray_SIZE(mAltOrigin)))) {
+        PyErr_SetString(PyExc_ValueError, "Input origin arrays must be the same size.");
+        return NULL;
+    }
+
+    // ensure floating point type
+    PyArrayObject *inArrayXTarget, *inArrayYTarget, *inArrayZTarget, *inArrayLatOrigin, *inArrayLonOrigin, *inArrayAltOrigin;
+    if (PyArray_ISINTEGER(mNLocal) == 0)
+        inArrayXTarget = mNLocal;
+    else {
+        inArrayXTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mNLocal), PyArray_SHAPE(mNLocal), NPY_DOUBLE);
+        if (inArrayXTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayXTarget, mNLocal) < 0) {
+            Py_DECREF(inArrayXTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayXTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mELocal) == 0)
+        inArrayYTarget = mELocal;
+    else {
+        inArrayYTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mELocal), PyArray_SHAPE(mELocal), NPY_DOUBLE);
+        if (inArrayYTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayYTarget, mELocal) < 0) {
+            Py_DECREF(inArrayYTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayYTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mDLocal) == 0)
+        inArrayZTarget = mDLocal;
+    else {
+        inArrayZTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mDLocal), PyArray_SHAPE(mDLocal), NPY_DOUBLE);
+        if (inArrayZTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayZTarget, mDLocal) < 0) {
+            Py_DECREF(inArrayZTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayZTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLatOrigin) == 0)
+        inArrayLatOrigin = radLatOrigin;
+    else {
+        inArrayLatOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLatOrigin), PyArray_SHAPE(radLatOrigin), NPY_DOUBLE);
+        if (inArrayLatOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLatOrigin, radLatOrigin) < 0) {
+            Py_DECREF(inArrayLatOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLatOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLonOrigin) == 0)
+        inArrayLonOrigin = radLonOrigin;
+    else {
+        inArrayLonOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLonOrigin), PyArray_SHAPE(radLonOrigin), NPY_DOUBLE);
+        if (inArrayLonOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLonOrigin, radLonOrigin) < 0) {
+            Py_DECREF(inArrayLonOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLonOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mAltOrigin) == 0)
+        inArrayAltOrigin = mAltOrigin;
+    else {
+        inArrayAltOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mAltOrigin), PyArray_SHAPE(mAltOrigin), NPY_DOUBLE);
+        if (inArrayAltOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayAltOrigin, mAltOrigin) < 0) {
+            Py_DECREF(inArrayAltOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayAltOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    // prepare inputs
+    PyArrayObject *mX, *mY, *mZ;
+    mX = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mY = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mZ = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    if ((mX == NULL) || (mY == NULL) || (mZ == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+        return NULL;
+    }
+    long nPoints = (int)PyArray_SIZE(inArrayXTarget);
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayXTarget) == PyArray_Size((PyObject*)inArrayAltOrigin));
+
+    // run function
+    switch (PyArray_TYPE(mX)) {
+    case NPY_DOUBLE:
+        NED2ECEFDoubleUnrolled(
+            (double*)PyArray_DATA(inArrayLatOrigin), (double*)PyArray_DATA(inArrayLonOrigin), (double*)PyArray_DATA(inArrayAltOrigin), (double*)PyArray_DATA(inArrayXTarget), (double*)PyArray_DATA(inArrayYTarget), (double*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, a, b, (double*)PyArray_DATA(mX), (double*)PyArray_DATA(mY), (double*)PyArray_DATA(mZ));
+        break;
+    case NPY_FLOAT:
+        NED2ECEFFloatUnrolled(
+            (float*)PyArray_DATA(inArrayLatOrigin), (float*)PyArray_DATA(inArrayLonOrigin), (float*)PyArray_DATA(inArrayAltOrigin), (float*)PyArray_DATA(inArrayXTarget), (float*)PyArray_DATA(inArrayYTarget), (float*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), (float*)PyArray_DATA(mX), (float*)PyArray_DATA(mY), (float*)PyArray_DATA(mZ));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+
+    // output
+    PyObject* tuple = PyTuple_New(3);
+    if (!tuple){
+        Py_DECREF(inArrayLatOrigin);
+        Py_DECREF(inArrayLonOrigin);
+        Py_DECREF(inArrayAltOrigin);
+        Py_DECREF(inArrayXTarget);
+        Py_DECREF(inArrayYTarget);
+        Py_DECREF(inArrayZTarget);
+        Py_DECREF(mX);
+        Py_DECREF(mY);
+        Py_DECREF(mZ);
+        return NULL;
+    }
+    PyTuple_SetItem(tuple, 0, (PyObject*)mX);
+    PyTuple_SetItem(tuple, 1, (PyObject*)mY);
+    PyTuple_SetItem(tuple, 2, (PyObject*)mZ);
+    return tuple;
+}
+
+static PyObject*
+NED2ECEFRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject *rrmLLALocalOrigin, *mmmLocal;
     double a, b;
@@ -2883,7 +4362,229 @@ NED2ECEFWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-ENU2ECEFWrapper(PyObject* self, PyObject* args)
+NED2ECEFWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 4)
+        return NED2ECEFRolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 8)
+        return NED2ECEFUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either four or eight inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
+ENU2ECEFUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *radLatOrigin, *radLonOrigin, *mAltOrigin, *mNLocal, *mELocal, *mDLocal;
+    double a, b;
+
+    // checks
+    if (!PyArg_ParseTuple(args,
+            "O!O!O!O!O!O!dd",
+            &PyArray_Type,
+            &radLatOrigin,
+            &PyArray_Type,
+            &radLonOrigin,
+            &PyArray_Type,
+            &mAltOrigin,
+            &PyArray_Type,
+            &mNLocal,
+            &PyArray_Type,
+            &mELocal,
+            &PyArray_Type,
+            &mDLocal,
+            &a,
+            &b))
+        return NULL;
+    if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mNLocal)) && (PyArray_ISCONTIGUOUS(mELocal)) && (PyArray_ISCONTIGUOUS(mDLocal)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_TYPE(radLatOrigin) == PyArray_TYPE(radLonOrigin)) && (PyArray_TYPE(radLonOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mAltOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mELocal) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mNLocal) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mDLocal) == PyArray_TYPE(radLatOrigin)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must of the same type.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(mELocal) == PyArray_SIZE(mNLocal)) && (PyArray_SIZE(mELocal) == PyArray_SIZE(mDLocal)))) {
+        PyErr_SetString(PyExc_ValueError, "Input target arrays must be the same size.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(radLatOrigin) == PyArray_SIZE(radLonOrigin)) && (PyArray_SIZE(radLatOrigin) == PyArray_SIZE(mAltOrigin)))) {
+        PyErr_SetString(PyExc_ValueError, "Input origin arrays must be the same size.");
+        return NULL;
+    }
+
+    // ensure floating point type
+    PyArrayObject *inArrayXTarget, *inArrayYTarget, *inArrayZTarget, *inArrayLatOrigin, *inArrayLonOrigin, *inArrayAltOrigin;
+    if (PyArray_ISINTEGER(mNLocal) == 0)
+        inArrayXTarget = mNLocal;
+    else {
+        inArrayXTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mNLocal), PyArray_SHAPE(mNLocal), NPY_DOUBLE);
+        if (inArrayXTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayXTarget, mNLocal) < 0) {
+            Py_DECREF(inArrayXTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayXTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mNLocal) == 0)
+        inArrayYTarget = mELocal;
+    else {
+        inArrayYTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mELocal), PyArray_SHAPE(mELocal), NPY_DOUBLE);
+        if (inArrayYTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayYTarget, mELocal) < 0) {
+            Py_DECREF(inArrayYTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayYTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mDLocal) == 0)
+        inArrayZTarget = mDLocal;
+    else {
+        inArrayZTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mDLocal), PyArray_SHAPE(mDLocal), NPY_DOUBLE);
+        if (inArrayZTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayZTarget, mDLocal) < 0) {
+            Py_DECREF(inArrayZTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayZTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLatOrigin) == 0)
+        inArrayLatOrigin = radLatOrigin;
+    else {
+        inArrayLatOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLatOrigin), PyArray_SHAPE(radLatOrigin), NPY_DOUBLE);
+        if (inArrayLatOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLatOrigin, radLatOrigin) < 0) {
+            Py_DECREF(inArrayLatOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLatOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLonOrigin) == 0)
+        inArrayLonOrigin = radLonOrigin;
+    else {
+        inArrayLonOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLonOrigin), PyArray_SHAPE(radLonOrigin), NPY_DOUBLE);
+        if (inArrayLonOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLonOrigin, radLonOrigin) < 0) {
+            Py_DECREF(inArrayLonOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLonOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mAltOrigin) == 0)
+        inArrayAltOrigin = mAltOrigin;
+    else {
+        inArrayAltOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mAltOrigin), PyArray_SHAPE(mAltOrigin), NPY_DOUBLE);
+        if (inArrayAltOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayAltOrigin, mAltOrigin) < 0) {
+            Py_DECREF(inArrayAltOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayAltOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    // prepare inputs
+    PyArrayObject *mX, *mY, *mZ;
+    mX = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mY = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mZ = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    if ((mX == NULL) || (mY == NULL) || (mZ == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+        return NULL;
+    }
+    long nPoints = (int)PyArray_SIZE(inArrayXTarget);
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayXTarget) == PyArray_Size((PyObject*)inArrayAltOrigin));
+
+    // run function
+    switch (PyArray_TYPE(mX)) {
+    case NPY_DOUBLE:
+        ENU2ECEFDoubleUnrolled(
+            (double*)PyArray_DATA(inArrayLatOrigin), (double*)PyArray_DATA(inArrayLonOrigin), (double*)PyArray_DATA(inArrayAltOrigin), (double*)PyArray_DATA(inArrayXTarget), (double*)PyArray_DATA(inArrayYTarget), (double*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, a, b, (double*)PyArray_DATA(mX), (double*)PyArray_DATA(mY), (double*)PyArray_DATA(mZ));
+        break;
+    case NPY_FLOAT:
+        ENU2ECEFFloatUnrolled(
+            (float*)PyArray_DATA(inArrayLatOrigin), (float*)PyArray_DATA(inArrayLonOrigin), (float*)PyArray_DATA(inArrayAltOrigin), (float*)PyArray_DATA(inArrayXTarget), (float*)PyArray_DATA(inArrayYTarget), (float*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, (float)(a), (float)(b), (float*)PyArray_DATA(mX), (float*)PyArray_DATA(mY), (float*)PyArray_DATA(mZ));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+
+    // output
+    PyObject* tuple = PyTuple_New(3);
+    if (!tuple){
+        Py_DECREF(inArrayLatOrigin);
+        Py_DECREF(inArrayLonOrigin);
+        Py_DECREF(inArrayAltOrigin);
+        Py_DECREF(inArrayXTarget);
+        Py_DECREF(inArrayYTarget);
+        Py_DECREF(inArrayZTarget);
+        Py_DECREF(mX);
+        Py_DECREF(mY);
+        Py_DECREF(mZ);
+        return NULL;
+    }
+    PyTuple_SetItem(tuple, 0, (PyObject*)mX);
+    PyTuple_SetItem(tuple, 1, (PyObject*)mY);
+    PyTuple_SetItem(tuple, 2, (PyObject*)mZ);
+    return tuple;
+}
+
+static PyObject*
+ENU2ECEFRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject *rrmLLALocalOrigin, *mmmLocal;
     double a, b;
@@ -2979,7 +4680,20 @@ ENU2ECEFWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-ENU2ECEFvWrapper(PyObject* self, PyObject* args)
+ENU2ECEFWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 4)
+        return ENU2ECEFRolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 8)
+        return ENU2ECEFUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either four or eight inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
+ENU2ECEFvRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject *rrmLLALocalOrigin, *mmmLocal;
 
@@ -3072,7 +4786,434 @@ ENU2ECEFvWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-NED2ECEFvWrapper(PyObject* self, PyObject* args)
+ENU2ECEFvUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *radLatOrigin, *radLonOrigin, *mAltOrigin, *mNLocal, *mELocal, *mDLocal;
+
+    // checks
+    if (!PyArg_ParseTuple(args,
+        "O!O!O!O!O!O!",
+        &PyArray_Type,
+        &radLatOrigin,
+        &PyArray_Type,
+        &radLonOrigin,
+        &PyArray_Type,
+        &mAltOrigin,
+        &PyArray_Type,
+        &mNLocal,
+        &PyArray_Type,
+        &mELocal,
+        &PyArray_Type,
+        &mDLocal))
+    return NULL;
+    if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mNLocal)) && (PyArray_ISCONTIGUOUS(mELocal)) && (PyArray_ISCONTIGUOUS(mDLocal)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_TYPE(radLatOrigin) == PyArray_TYPE(radLonOrigin)) && (PyArray_TYPE(radLonOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mAltOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mELocal) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mNLocal) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mDLocal) == PyArray_TYPE(radLatOrigin)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must of the same type.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(mELocal) == PyArray_SIZE(mNLocal)) && (PyArray_SIZE(mELocal) == PyArray_SIZE(mDLocal)))) {
+        PyErr_SetString(PyExc_ValueError, "Input target arrays must be the same size.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(radLatOrigin) == PyArray_SIZE(radLonOrigin)) && (PyArray_SIZE(radLatOrigin) == PyArray_SIZE(mAltOrigin)))) {
+        PyErr_SetString(PyExc_ValueError, "Input origin arrays must be the same size.");
+        return NULL;
+    }
+
+    // ensure floating point type
+    PyArrayObject *inArrayXTarget, *inArrayYTarget, *inArrayZTarget, *inArrayLatOrigin, *inArrayLonOrigin, *inArrayAltOrigin;
+    if (PyArray_ISINTEGER(mNLocal) == 0)
+        inArrayXTarget = mNLocal;
+    else {
+        inArrayXTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mNLocal), PyArray_SHAPE(mNLocal), NPY_DOUBLE);
+        if (inArrayXTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayXTarget, mNLocal) < 0) {
+            Py_DECREF(inArrayXTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayXTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mNLocal) == 0)
+        inArrayYTarget = mELocal;
+    else {
+        inArrayYTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mELocal), PyArray_SHAPE(mELocal), NPY_DOUBLE);
+        if (inArrayYTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayYTarget, mELocal) < 0) {
+            Py_DECREF(inArrayYTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayYTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mDLocal) == 0)
+        inArrayZTarget = mDLocal;
+    else {
+        inArrayZTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mDLocal), PyArray_SHAPE(mDLocal), NPY_DOUBLE);
+        if (inArrayZTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayZTarget, mDLocal) < 0) {
+            Py_DECREF(inArrayZTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayZTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLatOrigin) == 0)
+        inArrayLatOrigin = radLatOrigin;
+    else {
+        inArrayLatOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLatOrigin), PyArray_SHAPE(radLatOrigin), NPY_DOUBLE);
+        if (inArrayLatOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLatOrigin, radLatOrigin) < 0) {
+            Py_DECREF(inArrayLatOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLatOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLonOrigin) == 0)
+        inArrayLonOrigin = radLonOrigin;
+    else {
+        inArrayLonOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLonOrigin), PyArray_SHAPE(radLonOrigin), NPY_DOUBLE);
+        if (inArrayLonOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLonOrigin, radLonOrigin) < 0) {
+            Py_DECREF(inArrayLonOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLonOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mAltOrigin) == 0)
+        inArrayAltOrigin = mAltOrigin;
+    else {
+        inArrayAltOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mAltOrigin), PyArray_SHAPE(mAltOrigin), NPY_DOUBLE);
+        if (inArrayAltOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayAltOrigin, mAltOrigin) < 0) {
+            Py_DECREF(inArrayAltOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayAltOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    // prepare inputs
+    PyArrayObject *mX, *mY, *mZ;
+    mX = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mY = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mZ = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    if ((mX == NULL) || (mY == NULL) || (mZ == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+        return NULL;
+    }
+    long nPoints = (int)PyArray_SIZE(inArrayXTarget);
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayXTarget) == PyArray_Size((PyObject*)inArrayAltOrigin));
+
+    // run function
+    switch (PyArray_TYPE(mX)) {
+        case NPY_DOUBLE:
+            ENU2ECEFvDoubleUnrolled(
+                (double*)PyArray_DATA(inArrayLatOrigin), (double*)PyArray_DATA(inArrayLonOrigin), (double*)PyArray_DATA(inArrayAltOrigin), (double*)PyArray_DATA(inArrayXTarget), (double*)PyArray_DATA(inArrayYTarget), (double*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, (double*)PyArray_DATA(mX), (double*)PyArray_DATA(mY), (double*)PyArray_DATA(mZ));
+            break;
+        case NPY_FLOAT:
+            ENU2ECEFvFloatUnrolled(
+                (float*)PyArray_DATA(inArrayLatOrigin), (float*)PyArray_DATA(inArrayLonOrigin), (float*)PyArray_DATA(inArrayAltOrigin), (float*)PyArray_DATA(inArrayXTarget), (float*)PyArray_DATA(inArrayYTarget), (float*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, (float*)PyArray_DATA(mX), (float*)PyArray_DATA(mY), (float*)PyArray_DATA(mZ));
+            break;
+        default:
+            PyErr_SetString(PyExc_ValueError,
+                "Only 32 and 64 bit float types or all integer are accepted.");
+            return NULL;
+        }
+    
+        // output
+        PyObject* tuple = PyTuple_New(3);
+        if (!tuple){
+            Py_DECREF(inArrayLatOrigin);
+            Py_DECREF(inArrayLonOrigin);
+            Py_DECREF(inArrayAltOrigin);
+            Py_DECREF(inArrayXTarget);
+            Py_DECREF(inArrayYTarget);
+            Py_DECREF(inArrayZTarget);
+            Py_DECREF(mX);
+            Py_DECREF(mY);
+            Py_DECREF(mZ);
+            return NULL;
+        }
+        PyTuple_SetItem(tuple, 0, (PyObject*)mX);
+        PyTuple_SetItem(tuple, 1, (PyObject*)mY);
+        PyTuple_SetItem(tuple, 2, (PyObject*)mZ);
+        return tuple;
+    
+}
+
+static PyObject*
+ENU2ECEFvWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 2)
+        return ENU2ECEFvRolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 6)
+        return ENU2ECEFvUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either two or six inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
+NED2ECEFvUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *radLatOrigin, *radLonOrigin, *mAltOrigin, *mNLocal, *mELocal, *mDLocal;
+
+    // checks
+    if (!PyArg_ParseTuple(args,
+        "O!O!O!O!O!O!",
+        &PyArray_Type,
+        &radLatOrigin,
+        &PyArray_Type,
+        &radLonOrigin,
+        &PyArray_Type,
+        &mAltOrigin,
+        &PyArray_Type,
+        &mNLocal,
+        &PyArray_Type,
+        &mELocal,
+        &PyArray_Type,
+        &mDLocal))
+    return NULL;
+    if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mNLocal)) && (PyArray_ISCONTIGUOUS(mELocal)) && (PyArray_ISCONTIGUOUS(mDLocal)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_TYPE(radLatOrigin) == PyArray_TYPE(radLonOrigin)) && (PyArray_TYPE(radLonOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mAltOrigin) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mELocal) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mNLocal) == PyArray_TYPE(radLatOrigin)) && (PyArray_TYPE(mDLocal) == PyArray_TYPE(radLatOrigin)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must of the same type.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(mELocal) == PyArray_SIZE(mNLocal)) && (PyArray_SIZE(mELocal) == PyArray_SIZE(mDLocal)))) {
+        PyErr_SetString(PyExc_ValueError, "Input target arrays must be the same size.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(radLatOrigin) == PyArray_SIZE(radLonOrigin)) && (PyArray_SIZE(radLatOrigin) == PyArray_SIZE(mAltOrigin)))) {
+        PyErr_SetString(PyExc_ValueError, "Input origin arrays must be the same size.");
+        return NULL;
+    }
+
+    // ensure floating point type
+    PyArrayObject *inArrayXTarget, *inArrayYTarget, *inArrayZTarget, *inArrayLatOrigin, *inArrayLonOrigin, *inArrayAltOrigin;
+    if (PyArray_ISINTEGER(mNLocal) == 0)
+        inArrayXTarget = mNLocal;
+    else {
+        inArrayXTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mNLocal), PyArray_SHAPE(mNLocal), NPY_DOUBLE);
+        if (inArrayXTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayXTarget, mNLocal) < 0) {
+            Py_DECREF(inArrayXTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayXTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mNLocal) == 0)
+        inArrayYTarget = mELocal;
+    else {
+        inArrayYTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mELocal), PyArray_SHAPE(mELocal), NPY_DOUBLE);
+        if (inArrayYTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayYTarget, mELocal) < 0) {
+            Py_DECREF(inArrayYTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayYTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mDLocal) == 0)
+        inArrayZTarget = mDLocal;
+    else {
+        inArrayZTarget = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mDLocal), PyArray_SHAPE(mDLocal), NPY_DOUBLE);
+        if (inArrayZTarget == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayZTarget, mDLocal) < 0) {
+            Py_DECREF(inArrayZTarget);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayZTarget))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLatOrigin) == 0)
+        inArrayLatOrigin = radLatOrigin;
+    else {
+        inArrayLatOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLatOrigin), PyArray_SHAPE(radLatOrigin), NPY_DOUBLE);
+        if (inArrayLatOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLatOrigin, radLatOrigin) < 0) {
+            Py_DECREF(inArrayLatOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLatOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radLonOrigin) == 0)
+        inArrayLonOrigin = radLonOrigin;
+    else {
+        inArrayLonOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radLonOrigin), PyArray_SHAPE(radLonOrigin), NPY_DOUBLE);
+        if (inArrayLonOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayLonOrigin, radLonOrigin) < 0) {
+            Py_DECREF(inArrayLonOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayLonOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mAltOrigin) == 0)
+        inArrayAltOrigin = mAltOrigin;
+    else {
+        inArrayAltOrigin = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mAltOrigin), PyArray_SHAPE(mAltOrigin), NPY_DOUBLE);
+        if (inArrayAltOrigin == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayAltOrigin, mAltOrigin) < 0) {
+            Py_DECREF(inArrayAltOrigin);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayAltOrigin))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    // prepare inputs
+    PyArrayObject *mX, *mY, *mZ;
+    mX = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mY = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    mZ = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayXTarget), PyArray_SHAPE(inArrayXTarget), PyArray_TYPE(inArrayXTarget));
+    if ((mX == NULL) || (mY == NULL) || (mZ == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+        return NULL;
+    }
+    long nPoints = (int)PyArray_SIZE(inArrayXTarget);
+    int isOriginSizeOfTargets = (PyArray_Size((PyObject*)inArrayXTarget) == PyArray_Size((PyObject*)inArrayAltOrigin));
+
+    // run function
+    switch (PyArray_TYPE(mX)) {
+        case NPY_DOUBLE:
+            NED2ECEFvDoubleUnrolled(
+                (double*)PyArray_DATA(inArrayLatOrigin), (double*)PyArray_DATA(inArrayLonOrigin), (double*)PyArray_DATA(inArrayAltOrigin), (double*)PyArray_DATA(inArrayXTarget), (double*)PyArray_DATA(inArrayYTarget), (double*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, (double*)PyArray_DATA(mX), (double*)PyArray_DATA(mY), (double*)PyArray_DATA(mZ));
+            break;
+        case NPY_FLOAT:
+            NED2ECEFvFloatUnrolled(
+                (float*)PyArray_DATA(inArrayLatOrigin), (float*)PyArray_DATA(inArrayLonOrigin), (float*)PyArray_DATA(inArrayAltOrigin), (float*)PyArray_DATA(inArrayXTarget), (float*)PyArray_DATA(inArrayYTarget), (float*)PyArray_DATA(inArrayZTarget), nPoints, isOriginSizeOfTargets, (float*)PyArray_DATA(mX), (float*)PyArray_DATA(mY), (float*)PyArray_DATA(mZ));
+            break;
+        default:
+            PyErr_SetString(PyExc_ValueError,
+                "Only 32 and 64 bit float types or all integer are accepted.");
+            return NULL;
+        }
+    
+        // output
+        PyObject* tuple = PyTuple_New(3);
+        if (!tuple){
+            Py_DECREF(inArrayLatOrigin);
+            Py_DECREF(inArrayLonOrigin);
+            Py_DECREF(inArrayAltOrigin);
+            Py_DECREF(inArrayXTarget);
+            Py_DECREF(inArrayYTarget);
+            Py_DECREF(inArrayZTarget);
+            Py_DECREF(mX);
+            Py_DECREF(mY);
+            Py_DECREF(mZ);
+            return NULL;
+        }
+        PyTuple_SetItem(tuple, 0, (PyObject*)mX);
+        PyTuple_SetItem(tuple, 1, (PyObject*)mY);
+        PyTuple_SetItem(tuple, 2, (PyObject*)mZ);
+        return tuple;
+    
+}
+
+static PyObject*
+NED2ECEFvRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject *rrmLLALocalOrigin, *mmmLocal;
 
@@ -3165,7 +5306,159 @@ NED2ECEFvWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-ENU2AERWrapper(PyObject* self, PyObject* args)
+NED2ECEFvWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 2)
+        return NED2ECEFvRolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 6)
+        return NED2ECEFvUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either two or six inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
+ENU2AERUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *mE, *mN, *mU;
+
+    // checks
+    // checks
+    if (!PyArg_ParseTuple(args,
+        "O!O!O!",
+        &PyArray_Type,
+        &mE,
+        &PyArray_Type,
+        &mN,
+        &PyArray_Type,
+        &mU
+        ))
+    return NULL;
+    if (!((PyArray_ISCONTIGUOUS(mE)) && (PyArray_ISCONTIGUOUS(mN)) && (PyArray_ISCONTIGUOUS(mU)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_TYPE(mE) == PyArray_TYPE(mN)) && (PyArray_TYPE(mE) == PyArray_TYPE(mU)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must of the same type.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(mE) == PyArray_SIZE(mN)) && (PyArray_SIZE(mE) == PyArray_SIZE(mU)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be the same size.");
+        return NULL;
+    }
+
+    // ensure floating point type
+    PyArrayObject *inArrayE, *inArrayN, *inArrayU;
+    if (PyArray_ISINTEGER(mE) == 0)
+        inArrayE = mE;
+    else {
+        inArrayE = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mE), PyArray_SHAPE(mE), NPY_DOUBLE);
+        if (inArrayE == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayE, mE) < 0) {
+            Py_DECREF(inArrayE);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayE))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mN) == 0)
+        inArrayN = mN;
+    else {
+        inArrayN = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mN), PyArray_SHAPE(mN), NPY_DOUBLE);
+        if (inArrayN == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayN, mN) < 0) {
+            Py_DECREF(inArrayN);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayN))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mU) == 0)
+        inArrayU = mU;
+    else {
+        inArrayU = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mU), PyArray_SHAPE(mU), NPY_DOUBLE);
+        if (inArrayU == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayU, mU) < 0) {
+            Py_DECREF(inArrayU);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayU))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    // prepare inputs
+    PyArrayObject *radAz, *radEl, *mRange;
+    radAz = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayE), PyArray_SHAPE(inArrayE), PyArray_TYPE(inArrayE));
+    radEl = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayE), PyArray_SHAPE(inArrayE), PyArray_TYPE(inArrayE));
+    mRange = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayE), PyArray_SHAPE(inArrayE), PyArray_TYPE(inArrayE));
+    if ((radAz == NULL) || (radEl == NULL) || (mRange == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+        return NULL;
+    }
+    long nPoints = (int)PyArray_SIZE(inArrayE);
+
+    // run function
+    switch (PyArray_TYPE(mE)) {
+        case NPY_DOUBLE:
+            ENU2AERDoubleUnrolled(
+                (double*)PyArray_DATA(inArrayE), (double*)PyArray_DATA(inArrayN), (double*)PyArray_DATA(inArrayU), nPoints, (double*)PyArray_DATA(radAz), (double*)PyArray_DATA(radEl), (double*)PyArray_DATA(mRange));
+            break;
+        case NPY_FLOAT:
+            ENU2AERFloatUnrolled(
+                (float*)PyArray_DATA(inArrayE), (float*)PyArray_DATA(inArrayN), (float*)PyArray_DATA(inArrayU), nPoints, (float*)PyArray_DATA(radAz), (float*)PyArray_DATA(radEl), (float*)PyArray_DATA(mRange));
+            break;
+        default:
+            PyErr_SetString(PyExc_ValueError,
+                "Only 32 and 64 bit float types or all integer are accepted.");
+            return NULL;
+        }
+    
+        // output
+        PyObject* tuple = PyTuple_New(3);
+        if (!tuple){
+            Py_DECREF(inArrayE);
+            Py_DECREF(inArrayN);
+            Py_DECREF(inArrayU);
+            Py_DECREF(mE);
+            Py_DECREF(mN);
+            Py_DECREF(mU);
+            Py_DECREF(radAz);
+            Py_DECREF(radEl);
+            Py_DECREF(mRange);
+            return NULL;
+        }
+        PyTuple_SetItem(tuple, 0, (PyObject*)radAz);
+        PyTuple_SetItem(tuple, 1, (PyObject*)radEl);
+        PyTuple_SetItem(tuple, 2, (PyObject*)mRange);
+        return tuple;}
+
+static PyObject*
+ENU2AERRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject* mmmENU;
 
@@ -3226,7 +5519,159 @@ ENU2AERWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-NED2AERWrapper(PyObject* self, PyObject* args)
+ENU2AERWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 1)
+        return ENU2AERRolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 3)
+        return ENU2AERUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either two or six inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
+NED2AERUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *mN, *mE, *mD;
+
+    // checks
+    // checks
+    if (!PyArg_ParseTuple(args,
+        "O!O!O!",
+        &PyArray_Type,
+        &mN,
+        &PyArray_Type,
+        &mE,
+        &PyArray_Type,
+        &mD
+        ))
+    return NULL;
+    if (!((PyArray_ISCONTIGUOUS(mN)) && (PyArray_ISCONTIGUOUS(mE)) && (PyArray_ISCONTIGUOUS(mD)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_TYPE(mN) == PyArray_TYPE(mE)) && (PyArray_TYPE(mN) == PyArray_TYPE(mD)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must of the same type.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(mN) == PyArray_SIZE(mE)) && (PyArray_SIZE(mN) == PyArray_SIZE(mD)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be the same size.");
+        return NULL;
+    }
+
+    // ensure floating point type
+    PyArrayObject *inArrayE, *inArrayN, *inArrayU;
+    if (PyArray_ISINTEGER(mN) == 0)
+        inArrayE = mN;
+    else {
+        inArrayE = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mN), PyArray_SHAPE(mN), NPY_DOUBLE);
+        if (inArrayE == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayE, mN) < 0) {
+            Py_DECREF(inArrayE);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayE))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mE) == 0)
+        inArrayN = mE;
+    else {
+        inArrayN = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mE), PyArray_SHAPE(mE), NPY_DOUBLE);
+        if (inArrayN == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayN, mE) < 0) {
+            Py_DECREF(inArrayN);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayN))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mD) == 0)
+        inArrayU = mD;
+    else {
+        inArrayU = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mD), PyArray_SHAPE(mD), NPY_DOUBLE);
+        if (inArrayU == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayU, mD) < 0) {
+            Py_DECREF(inArrayU);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayU))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    // prepare inputs
+    PyArrayObject *radAz, *radEl, *mRange;
+    radAz = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayE), PyArray_SHAPE(inArrayE), PyArray_TYPE(inArrayE));
+    radEl = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayE), PyArray_SHAPE(inArrayE), PyArray_TYPE(inArrayE));
+    mRange = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayE), PyArray_SHAPE(inArrayE), PyArray_TYPE(inArrayE));
+    if ((radAz == NULL) || (radEl == NULL) || (mRange == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+        return NULL;
+    }
+    long nPoints = (int)PyArray_SIZE(inArrayE);
+
+    // run function
+    switch (PyArray_TYPE(mN)) {
+        case NPY_DOUBLE:
+            NED2AERDoubleUnrolled(
+                (double*)PyArray_DATA(inArrayE), (double*)PyArray_DATA(inArrayN), (double*)PyArray_DATA(inArrayU), nPoints, (double*)PyArray_DATA(radAz), (double*)PyArray_DATA(radEl), (double*)PyArray_DATA(mRange));
+            break;
+        case NPY_FLOAT:
+            NED2AERFloatUnrolled(
+                (float*)PyArray_DATA(inArrayE), (float*)PyArray_DATA(inArrayN), (float*)PyArray_DATA(inArrayU), nPoints, (float*)PyArray_DATA(radAz), (float*)PyArray_DATA(radEl), (float*)PyArray_DATA(mRange));
+            break;
+        default:
+            PyErr_SetString(PyExc_ValueError,
+                "Only 32 and 64 bit float types or all integer are accepted.");
+            return NULL;
+        }
+    
+        // output
+        PyObject* tuple = PyTuple_New(3);
+        if (!tuple){
+            Py_DECREF(inArrayE);
+            Py_DECREF(inArrayN);
+            Py_DECREF(inArrayU);
+            Py_DECREF(mN);
+            Py_DECREF(mE);
+            Py_DECREF(mD);
+            Py_DECREF(radAz);
+            Py_DECREF(radEl);
+            Py_DECREF(mRange);
+            return NULL;
+        }
+        PyTuple_SetItem(tuple, 0, (PyObject*)radAz);
+        PyTuple_SetItem(tuple, 1, (PyObject*)radEl);
+        PyTuple_SetItem(tuple, 2, (PyObject*)mRange);
+        return tuple;}
+
+static PyObject*
+NED2AERRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject* mmmNED;
 
@@ -3287,7 +5732,20 @@ NED2AERWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-AER2NEDWrapper(PyObject* self, PyObject* args)
+NED2AERWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 1)
+        return NED2AERRolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 3)
+        return NED2AERUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either one or three inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
+AER2NEDRolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject* rrmAER;
 
@@ -3348,7 +5806,159 @@ AER2NEDWrapper(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-AER2ENUWrapper(PyObject* self, PyObject* args)
+AER2NEDUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *radAz, *radEl, *mRange;
+
+    // checks
+    if (!PyArg_ParseTuple(args,
+        "O!O!O!",
+        &PyArray_Type,
+        &radAz,
+        &PyArray_Type,
+        &radEl,
+        &PyArray_Type,
+        &mRange
+        ))
+    return NULL;
+    if (!((PyArray_ISCONTIGUOUS(radAz)) && (PyArray_ISCONTIGUOUS(radEl)) && (PyArray_ISCONTIGUOUS(mRange)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_TYPE(radAz) == PyArray_TYPE(radEl)) && (PyArray_TYPE(radAz) == PyArray_TYPE(mRange)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must of the same type.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(radAz) == PyArray_SIZE(radEl)) && (PyArray_SIZE(radAz) == PyArray_SIZE(mRange)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be the same size.");
+        return NULL;
+    }
+
+    // ensure floating point type
+    PyArrayObject *inArrayAz, *inArrayEl, *inArrayRange;
+    if (PyArray_ISINTEGER(radAz) == 0)
+        inArrayAz = radAz;
+    else {
+        inArrayAz = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radAz), PyArray_SHAPE(radAz), NPY_DOUBLE);
+        if (inArrayAz == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayAz, radAz) < 0) {
+            Py_DECREF(inArrayAz);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayAz))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radEl) == 0)
+        inArrayEl = radEl;
+    else {
+        inArrayEl = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radEl), PyArray_SHAPE(radEl), NPY_DOUBLE);
+        if (inArrayEl == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayEl, radEl) < 0) {
+            Py_DECREF(inArrayEl);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayEl))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mRange) == 0)
+        inArrayRange = mRange;
+    else {
+        inArrayRange = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mRange), PyArray_SHAPE(mRange), NPY_DOUBLE);
+        if (inArrayRange == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayRange, mRange) < 0) {
+            Py_DECREF(inArrayRange);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayRange))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    // prepare inputs
+    PyArrayObject *mN, *mE, *mD;
+    mN = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayAz), PyArray_SHAPE(inArrayAz), PyArray_TYPE(inArrayAz));
+    mE = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayAz), PyArray_SHAPE(inArrayAz), PyArray_TYPE(inArrayAz));
+    mD = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayAz), PyArray_SHAPE(inArrayAz), PyArray_TYPE(inArrayAz));
+    if ((mN == NULL) || (mE == NULL) || (mD == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+        return NULL;
+    }
+    long nPoints = (int)PyArray_SIZE(inArrayAz);
+
+    // run function
+    switch (PyArray_TYPE(mN)) {
+    case NPY_DOUBLE:
+        AER2NEDDoubleUnrolled(
+            (double*)PyArray_DATA(inArrayAz), (double*)PyArray_DATA(inArrayEl), (double*)PyArray_DATA(inArrayRange), nPoints, (double*)PyArray_DATA(mN), (double*)PyArray_DATA(mE), (double*)PyArray_DATA(mD));
+        break;
+    case NPY_FLOAT:
+        AER2NEDFloatUnrolled(
+            (float*)PyArray_DATA(inArrayAz), (float*)PyArray_DATA(inArrayEl), (float*)PyArray_DATA(inArrayRange), nPoints, (float*)PyArray_DATA(mN), (float*)PyArray_DATA(mE), (float*)PyArray_DATA(mD));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+    
+    // output
+    PyObject* tuple = PyTuple_New(3);
+    if (!tuple){
+        Py_DECREF(inArrayAz);
+        Py_DECREF(inArrayEl);
+        Py_DECREF(inArrayRange);
+        Py_DECREF(mN);
+        Py_DECREF(mE);
+        Py_DECREF(mD);
+        Py_DECREF(radAz);
+        Py_DECREF(radEl);
+        Py_DECREF(mRange);
+        return NULL;
+    }
+    PyTuple_SetItem(tuple, 0, (PyObject*)mN);
+    PyTuple_SetItem(tuple, 1, (PyObject*)mE);
+    PyTuple_SetItem(tuple, 2, (PyObject*)mD);
+    return tuple;
+}
+
+static PyObject*
+AER2NEDWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 1)
+        return AER2NEDRolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 3)
+        return AER2NEDUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either one or three inputs");
+        return NULL;
+    }
+}
+
+static PyObject*
+AER2ENURolledWrapper(PyObject* self, PyObject* args)
 {
     PyArrayObject* rrmAER;
 
@@ -3406,6 +6016,158 @@ AER2ENUWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
     return (PyObject*)result_array;
+}
+
+static PyObject*
+AER2ENUUnrolledWrapper(PyObject* self, PyObject* args)
+{
+    PyArrayObject *radAz, *radEl, *mRange;
+
+    // checks
+    if (!PyArg_ParseTuple(args,
+        "O!O!O!",
+        &PyArray_Type,
+        &radAz,
+        &PyArray_Type,
+        &radEl,
+        &PyArray_Type,
+        &mRange
+        ))
+    return NULL;
+    if (!((PyArray_ISCONTIGUOUS(radAz)) && (PyArray_ISCONTIGUOUS(radEl)) && (PyArray_ISCONTIGUOUS(mRange)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+        return NULL;
+    }
+    if (!((PyArray_TYPE(radAz) == PyArray_TYPE(radEl)) && (PyArray_TYPE(radAz) == PyArray_TYPE(mRange)))) {
+            PyErr_SetString(PyExc_ValueError, "Input arrays must of the same type.");
+        return NULL;
+    }
+    if (!((PyArray_SIZE(radAz) == PyArray_SIZE(radEl)) && (PyArray_SIZE(radAz) == PyArray_SIZE(mRange)))) {
+        PyErr_SetString(PyExc_ValueError, "Input arrays must be the same size.");
+        return NULL;
+    }
+
+    // ensure floating point type
+    PyArrayObject *inArrayAz, *inArrayEl, *inArrayRange;
+    if (PyArray_ISINTEGER(radAz) == 0)
+        inArrayAz = radAz;
+    else {
+        inArrayAz = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radAz), PyArray_SHAPE(radAz), NPY_DOUBLE);
+        if (inArrayAz == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayAz, radAz) < 0) {
+            Py_DECREF(inArrayAz);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayAz))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(radEl) == 0)
+        inArrayEl = radEl;
+    else {
+        inArrayEl = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(radEl), PyArray_SHAPE(radEl), NPY_DOUBLE);
+        if (inArrayEl == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayEl, radEl) < 0) {
+            Py_DECREF(inArrayEl);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayEl))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+    if (PyArray_ISINTEGER(mRange) == 0)
+        inArrayRange = mRange;
+    else {
+        inArrayRange = (PyArrayObject*)PyArray_SimpleNew(
+            PyArray_NDIM(mRange), PyArray_SHAPE(mRange), NPY_DOUBLE);
+        if (inArrayRange == NULL) {
+            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
+            return NULL;
+        }
+        if (PyArray_CopyInto(inArrayRange, mRange) < 0) {
+            Py_DECREF(inArrayRange);
+            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
+            return NULL;
+        }
+        if (!(PyArray_ISCONTIGUOUS(inArrayRange))) {
+            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
+            return NULL;
+        }
+    }
+
+    // prepare inputs
+    PyArrayObject *mE, *mN, *mU;
+    mE = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayAz), PyArray_SHAPE(inArrayAz), PyArray_TYPE(inArrayAz));
+    mN = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayAz), PyArray_SHAPE(inArrayAz), PyArray_TYPE(inArrayAz));
+    mU = (PyArrayObject*)PyArray_SimpleNew(
+        PyArray_NDIM(inArrayAz), PyArray_SHAPE(inArrayAz), PyArray_TYPE(inArrayAz));
+    if ((mE == NULL) || (mN == NULL) || (mU == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Failed to initialise output arrays.");
+        return NULL;
+    }
+    long nPoints = (int)PyArray_SIZE(inArrayAz);
+
+    // run function
+    switch (PyArray_TYPE(mE)) {
+    case NPY_DOUBLE:
+        AER2ENUDoubleUnrolled(
+            (double*)PyArray_DATA(inArrayAz), (double*)PyArray_DATA(inArrayEl), (double*)PyArray_DATA(inArrayRange), nPoints, (double*)PyArray_DATA(mE), (double*)PyArray_DATA(mN), (double*)PyArray_DATA(mU));
+        break;
+    case NPY_FLOAT:
+        AER2ENUFloatUnrolled(
+            (float*)PyArray_DATA(inArrayAz), (float*)PyArray_DATA(inArrayEl), (float*)PyArray_DATA(inArrayRange), nPoints, (float*)PyArray_DATA(mE), (float*)PyArray_DATA(mN), (float*)PyArray_DATA(mU));
+        break;
+    default:
+        PyErr_SetString(PyExc_ValueError,
+            "Only 32 and 64 bit float types or all integer are accepted.");
+        return NULL;
+    }
+    
+    // output
+    PyObject* tuple = PyTuple_New(3);
+    if (!tuple){
+        Py_DECREF(inArrayAz);
+        Py_DECREF(inArrayEl);
+        Py_DECREF(inArrayRange);
+        Py_DECREF(mE);
+        Py_DECREF(mN);
+        Py_DECREF(mU);
+        Py_DECREF(radAz);
+        Py_DECREF(radEl);
+        Py_DECREF(mRange);
+        return NULL;
+    }
+    PyTuple_SetItem(tuple, 0, (PyObject*)mE);
+    PyTuple_SetItem(tuple, 1, (PyObject*)mN);
+    PyTuple_SetItem(tuple, 2, (PyObject*)mU);
+    return tuple;
+}
+
+static PyObject*
+AER2ENUWrapper(PyObject* self, PyObject* args)
+{
+    if (PyTuple_Size(args) == 1)
+        return AER2ENURolledWrapper(self, args);
+    else if (PyTuple_Size(args) == 3)
+        return AER2ENUUnrolledWrapper(self, args);
+    else {
+        PyErr_SetString(PyExc_TypeError, "Function accepts either one or three inputs");
+        return NULL;
+    }
 }
 
 // Method definition object for this extension, these argumens mean:

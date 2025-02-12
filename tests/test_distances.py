@@ -58,6 +58,20 @@ def _test_Haversine_omp():
 #     _test_Haversine_omp()
 
 
+def test_Haersine_raise_wrong_dtype_unrolled():
+    rrm_start = np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=np.float16)
+    with pytest.raises(ValueError):
+        Haversine(
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            WGS84.mean_radius,
+        )  # type: ignore
+
+
 def test_Haersine_raise_wrong_dtype():
     rrm_start = np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=np.float16)
     with pytest.raises(ValueError):
@@ -73,11 +87,136 @@ def test_Haersine_raise_wrong_size():
 
 
 @pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
+def test_Haversine_int_unrolled(dtype):
+    rrm_start = np.array([[0], [0], [0]], dtype=dtype)
+    rrm_end = np.array([[1], [1], [0]], dtype=dtype)
+    assert np.isclose(
+        Haversine(
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+        8120200.0,
+    )
+    assert np.isclose(
+        Haversine(
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            WGS84.mean_radius,
+        ),
+        8120200.0,
+    )
+
+
+@pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
 def test_Haversine_int(dtype):
     rrm_start = np.array([[0], [0], [0]], dtype=dtype)
     rrm_end = np.array([[1], [1], [0]], dtype=dtype)
     assert np.isclose(Haversine(rrm_start, rrm_end, WGS84.mean_radius), 8120200.0)
     assert np.isclose(Haversine(rrm_end, rrm_start, WGS84.mean_radius), 8120200.0)
+
+
+@pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
+def test_Haversine_with_height_int_unrolled(dtype):
+    rrm_start_with_height = np.array([[0], [0], [10]], dtype=dtype)
+    rrm_start = np.array([[0], [0], [0]], dtype=dtype)
+    rrm_end = np.array([[1], [1], [0]], dtype=dtype)
+    assert np.isclose(
+        Haversine(
+            rrm_start_with_height[0],
+            rrm_start_with_height[1],
+            rrm_start_with_height[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+        8120200.0,
+    )
+    assert np.isclose(
+        Haversine(
+            rrm_start_with_height[0],
+            rrm_start_with_height[1],
+            rrm_start_with_height[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+        Haversine(
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+    )
+    assert np.isclose(
+        Haversine(
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+        8120200.0,
+    )
+    assert np.isclose(
+        Haversine(
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            rrm_start_with_height[0],
+            rrm_start_with_height[1],
+            rrm_start_with_height[2],
+            WGS84.mean_radius,
+        ),
+        8120200.0,
+    )
+    assert np.isclose(
+        Haversine(
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            WGS84.mean_radius,
+        ),
+        8120200.0,
+    )
+    assert np.isclose(
+        Haversine(
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+        Haversine(
+            rrm_start_with_height[0],
+            rrm_start_with_height[1],
+            rrm_start_with_height[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+    )
 
 
 @pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
@@ -121,6 +260,36 @@ def test_Haversine_one2many_int(dtype):
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_Haversine_unrolled(dtype):
+    rrm_start = np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=dtype)
+    rrm_end = np.array([[np.deg2rad(32)], [np.deg2rad(38)], [0]], dtype=dtype)
+    assert np.isclose(
+        Haversine(
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+        391225.574516907,
+    )
+    assert np.isclose(
+        Haversine(
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            WGS84.mean_radius,
+        ),
+        391225.574516907,
+    )
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
 def test_Haversine(dtype):
     rrm_start = np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=dtype)
     rrm_end = np.array([[np.deg2rad(32)], [np.deg2rad(38)], [0]], dtype=dtype)
@@ -129,6 +298,48 @@ def test_Haversine(dtype):
     )
     assert np.isclose(
         Haversine(rrm_end, rrm_start, WGS84.mean_radius), 391225.574516907
+    )
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_Haversine_parallel_unrolled(dtype):
+    rrm_start = np.ascontiguousarray(
+        np.tile(
+            np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    rrm_end = np.ascontiguousarray(
+        np.tile(
+            np.array([[np.deg2rad(32)], [np.deg2rad(38)], [0]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    assert np.all(
+        np.isclose(
+            Haversine(
+                np.ascontiguousarray(rrm_start[:, 0, 0]),
+                np.ascontiguousarray(rrm_start[:, 1, 0]),
+                np.ascontiguousarray(rrm_start[:, 2, 0]),
+                np.ascontiguousarray(rrm_end[:, 0, 0]),
+                np.ascontiguousarray(rrm_end[:, 1, 0]),
+                np.ascontiguousarray(rrm_end[:, 2, 0]),
+                WGS84.mean_radius,
+            ),
+            391225.574516907,
+        )
+    )
+    assert np.all(
+        np.isclose(
+            Haversine(
+                np.ascontiguousarray(rrm_end[:, 0, 0]),
+                np.ascontiguousarray(rrm_end[:, 1, 0]),
+                np.ascontiguousarray(rrm_end[:, 2, 0]),
+                np.ascontiguousarray(rrm_start[:, 0, 0]),
+                np.ascontiguousarray(rrm_start[:, 1, 0]),
+                np.ascontiguousarray(rrm_start[:, 2, 0]),
+                WGS84.mean_radius,
+            ),
+            391225.574516907,
+        )
     )
 
 
@@ -251,6 +462,103 @@ def test_Haversine_points_different_dtypes(dtype0, dtype1):
     assert np.all(np.isclose(out2, 391225.574516907))
     assert np.all(np.isclose(out3, 391225.574516907))
     assert np.all(np.isclose(out1, out3))
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_Haversine_with_height_unrolled(dtype):
+    rrm_start_with_height = np.array(
+        [[np.deg2rad(33)], [np.deg2rad(34)], [100000]], dtype=dtype
+    )
+    rrm_start = np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=dtype)
+    rrm_end = np.array([[np.deg2rad(32)], [np.deg2rad(38)], [0]], dtype=dtype)
+    assert np.isclose(
+        Haversine(
+            rrm_start_with_height[0],
+            rrm_start_with_height[1],
+            rrm_start_with_height[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+        391225.574516907,
+    )
+    assert np.isclose(
+        Haversine(
+            rrm_start_with_height[0],
+            rrm_start_with_height[1],
+            rrm_start_with_height[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+        Haversine(
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+    )
+    assert np.isclose(
+        Haversine(
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+        391225.574516907,
+    )
+    assert np.isclose(
+        Haversine(
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            rrm_start_with_height[0],
+            rrm_start_with_height[1],
+            rrm_start_with_height[2],
+            WGS84.mean_radius,
+        ),
+        391225.574516907,
+    )
+    assert np.isclose(
+        Haversine(
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            WGS84.mean_radius,
+        ),
+        391225.574516907,
+    )
+    assert np.isclose(
+        Haversine(
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+        Haversine(
+            rrm_start_with_height[0],
+            rrm_start_with_height[1],
+            rrm_start_with_height[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+    )
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])

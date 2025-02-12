@@ -31,6 +31,20 @@ def test_ENU2ECEFv_different_dtypes(dtype0, dtype1, tol):
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
+def test_ENU2ECEFv_unrolled(dtype, tol):
+    rrm_local = DDM2RRM(np.array([[17.41], [78.27], [0]], dtype=dtype))
+    uvw = np.array([[-27.6190], [-16.4298], [-0.3186]], dtype=dtype)
+    x, y, z = ENU2ECEFv(
+        rrm_local[0], rrm_local[1], rrm_local[2], uvw[0], uvw[1], uvw[2]
+    )
+    assert np.isclose(x, 27.9798, atol=tol)
+    assert np.isclose(y, -1.0993, atol=tol)
+    assert np.isclose(z, -15.7724, atol=tol)
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
 def test_ENU2ECEFv(dtype, tol):
     rrm_local = DDM2RRM(np.array([[17.41], [78.27], [0]], dtype=dtype))
     uvw = np.array([[-27.6190], [-16.4298], [-0.3186]], dtype=dtype)
@@ -41,6 +55,33 @@ def test_ENU2ECEFv(dtype, tol):
             atol=tol,
         )
     )
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_ENU2ECEFv_parallel_unrolled(dtype, tol):
+    rrm_local = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[17.41], [78.27], [0]], dtype=dtype)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    uvw = np.ascontiguousarray(
+        np.tile(
+            np.array([[-27.6190], [-16.4298], [-0.3186]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    x, y, z = ENU2ECEFv(
+        np.ascontiguousarray(rrm_local[:, 0, 0]),
+        np.ascontiguousarray(rrm_local[:, 1, 0]),
+        np.ascontiguousarray(rrm_local[:, 2, 0]),
+        np.ascontiguousarray(uvw[:, 0, 0]),
+        np.ascontiguousarray(uvw[:, 1, 0]),
+        np.ascontiguousarray(uvw[:, 2, 0]),
+    )
+    assert np.all(np.isclose(x, 27.9798, atol=tol))
+    assert np.all(np.isclose(y, -1.0993, atol=tol))
+    assert np.all(np.isclose(z, -15.7724, atol=tol))
 
 
 @pytest.mark.parametrize(
