@@ -13,6 +13,23 @@ def test_ENU2AER_raise_wrong_dtype():
         ENU2AER(ENU)  # type: ignore
 
 
+def test_ENU2AER_raise_wrong_dtype_unrolled():
+    ENU = np.array([[8.4504], [12.4737], [1.1046]], dtype=np.float16)
+    with pytest.raises(ValueError):
+        ENU2AER(ENU[0], ENU[1], ENU[2])
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_ENU2AER_point_unrolled(dtype, tol):
+    ENU = np.array([[8.4504], [12.4737], [1.1046]], dtype=dtype)
+    a, e, r = ENU2AER(ENU[0], ENU[1], ENU[2])
+    assert np.isclose(a, np.deg2rad(34.1160), atol=tol)
+    assert np.isclose(e, np.deg2rad(4.1931), atol=tol)
+    assert np.isclose(r, 15.1070, atol=tol)
+
+
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
@@ -25,6 +42,27 @@ def test_ENU2AER_point(dtype, tol):
             atol=tol,
         ),
     )
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_ENU2AER_points_unrolled(dtype, tol):
+    ENU = np.array(
+        [
+            [[8.4504], [12.4737], [1.1046]],
+            [[8.4504], [12.4737], [1.1046]],
+        ],
+        dtype=dtype,
+    )
+    a, e, r = ENU2AER(
+        np.ascontiguousarray(ENU[:, 0, 0]),
+        np.ascontiguousarray(ENU[:, 1, 0]),
+        np.ascontiguousarray(ENU[:, 2, 0]),
+    )
+    assert np.all(np.isclose(a, np.deg2rad(34.1160), atol=tol))
+    assert np.all(np.isclose(e, np.deg2rad(4.1931), atol=tol))
+    assert np.all(np.isclose(r, 15.1070, atol=tol))
 
 
 @pytest.mark.parametrize(
@@ -45,6 +83,25 @@ def test_ENU2AER_points(dtype, tol):
             atol=tol,
         ),
     )
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_ENU2AER_parallel_unrolled(dtype, tol):
+    ENU = np.ascontiguousarray(
+        np.tile(np.array([[8.4504], [12.4737], [1.1046]], dtype=dtype), 1000).T.reshape(
+            (-1, 3, 1)
+        )
+    )
+    a, e, r = ENU2AER(
+        np.ascontiguousarray(ENU[:, 0, 0]),
+        np.ascontiguousarray(ENU[:, 1, 0]),
+        np.ascontiguousarray(ENU[:, 2, 0]),
+    )
+    assert np.all(np.isclose(a, np.deg2rad(34.1160), atol=tol))
+    assert np.all(np.isclose(e, np.deg2rad(4.1931), atol=tol))
+    assert np.all(np.isclose(r, 15.1070, atol=tol))
 
 
 @pytest.mark.parametrize(

@@ -24,7 +24,7 @@ int main()
     }
 
     start = clock();
-    HaversineDouble(
+    HaversineDoubleRolled(
         rrmStart,
         rrmEnd,
         N,

@@ -5,10 +5,25 @@ from transforms84.helpers import DDM2RRM
 from transforms84.transforms import AER2ENU
 
 
+def test_AER2ENU_raise_wrong_dtype_unrolled():
+    AER = np.array([[34.1160], [4.1931], [15.1070]], dtype=np.float16)
+    with pytest.raises(ValueError):
+        AER2ENU(AER[0], AER[1], AER[2])
+
+
 def test_AER2ENU_raise_wrong_dtype():
     AER = np.array([[34.1160], [4.1931], [15.1070]], dtype=np.float16)
     with pytest.raises(ValueError):
         AER2ENU(AER)  # type: ignore
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_AER2ENU_point_unrolled(dtype):
+    AER = DDM2RRM(np.array([[34.1160], [4.1931], [15.1070]], dtype=dtype))
+    e, n, u = AER2ENU(AER[0], AER[1], AER[2])
+    assert np.isclose(e, 8.4504)
+    assert np.isclose(n, 12.4737)
+    assert np.isclose(u, 1.1046)
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
@@ -49,6 +64,47 @@ def test_AER2ENU_points(dtype):
             np.array([[8.4504], [12.4737], [1.1046]], dtype=dtype),
         ),
     )
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_AER2ENU_points_unrolled(dtype):
+    AER = DDM2RRM(
+        np.array(
+            [
+                [[34.1160], [4.1931], [15.1070]],
+                [[34.1160], [4.1931], [15.1070]],
+            ],
+            dtype=dtype,
+        )
+    )
+    e, n, u = AER2ENU(
+        np.ascontiguousarray(AER[:, 0, 0]),
+        np.ascontiguousarray(AER[:, 1, 0]),
+        np.ascontiguousarray(AER[:, 2, 0]),
+    )
+    assert np.all(np.isclose(e, 8.4504))
+    assert np.all(np.isclose(n, 12.4737))
+    assert np.all(np.isclose(u, 1.1046))
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_AER2ENU_points_parellel_unrolled(dtype):
+    AER = DDM2RRM(
+        np.ascontiguousarray(
+            np.tile(
+                np.array([[34.1160], [4.1931], [15.1070]], dtype=dtype), 1000
+            ).T.reshape((-1, 3, 1))
+        )
+    )
+
+    e, n, u = AER2ENU(
+        np.ascontiguousarray(AER[:, 0, 0]),
+        np.ascontiguousarray(AER[:, 1, 0]),
+        np.ascontiguousarray(AER[:, 2, 0]),
+    )
+    assert np.all(np.isclose(e, 8.4504))
+    assert np.all(np.isclose(n, 12.4737))
+    assert np.all(np.isclose(u, 1.1046))
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
