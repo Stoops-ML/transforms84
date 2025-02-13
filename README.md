@@ -1,7 +1,6 @@
 # transforms84
 ![PyPI - Version](https://img.shields.io/pypi/v/transforms84)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/transforms84)
-![Codecov](https://img.shields.io/codecov/c/gh/Stoops-ML/transforms84)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/transforms84)
 ![PyPI - License](https://img.shields.io/pypi/l/transforms84)
 
@@ -9,7 +8,9 @@ Python library for geographic system transformations with additional helper func
 
 This package focuses on:
 1. Performance
-2. Ideal mathematical shapes of (NumPy) matrices: `(3,1)` or `(nPoints,3,1)`. Shapes `(3,)` and `(nPoints,3)` are also supported.
+2. Support for different matrix shapes:
+   * Ideal point shape of `(3,1)`, `(nPoints,3,1)` (as well as `(3,)` and `(nPoints,3)`)
+   * Separate input array for each axis in the coordinate system of size `(nPoints,)`
 3. Functions that adapt to differing input matrices shapes: one-to-one, many-to-many and one-to-many points. See [below](#many-to-many--one-to-many) for an example.
 
 ## Installation
@@ -74,23 +75,41 @@ The `transforms.ECEF2ENU` transformation accepts same and differing matrix shape
 >> )  # geodetic2ECEF -> ECEF2ENU
 array(
     [
-        [[4.06379074e01], [-6.60007585e-01], [1.46643956e05]],
-        [[4.06379074e01], [-6.60007585e-01], [1.46643956e05]],
-        [[4.06379074e01], [-6.60007585e-01], [1.46643956e05]],
+        [[95499.41373564], [111272.00245298], [-1689.19916788]],
+        [[95499.41373564], [111272.00245298], [-1689.19916788]],
+        [[95499.41373564], [111272.00245298], [-1689.19916788]],
     ]
 )
 ```
 
 We can achieve the same result using the one-to-many method with a single local point of shape (3, 1):
 ```
->> rrm_local = DDM2RRM(np.array([[30], [31], [0]], dtype=np.float64))
->> ECEF2ENU(rrm_local, geodetic2ECEF(rrm_target, WGS84.a, WGS84.b), WGS84.a, WGS84.b)
+>> rrm_local_one_point = DDM2RRM(np.array([[30], [31], [0]], dtype=np.float64))
+>> ECEF2ENU(rrm_local_one_point, geodetic2ECEF(rrm_target, WGS84.a, WGS84.b), WGS84.a, WGS84.b)
 array(
     [
-        [[4.06379074e01], [-6.60007585e-01], [1.46643956e05]],
-        [[4.06379074e01], [-6.60007585e-01], [1.46643956e05]],
-        [[4.06379074e01], [-6.60007585e-01], [1.46643956e05]],
+        [[95499.41373564], [111272.00245298], [-1689.19916788]],
+        [[95499.41373564], [111272.00245298], [-1689.19916788]],
+        [[95499.41373564], [111272.00245298], [-1689.19916788]],
     ]
+)
+```
+
+Again, we can achieve the same result by splitting the arrays over each coordiante system axis:
+```
+>> rad_lat_target = np.deg2rad(np.array([31, 31, 31], dtype=np.float64))
+>> rad_lon_target = np.deg2rad(np.array([32, 32, 32], dtype=np.float64))
+>> m_alt_target = np.array([0, 0, 0], dtype=np.float64)
+>> rad_lat_origin = np.deg2rad(np.array([30, 30, 30], dtype=np.float64))
+>> rad_lon_origin = np.deg2rad(np.array([31, 31, 31], dtype=np.float64))
+>> m_alt_origin = np.array([0, 0, 0], dtype=np.float64)
+>> ECEF2ENU(
+        rad_lat_origin, rad_lon_origin, m_alt_origin, *geodetic2ECEF(rad_lat_target, rad_lon_target, m_alt_target, WGS84.a, WGS84.b), WGS84.a, WGS84.b
+    )
+(
+    array([95499.41373564, 95499.41373564, 95499.41373564]),
+    array([111272.00245298, 111272.00245298, 111272.00245298]),
+    array([-1689.19916788, -1689.19916788, -1689.19916788]),
 )
 ```
 
