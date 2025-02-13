@@ -104,15 +104,6 @@ src = ["src", "tests"]
 ignore = ["UP007", "E501", "UP006"]
 select = ["E", "F", "UP", "B", "SIM", "I"]
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = [
-    "--cov=transforms84",
-    "--cov-fail-under=100",
-    # "--cov-report=term-missing",
-    # "--cov-report=term",
-]
-
 [tool.mypy]
 files = [
     "src/transforms84/**/*.py",
@@ -169,7 +160,7 @@ legacy_tox_ini = """
         PYTHONUNBUFFERED = yes
     extras = tests
     commands =
-        pytest
+        pytest --cov transforms84 --cov-report=term-missing
         mypy
 
     [testenv:quality]
