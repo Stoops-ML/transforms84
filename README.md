@@ -2,7 +2,7 @@
 ![PyPI - Version](https://img.shields.io/pypi/v/transforms84)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/transforms84)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/transforms84)
-![PyPI - License](https://img.shields.io/pypi/l/transforms84)
+![workflow-status](https://img.shields.io/github/actions/workflow/status/Stoops-ML/transforms84/workflow.yml)
 
 Python library for geographic system transformations with additional helper functions.
 
@@ -104,8 +104,13 @@ Again, we can achieve the same result by splitting the arrays over each coordian
 >> rad_lon_origin = np.deg2rad(np.array([31, 31, 31], dtype=np.float64))
 >> m_alt_origin = np.array([0, 0, 0], dtype=np.float64)
 >> ECEF2ENU(
-        rad_lat_origin, rad_lon_origin, m_alt_origin, *geodetic2ECEF(rad_lat_target, rad_lon_target, m_alt_target, WGS84.a, WGS84.b), WGS84.a, WGS84.b
-    )
+      rad_lat_origin,
+      rad_lon_origin,
+      m_alt_origin,
+      *geodetic2ECEF(rad_lat_target, rad_lon_target, m_alt_target, WGS84.a, WGS84.b),
+      WGS84.a,
+      WGS84.b,
+  )
 (
     array([95499.41373564, 95499.41373564, 95499.41373564]),
     array([111272.00245298, 111272.00245298, 111272.00245298]),
