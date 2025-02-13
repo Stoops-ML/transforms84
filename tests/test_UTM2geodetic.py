@@ -16,7 +16,7 @@ def test_raise_wrong_dtype():
 def test_raise_wrong_dtype_unrolled():
     in_arr = np.array([[np.deg2rad(30)], [np.deg2rad(25)]], dtype=np.float16)
     with pytest.raises(ValueError):
-        UTM2geodetic(in_arr[0], in_arr[1], 36, "R", WGS84.a, WGS84.b)  # type: ignore
+        UTM2geodetic(in_arr[0], in_arr[1], 36, "R", WGS84.a, WGS84.b)
 
 
 def test_raise_wrong_size():

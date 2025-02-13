@@ -69,7 +69,7 @@ def test_Haersine_raise_wrong_dtype_unrolled():
             rrm_start[1],
             rrm_start[2],
             WGS84.mean_radius,
-        )  # type: ignore
+        )
 
 
 def test_Haersine_raise_wrong_dtype():

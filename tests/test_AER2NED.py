@@ -16,7 +16,7 @@ def test_AER2NED_raise_wrong_dtype():
 def test_AER2NED_raise_wrong_dtype_unrolled():
     AER = np.array([[155.427], [-23.161], [10.885]], dtype=np.float16)
     with pytest.raises(ValueError):
-        AER2NED(AER[0], AER[1], AER[2])  # type: ignore
+        AER2NED(AER[0], AER[1], AER[2])
 
 
 @pytest.mark.parametrize(

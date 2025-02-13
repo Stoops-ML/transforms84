@@ -31,14 +31,17 @@ def test_example1():
             ),
         )
     )
-    
+
     # part 2
     rrm_local_one_point = DDM2RRM(np.array([[30], [31], [0]], dtype=np.float64))
     out2 = ECEF2ENU(
-        rrm_local_one_point, geodetic2ECEF(rrm_target, WGS84.a, WGS84.b), WGS84.a, WGS84.b
+        rrm_local_one_point,
+        geodetic2ECEF(rrm_target, WGS84.a, WGS84.b),
+        WGS84.a,
+        WGS84.b,
     )
     assert np.all(out1 == out2)
-    
+
     # part 3
     rad_lat_target = np.deg2rad(np.array([31, 31, 31], dtype=np.float64))
     rad_lon_target = np.deg2rad(np.array([32, 32, 32], dtype=np.float64))
@@ -47,7 +50,12 @@ def test_example1():
     rad_lon_origin = np.deg2rad(np.array([31, 31, 31], dtype=np.float64))
     m_alt_origin = np.array([0, 0, 0], dtype=np.float64)
     e, n, u = ECEF2ENU(
-        rad_lat_origin, rad_lon_origin, m_alt_origin, *geodetic2ECEF(rad_lat_target, rad_lon_target, m_alt_target, WGS84.a, WGS84.b), WGS84.a, WGS84.b
+        rad_lat_origin,
+        rad_lon_origin,
+        m_alt_origin,
+        *geodetic2ECEF(rad_lat_target, rad_lon_target, m_alt_target, WGS84.a, WGS84.b),
+        WGS84.a,
+        WGS84.b,
     )
     assert np.all(out1[:, 0, 0] == e)
     assert np.all(out1[:, 1, 0] == n)

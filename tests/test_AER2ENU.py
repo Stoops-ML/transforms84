@@ -8,7 +8,7 @@ from transforms84.transforms import AER2ENU
 def test_AER2ENU_raise_wrong_dtype_unrolled():
     AER = np.array([[34.1160], [4.1931], [15.1070]], dtype=np.float16)
     with pytest.raises(ValueError):
-        AER2ENU(AER[0], AER[1], AER[2])  # type: ignore
+        AER2ENU(AER[0], AER[1], AER[2])
 
 
 def test_AER2ENU_raise_wrong_dtype():

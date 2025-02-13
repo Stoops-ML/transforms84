@@ -23,7 +23,7 @@ def test_ECEF2NED_raise_wrong_dtype_unrolled():
             NED[2],
             WGS84.a,
             WGS84.b,
-        )  # type: ignore
+        )
     ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float32)
     NED = np.array(
         [[3906.67536618], [2732.16708], [1519.47079847], [1]], dtype=np.float16
@@ -38,7 +38,7 @@ def test_ECEF2NED_raise_wrong_dtype_unrolled():
             NED[2],
             WGS84.a,
             WGS84.b,
-        )  # type: ignore
+        )
     ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float16)
     NED = np.array(
         [[3906.67536618], [2732.16708], [1519.47079847], [1]], dtype=np.float16
@@ -53,7 +53,7 @@ def test_ECEF2NED_raise_wrong_dtype_unrolled():
             NED[2],
             WGS84.a,
             WGS84.b,
-        )  # type: ignore
+        )
 
 
 def test_ECEF2NED_raise_wrong_dtype():

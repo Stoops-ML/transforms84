@@ -18,7 +18,7 @@ def test_ECEF2geodetic_raise_wrong_dtype():
 def test_ECEF2geodetic_raise_wrong_dtype_unrolled():
     in_arr = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float16)
     with pytest.raises(ValueError):
-        ECEF2geodetic(in_arr[0], in_arr[1], in_arr[2], WGS84.a, WGS84.b)  # type: ignore
+        ECEF2geodetic(in_arr[0], in_arr[1], in_arr[2], WGS84.a, WGS84.b)
 
 
 def test_ECEF2geodetic_raise_wrong_size():

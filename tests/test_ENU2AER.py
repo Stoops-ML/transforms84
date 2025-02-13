@@ -16,7 +16,7 @@ def test_ENU2AER_raise_wrong_dtype():
 def test_ENU2AER_raise_wrong_dtype_unrolled():
     ENU = np.array([[8.4504], [12.4737], [1.1046]], dtype=np.float16)
     with pytest.raises(ValueError):
-        ENU2AER(ENU[0], ENU[1], ENU[2])  # type: ignore
+        ENU2AER(ENU[0], ENU[1], ENU[2])
 
 
 @pytest.mark.parametrize(

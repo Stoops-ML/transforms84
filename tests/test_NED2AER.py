@@ -16,7 +16,7 @@ def test_NED2AER_raise_wrong_dtype():
 def test_NED2AER_raise_wrong_dtype_unrolled():
     NED = np.array([[-9.1013], [4.1617], [4.2812]], dtype=np.float16)
     with pytest.raises(ValueError):
-        NED2AER(NED[0], NED[1], NED[2])  # type: ignore
+        NED2AER(NED[0], NED[1], NED[2])
 
 
 @pytest.mark.skip(reason="Get check data")

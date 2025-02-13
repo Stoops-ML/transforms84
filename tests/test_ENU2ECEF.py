@@ -23,7 +23,7 @@ def test_ENU2ECEF_raise_wrong_dtype_unrolled():
             XYZ[2],
             WGS84.a,
             WGS84.b,
-        )  # type: ignore
+        )
 
 
 def test_ENU2ECEF_raise_wrong_dtype():
