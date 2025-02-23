@@ -623,9 +623,9 @@ def test_ECEF2ENU_one2many_unrolled_list(dtype):
         WGS84.b,
     )
     m_ENU_x1, m_ENU_y1, m_ENU_z1 = ECEF2ENU(
-        [df.loc[0, "radLatOrigin"]],
-        [df.loc[0, "radLonOrigin"]],
-        [df.loc[0, "mAltOrigin"]],
+        [df.loc[0, "radLatOrigin"]],  # type: ignore
+        [df.loc[0, "radLonOrigin"]],  # type: ignore
+        [df.loc[0, "mAltOrigin"]],  # type: ignore
         df["mETarget"].tolist(),
         df["mYTarget"].tolist(),
         df["mZTarget"].tolist(),
@@ -859,9 +859,9 @@ def test_ECEF2ENU_parllel_unrolled_list(dtype):
         WGS84.b,
     )
     m_ENU_x1, m_ENU_y1, m_ENU_z1 = ECEF2ENU(
-        [df.loc[0, "radLatOrigin"]],
-        [df.loc[0, "radLonOrigin"]],
-        [df.loc[0, "mAltOrigin"]],
+        [df.loc[0, "radLatOrigin"]],  # type: ignore
+        [df.loc[0, "radLonOrigin"]],  # type: ignore
+        [df.loc[0, "mAltOrigin"]],  # type: ignore
         df["mETarget"].tolist(),
         df["mYTarget"].tolist(),
         df["mZTarget"].tolist(),
