@@ -135,21 +135,25 @@ HaversineUnrolledWrapper(PyObject* self, PyObject* args)
 
     // checks
     if (!PyArg_ParseTuple(args,
-            "O!O!O!O!O!O!d",
-            &PyArray_Type,
+            "OOOOOOd",
             &radLatStart,
-            &PyArray_Type,
             &radLonStart,
-            &PyArray_Type,
             &mAltStart,
-            &PyArray_Type,
             &radLatEnd,
-            &PyArray_Type,
             &radLonEnd,
-            &PyArray_Type,
             &mAltEnd,
             &mRadiusSphere))
         return NULL;
+    if (((radLatStart = get_numpy_array(radLatStart)) == NULL) || ((radLonStart = get_numpy_array(radLonStart)) == NULL) || ((mAltStart = get_numpy_array(mAltStart)) == NULL) || ((radLatEnd = get_numpy_array(radLatEnd)) == NULL) || ((radLonEnd = get_numpy_array(radLonEnd)) == NULL) || ((mAltEnd = get_numpy_array(mAltEnd)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(radLatStart);
+        Py_XDECREF(radLonStart);
+        Py_XDECREF(mAltStart);
+        Py_XDECREF(radLatEnd);
+        Py_XDECREF(radLonEnd);
+        Py_XDECREF(mAltEnd);
+        return NULL;
+    }
     if (!(PyArray_ISCONTIGUOUS(radLatStart)) || !(PyArray_ISCONTIGUOUS(radLonStart)) || !(PyArray_ISCONTIGUOUS(mAltStart)) || !(PyArray_ISCONTIGUOUS(radLatEnd)) || !(PyArray_ISCONTIGUOUS(radLonEnd)) || !(PyArray_ISCONTIGUOUS(mAltEnd))) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
