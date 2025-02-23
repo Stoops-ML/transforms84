@@ -63,7 +63,7 @@ def test_points_int(dtype):
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
 def test_point_unrolled(dtype):
     in_arr = np.array([[690950.46], [3431318.84]], dtype=dtype)
-    rad_lat, rad_lon, m_alt = UTM2geodetic(in_arr, 36, "R", WGS84.a, WGS84.b)
+    rad_lat, rad_lon, m_alt = UTM2geodetic(in_arr[0], in_arr[1], 36, "R", WGS84.a, WGS84.b)
     assert np.all(np.isclose(rad_lat, np.deg2rad(31.0)))
     assert np.all(np.isclose(rad_lon, np.deg2rad(35.0)))
     assert np.all(np.isclose(m_alt, 0))
