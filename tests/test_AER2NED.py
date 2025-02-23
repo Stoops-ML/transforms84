@@ -23,6 +23,26 @@ def test_AER2NED_raise_wrong_dtype_unrolled():
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
+def test_AER2NED_point_unrolled_list(dtype, tol):
+    AER = DDM2RRM(np.array([[155.427], [-23.161], [10.885]], dtype=dtype))
+    df = pd.DataFrame(
+        {
+            "azimuth": AER[0],
+            "elevation": AER[1],
+            "range": AER[2],
+        }
+    )
+    n, e, d = AER2NED(
+        df["azimuth"].tolist(), df["elevation"].tolist(), df["range"].tolist()
+    )
+    assert np.isclose(n, -9.1013, atol=tol)
+    assert np.isclose(e, 4.1617, atol=tol)
+    assert np.isclose(d, 4.2812, atol=tol)
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
 def test_AER2NED_point_unrolled_pandas(dtype, tol):
     AER = DDM2RRM(np.array([[155.427], [-23.161], [10.885]], dtype=dtype))
     df = pd.DataFrame(
@@ -104,6 +124,34 @@ def test_AER2NED_points_unrolled_pandas(dtype, tol):
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
+def test_AER2NED_points_unrolled_list(dtype, tol):
+    AER = DDM2RRM(
+        np.array(
+            [
+                [[155.427], [-23.161], [10.885]],
+                [[155.427], [-23.161], [10.885]],
+            ],
+            dtype=dtype,
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "azimuth": AER[:, 0, 0],
+            "elevation": AER[:, 1, 0],
+            "range": AER[:, 2, 0],
+        }
+    )
+    n, e, d = AER2NED(
+        df["azimuth"].tolist(), df["elevation"].tolist(), df["range"].tolist()
+    )
+    assert np.all(np.isclose(n, -9.1013, atol=tol))
+    assert np.all(np.isclose(e, 4.1617, atol=tol))
+    assert np.all(np.isclose(d, 4.2812, atol=tol))
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
 def test_AER2NED_points_unrolled(dtype, tol):
     AER = DDM2RRM(
         np.array(
@@ -163,6 +211,32 @@ def test_AER2NED_paralllel_unrolled_pandas(dtype, tol):
         }
     )
     n, e, d = AER2NED(df["azimuth"], df["elevation"], df["range"])
+    assert np.all(np.isclose(n, -9.1013, atol=tol))
+    assert np.all(np.isclose(e, 4.1617, atol=tol))
+    assert np.all(np.isclose(d, 4.2812, atol=tol))
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_AER2NED_paralllel_unrolled_list(dtype, tol):
+    AER = DDM2RRM(
+        np.ascontiguousarray(
+            np.tile(
+                np.array([[155.427], [-23.161], [10.885]], dtype=dtype), 1000
+            ).T.reshape((-1, 3, 1))
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "azimuth": AER[:, 0, 0],
+            "elevation": AER[:, 1, 0],
+            "range": AER[:, 2, 0],
+        }
+    )
+    n, e, d = AER2NED(
+        df["azimuth"].tolist(), df["elevation"].tolist(), df["range"].tolist()
+    )
     assert np.all(np.isclose(n, -9.1013, atol=tol))
     assert np.all(np.isclose(e, 4.1617, atol=tol))
     assert np.all(np.isclose(d, 4.2812, atol=tol))

@@ -88,6 +88,43 @@ def test_NED2ECEFv_parallel_unrolled(dtype, tol):
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
+def test_NED2ECEFv_parallel_unrolled_list(dtype, tol):
+    rrm_local = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[61.64], [30.70], [0]], dtype=dtype)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    uvw = np.ascontiguousarray(
+        np.tile(
+            np.array([[-434.0403], [152.4451], [-684.6964]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "rrm_local_0": rrm_local[:, 0, 0],
+            "rrm_local_1": rrm_local[:, 1, 0],
+            "rrm_local_2": rrm_local[:, 2, 0],
+            "uvw_0": uvw[:, 0, 0],
+            "uvw_1": uvw[:, 1, 0],
+            "uvw_2": uvw[:, 2, 0],
+        }
+    )
+    x, y, z = NED2ECEFv(
+        df["rrm_local_0"].tolist(),
+        df["rrm_local_1"].tolist(),
+        df["rrm_local_2"].tolist(),
+        df["uvw_0"].tolist(),
+        df["uvw_1"].tolist(),
+        df["uvw_2"].tolist(),
+    )
+    assert np.all(np.isclose(x, 530.2445, atol=tol))
+    assert np.all(np.isclose(y, 492.1283, atol=tol))
+    assert np.all(np.isclose(z, 396.3459, atol=tol))
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
 def test_NED2ECEFv_parallel_unrolled_pandas(dtype, tol):
     rrm_local = np.ascontiguousarray(
         np.tile(

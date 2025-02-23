@@ -118,6 +118,46 @@ def test_Haversine_int_unrolled(dtype):
 
 
 @pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
+def test_Haversine_int_unrolled_list(dtype):
+    rrm_start = np.array([[0], [0], [0]], dtype=dtype)
+    rrm_end = np.array([[1], [1], [0]], dtype=dtype)
+    df = pd.DataFrame(
+        {
+            "radStartLat": rrm_start[0],
+            "radStartLon": rrm_start[1],
+            "mStartHeight": rrm_start[2],
+            "radEndLat": rrm_end[0],
+            "radEndLon": rrm_end[1],
+            "mEndHeight": rrm_end[2],
+        }
+    )
+    assert np.isclose(
+        Haversine(
+            df["radStartLat"].tolist(),
+            df["radStartLon"].tolist(),
+            df["mStartHeight"].tolist(),
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        8120200.0,
+    )
+    assert np.isclose(
+        Haversine(
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            df["radStartLat"].tolist(),
+            df["radStartLon"].tolist(),
+            df["mStartHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        8120200.0,
+    )
+
+
+@pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
 def test_Haversine_int_unrolled_pandas(dtype):
     rrm_start = np.array([[0], [0], [0]], dtype=dtype)
     rrm_end = np.array([[1], [1], [0]], dtype=dtype)
@@ -369,6 +409,114 @@ def test_Haversine_with_height_int_unrolled_pandas(dtype):
 
 
 @pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
+def test_Haversine_with_height_int_unrolled_list(dtype):
+    rrm_start_with_height = np.array([[0], [0], [10]], dtype=dtype)
+    rrm_start = np.array([[0], [0], [0]], dtype=dtype)
+    rrm_end = np.array([[1], [1], [0]], dtype=dtype)
+    df = pd.DataFrame(
+        {
+            "radStartLat": rrm_start[0],
+            "radStartLon": rrm_start[1],
+            "mStartHeight": rrm_start[2],
+            "radEndLat": rrm_end[0],
+            "radEndLon": rrm_end[1],
+            "mEndHeight": rrm_end[2],
+            "radStartWithHeightLat": rrm_start_with_height[0],
+            "radStartWithHeightLon": rrm_start_with_height[1],
+            "mStartWithHeightHeight": rrm_start_with_height[2],
+        }
+    )
+    assert np.isclose(
+        Haversine(
+            df["radStartWithHeightLat"].tolist(),
+            df["radStartWithHeightLon"].tolist(),
+            df["mStartWithHeightHeight"].tolist(),
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        8120200.0,
+    )
+    assert np.isclose(
+        Haversine(
+            df["radStartWithHeightLat"].tolist(),
+            df["radStartWithHeightLon"].tolist(),
+            df["mStartWithHeightHeight"].tolist(),
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        Haversine(
+            df["radStartLat"].tolist(),
+            df["radStartLon"].tolist(),
+            df["mStartHeight"].tolist(),
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+    )
+    assert np.isclose(
+        Haversine(
+            df["radStartLat"].tolist(),
+            df["radStartLon"].tolist(),
+            df["mStartHeight"].tolist(),
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        8120200.0,
+    )
+    assert np.isclose(
+        Haversine(
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            df["radStartWithHeightLat"].tolist(),
+            df["radStartWithHeightLon"].tolist(),
+            df["mStartWithHeightHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        8120200.0,
+    )
+    assert np.isclose(
+        Haversine(
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            df["radStartLat"].tolist(),
+            df["radStartLon"].tolist(),
+            df["mStartHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        8120200.0,
+    )
+    assert np.isclose(
+        Haversine(
+            df["radStartLat"].tolist(),
+            df["radStartLon"].tolist(),
+            df["mStartHeight"].tolist(),
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        Haversine(
+            df["radStartWithHeightLat"].tolist(),
+            df["radStartWithHeightLon"].tolist(),
+            df["mStartWithHeightHeight"].tolist(),
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+    )
+
+
+@pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
 def test_Haversine_with_height_int(dtype):
     rrm_start_with_height = np.array([[0], [0], [10]], dtype=dtype)
     rrm_start = np.array([[0], [0], [0]], dtype=dtype)
@@ -432,6 +580,58 @@ def test_Haversine_unrolled(dtype):
             rrm_start[0],
             rrm_start[1],
             rrm_start[2],
+            WGS84.mean_radius,
+        ),
+        391225.574516907,
+    )
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_Haversine_unrolled_list(dtype):
+    rrm_start = np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=dtype)
+    rrm_end = np.array([[np.deg2rad(32)], [np.deg2rad(38)], [0]], dtype=dtype)
+    assert np.isclose(
+        Haversine(
+            rrm_start[0],
+            rrm_start[1],
+            rrm_start[2],
+            rrm_end[0],
+            rrm_end[1],
+            rrm_end[2],
+            WGS84.mean_radius,
+        ),
+        391225.574516907,
+    )
+    df = pd.DataFrame(
+        {
+            "radStartLat": rrm_start[0],
+            "radStartLon": rrm_start[1],
+            "mStartHeight": rrm_start[2],
+            "radEndLat": rrm_end[0],
+            "radEndLon": rrm_end[1],
+            "mEndHeight": rrm_end[2],
+        }
+    )
+    assert np.isclose(
+        Haversine(
+            df["radStartLat"].tolist(),
+            df["radStartLon"].tolist(),
+            df["mStartHeight"].tolist(),
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        391225.574516907,
+    )
+    assert np.isclose(
+        Haversine(
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            df["radStartLat"].tolist(),
+            df["radStartLon"].tolist(),
+            df["mStartHeight"].tolist(),
             WGS84.mean_radius,
         ),
         391225.574516907,
@@ -537,6 +737,58 @@ def test_Haversine_parallel_unrolled(dtype):
                 np.ascontiguousarray(rrm_start[:, 0, 0]),
                 np.ascontiguousarray(rrm_start[:, 1, 0]),
                 np.ascontiguousarray(rrm_start[:, 2, 0]),
+                WGS84.mean_radius,
+            ),
+            391225.574516907,
+        )
+    )
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_Haversine_parallel_unrolled_list(dtype):
+    rrm_start = np.ascontiguousarray(
+        np.tile(
+            np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    rrm_end = np.ascontiguousarray(
+        np.tile(
+            np.array([[np.deg2rad(32)], [np.deg2rad(38)], [0]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "radStartLat": rrm_start[:, 0, 0],
+            "radStartLon": rrm_start[:, 1, 0],
+            "mStartHeight": rrm_start[:, 2, 0],
+            "radEndLat": rrm_end[:, 0, 0],
+            "radEndLon": rrm_end[:, 1, 0],
+            "mEndHeight": rrm_end[:, 2, 0],
+        }
+    )
+    assert np.all(
+        np.isclose(
+            Haversine(
+                df["radStartLat"].tolist(),
+                df["radStartLon"].tolist(),
+                df["mStartHeight"].tolist(),
+                df["radEndLat"].tolist(),
+                df["radEndLon"].tolist(),
+                df["mEndHeight"].tolist(),
+                WGS84.mean_radius,
+            ),
+            391225.574516907,
+        )
+    )
+    assert np.all(
+        np.isclose(
+            Haversine(
+                df["radEndLat"].tolist(),
+                df["radEndLon"].tolist(),
+                df["mEndHeight"].tolist(),
+                df["radStartLat"].tolist(),
+                df["radStartLon"].tolist(),
+                df["mStartHeight"].tolist(),
                 WGS84.mean_radius,
             ),
             391225.574516907,
@@ -809,6 +1061,116 @@ def test_Haversine_with_height_unrolled(dtype):
             rrm_end[0],
             rrm_end[1],
             rrm_end[2],
+            WGS84.mean_radius,
+        ),
+    )
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_Haversine_with_height_unrolled_list(dtype):
+    rrm_start_with_height = np.array(
+        [[np.deg2rad(33)], [np.deg2rad(34)], [100000]], dtype=dtype
+    )
+    rrm_start = np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=dtype)
+    rrm_end = np.array([[np.deg2rad(32)], [np.deg2rad(38)], [0]], dtype=dtype)
+    df = pd.DataFrame(
+        {
+            "radStartLat": rrm_start[0],
+            "radStartLon": rrm_start[1],
+            "mStartHeight": rrm_start[2],
+            "radEndLat": rrm_end[0],
+            "radEndLon": rrm_end[1],
+            "mEndHeight": rrm_end[2],
+            "radStartWithHeightLat": rrm_start_with_height[0],
+            "radStartWithHeightLon": rrm_start_with_height[1],
+            "mStartWithHeightHeight": rrm_start_with_height[2],
+        }
+    )
+    assert np.isclose(
+        Haversine(
+            df["radStartWithHeightLat"].tolist(),
+            df["radStartWithHeightLon"].tolist(),
+            df["mStartWithHeightHeight"].tolist(),
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        391225.574516907,
+    )
+    assert np.isclose(
+        Haversine(
+            df["radStartWithHeightLat"].tolist(),
+            df["radStartWithHeightLon"].tolist(),
+            df["mStartWithHeightHeight"].tolist(),
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        Haversine(
+            df["radStartLat"].tolist(),
+            df["radStartLon"].tolist(),
+            df["mStartHeight"].tolist(),
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+    )
+    assert np.isclose(
+        Haversine(
+            df["radStartLat"].tolist(),
+            df["radStartLon"].tolist(),
+            df["mStartHeight"].tolist(),
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        391225.574516907,
+    )
+    assert np.isclose(
+        Haversine(
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            df["radStartWithHeightLat"].tolist(),
+            df["radStartWithHeightLon"].tolist(),
+            df["mStartWithHeightHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        391225.574516907,
+    )
+    assert np.isclose(
+        Haversine(
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            df["radStartLat"].tolist(),
+            df["radStartLon"].tolist(),
+            df["mStartHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        391225.574516907,
+    )
+    assert np.isclose(
+        Haversine(
+            df["radStartLat"].tolist(),
+            df["radStartLon"].tolist(),
+            df["mStartHeight"].tolist(),
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
+            WGS84.mean_radius,
+        ),
+        Haversine(
+            df["radStartWithHeightLat"].tolist(),
+            df["radStartWithHeightLon"].tolist(),
+            df["mStartWithHeightHeight"].tolist(),
+            df["radEndLat"].tolist(),
+            df["radEndLon"].tolist(),
+            df["mEndHeight"].tolist(),
             WGS84.mean_radius,
         ),
     )

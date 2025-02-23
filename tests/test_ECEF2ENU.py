@@ -523,6 +523,53 @@ def test_ECEF2ENU_one2many_int_unrolled_pandas(dtype):
 
 
 @pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
+def test_ECEF2ENU_one2many_int_unrolled_list(dtype):
+    rrm_target = DDM2RRM(np.array([[0], [0], [0]], dtype=dtype))
+    num_repeats = 3
+    rrm_targets = np.ascontiguousarray(
+        np.tile(rrm_target, num_repeats).T.reshape((-1, 3, 1))
+    )
+    rrm_local = DDM2RRM(np.array([[1], [1], [0]], dtype=dtype))
+    rrm_locals = np.ascontiguousarray(
+        np.tile(rrm_local, rrm_targets.shape[0]).T.reshape((-1, 3, 1))
+    )
+    mmm_ECEF_traget = geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b)
+    df = pd.DataFrame(
+        {
+            "radLatOrigin": rrm_locals[:, 0, 0],
+            "radLonOrigin": rrm_locals[:, 1, 0],
+            "mAltOrigin": rrm_locals[:, 2, 0],
+            "mETarget": mmm_ECEF_traget[:, 0, 0],
+            "mYTarget": mmm_ECEF_traget[:, 1, 0],
+            "mZTarget": mmm_ECEF_traget[:, 2, 0],
+        }
+    )
+    m_ENU_x, m_ENU_y, m_ENU_z = ECEF2ENU(
+        df["radLatOrigin"].tolist(),
+        df["radLonOrigin"].tolist(),
+        df["mAltOrigin"].tolist(),
+        df["mETarget"].tolist(),
+        df["mYTarget"].tolist(),
+        df["mZTarget"].tolist(),
+        WGS84.a,
+        WGS84.b,
+    )
+    m_ENU_x1, m_ENU_y1, m_ENU_z1 = ECEF2ENU(
+        np.array([df.loc[0, "radLatOrigin"]]),
+        np.array([df.loc[0, "radLonOrigin"]]),
+        np.array([df.loc[0, "mAltOrigin"]]),
+        df["mETarget"].tolist(),
+        df["mYTarget"].tolist(),
+        df["mZTarget"].tolist(),
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.all(np.isclose(m_ENU_x, m_ENU_x1))
+    assert np.all(np.isclose(m_ENU_y, m_ENU_y1))
+    assert np.all(np.isclose(m_ENU_z, m_ENU_z1))
+
+
+@pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
 def test_ECEF2ENU_one2many_int(dtype):
     rrm_target = DDM2RRM(np.array([[0], [0], [0]], dtype=dtype))
     num_repeats = 3
@@ -541,6 +588,53 @@ def test_ECEF2ENU_one2many_int(dtype):
             rrm_local, geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b), WGS84.a, WGS84.b
         )
     )
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_ECEF2ENU_one2many_unrolled_list(dtype):
+    rrm_target = DDM2RRM(np.array([[31], [32], [0]], dtype=dtype))
+    num_repeats = 3
+    rrm_targets = np.ascontiguousarray(
+        np.tile(rrm_target, num_repeats).T.reshape((-1, 3, 1))
+    )
+    rrm_local = DDM2RRM(np.array([[30], [31], [0]], dtype=dtype))
+    rrm_locals = np.ascontiguousarray(
+        np.tile(rrm_local, rrm_targets.shape[0]).T.reshape((-1, 3, 1))
+    )
+    mmm_ECEF_traget = geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b)
+    df = pd.DataFrame(
+        {
+            "radLatOrigin": rrm_locals[:, 0, 0],
+            "radLonOrigin": rrm_locals[:, 1, 0],
+            "mAltOrigin": rrm_locals[:, 2, 0],
+            "mETarget": mmm_ECEF_traget[:, 0, 0],
+            "mYTarget": mmm_ECEF_traget[:, 1, 0],
+            "mZTarget": mmm_ECEF_traget[:, 2, 0],
+        }
+    )
+    m_ENU_x, m_ENU_y, m_ENU_z = ECEF2ENU(
+        df["radLatOrigin"].tolist(),
+        df["radLonOrigin"].tolist(),
+        df["mAltOrigin"].tolist(),
+        df["mETarget"].tolist(),
+        df["mYTarget"].tolist(),
+        df["mZTarget"].tolist(),
+        WGS84.a,
+        WGS84.b,
+    )
+    m_ENU_x1, m_ENU_y1, m_ENU_z1 = ECEF2ENU(
+        [df.loc[0, "radLatOrigin"]],
+        [df.loc[0, "radLonOrigin"]],
+        [df.loc[0, "mAltOrigin"]],
+        df["mETarget"].tolist(),
+        df["mYTarget"].tolist(),
+        df["mZTarget"].tolist(),
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.all(np.isclose(m_ENU_x, m_ENU_x1))
+    assert np.all(np.isclose(m_ENU_y, m_ENU_y1))
+    assert np.all(np.isclose(m_ENU_z, m_ENU_z1))
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
@@ -724,6 +818,53 @@ def test_ECEF2ENU_parllel_unrolled_pandas(dtype):
         df["mETarget"],
         df["mYTarget"],
         df["mZTarget"],
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.all(np.isclose(m_ENU_x, m_ENU_x1))
+    assert np.all(np.isclose(m_ENU_y, m_ENU_y1))
+    assert np.all(np.isclose(m_ENU_z, m_ENU_z1))
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_ECEF2ENU_parllel_unrolled_list(dtype):
+    rrm_target = DDM2RRM(np.array([[31], [32], [0]], dtype=dtype))
+    num_repeats = 1000
+    rrm_targets = np.ascontiguousarray(
+        np.tile(rrm_target, num_repeats).T.reshape((-1, 3, 1))
+    )
+    rrm_local = DDM2RRM(np.array([[30], [31], [0]], dtype=dtype))
+    rrm_locals = np.ascontiguousarray(
+        np.tile(rrm_local, rrm_targets.shape[0]).T.reshape((-1, 3, 1))
+    )
+    mmm_ECEF_traget = geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b)
+    df = pd.DataFrame(
+        {
+            "radLatOrigin": rrm_locals[:, 0, 0],
+            "radLonOrigin": rrm_locals[:, 1, 0],
+            "mAltOrigin": rrm_locals[:, 2, 0],
+            "mETarget": mmm_ECEF_traget[:, 0, 0],
+            "mYTarget": mmm_ECEF_traget[:, 1, 0],
+            "mZTarget": mmm_ECEF_traget[:, 2, 0],
+        }
+    )
+    m_ENU_x, m_ENU_y, m_ENU_z = ECEF2ENU(
+        df["radLatOrigin"].tolist(),
+        df["radLonOrigin"].tolist(),
+        df["mAltOrigin"].tolist(),
+        df["mETarget"].tolist(),
+        df["mYTarget"].tolist(),
+        df["mZTarget"].tolist(),
+        WGS84.a,
+        WGS84.b,
+    )
+    m_ENU_x1, m_ENU_y1, m_ENU_z1 = ECEF2ENU(
+        [df.loc[0, "radLatOrigin"]],
+        [df.loc[0, "radLonOrigin"]],
+        [df.loc[0, "mAltOrigin"]],
+        df["mETarget"].tolist(),
+        df["mYTarget"].tolist(),
+        df["mZTarget"].tolist(),
         WGS84.a,
         WGS84.b,
     )

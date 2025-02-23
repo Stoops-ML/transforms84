@@ -27,6 +27,23 @@ def test_raise_wrong_size():
 
 
 @pytest.mark.parametrize("dtype", [np.int64, np.int32])
+def test_point_int_unrolled_list(dtype):
+    in_arr = np.array([[690950.0], [3431318.0]], dtype=dtype)
+    df = pd.DataFrame({"radLat": in_arr[0], "radLon": in_arr[1]})
+    df["radLat"], df["radLon"], df["mAlt"] = UTM2geodetic(
+        df["radLat"].tolist(),
+        df["radLon"].tolist(),
+        36,
+        "R",
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.all(np.isclose(df["radLat"], np.deg2rad(31.0)))
+    assert np.all(np.isclose(df["radLon"], np.deg2rad(35.0)))
+    assert np.all(np.isclose(df["mAlt"], 0))
+
+
+@pytest.mark.parametrize("dtype", [np.int64, np.int32])
 def test_point_int_unrolled_pandas(dtype):
     in_arr = np.array([[690950.0], [3431318.0]], dtype=dtype)
     df = pd.DataFrame({"radLat": in_arr[0], "radLon": in_arr[1]})
@@ -79,6 +96,23 @@ def test_points_int(dtype):
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_point_unrolled_list(dtype):
+    in_arr = np.array([[690950.46], [3431318.84]], dtype=dtype)
+    df = pd.DataFrame({"radLat": in_arr[0], "radLon": in_arr[1]})
+    df["radLat"], df["radLon"], df["mAlt"] = UTM2geodetic(
+        df["radLat"].tolist(),
+        df["radLon"].tolist(),
+        36,
+        "R",
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.all(np.isclose(df["radLat"], np.deg2rad(31.0)))
+    assert np.all(np.isclose(df["radLon"], np.deg2rad(35.0)))
+    assert np.all(np.isclose(df["mAlt"], 0))
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
 def test_point_unrolled_pandas(dtype):
     in_arr = np.array([[690950.46], [3431318.84]], dtype=dtype)
     df = pd.DataFrame({"radLat": in_arr[0], "radLon": in_arr[1]})
@@ -113,6 +147,30 @@ def test_point(dtype):
     assert np.all(np.isclose(out[0, 0], np.deg2rad(31.0)))
     assert np.all(np.isclose(out[1, 0], np.deg2rad(35.0)))
     assert np.all(np.isclose(out[2, 0], 0))
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_points_unrolled_list(dtype):
+    in_arr = np.array(
+        [
+            [[690950.46], [3431318.84]],
+            [[690950.46], [3431318.84]],
+        ],
+        dtype=dtype,
+    )
+    df = pd.DataFrame({"radLat": in_arr[:, 0, 0], "radLon": in_arr[:, 1, 0]})
+
+    df["radLat"], df["radLon"], df["mAlt"] = UTM2geodetic(
+        df["radLat"].tolist(),
+        df["radLon"].tolist(),
+        36,
+        "R",
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.all(np.isclose(df["radLat"], np.deg2rad(31.0)))
+    assert np.all(np.isclose(df["radLon"], np.deg2rad(35.0)))
+    assert np.all(np.isclose(df["mAlt"], 0))
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
@@ -174,6 +232,28 @@ def test_points(dtype):
     assert np.all(np.isclose(out[:, 0, 0], np.deg2rad(31.0)))
     assert np.all(np.isclose(out[:, 1, 0], np.deg2rad(35.0)))
     assert np.all(np.isclose(out[:, 2, 0], 0))
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_parallel_unrolled_list(dtype):
+    in_arr = np.ascontiguousarray(
+        np.tile(np.array([[690950.46], [3431318.84]], dtype=dtype), 1000).T.reshape(
+            (-1, 2, 1)
+        )
+    )
+    df = pd.DataFrame({"radLat": in_arr[:, 0, 0], "radLon": in_arr[:, 1, 0]})
+
+    df["radLat"], df["radLon"], df["mAlt"] = UTM2geodetic(
+        df["radLat"].tolist(),
+        df["radLon"].tolist(),
+        36,
+        "R",
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.all(np.isclose(df["radLat"], np.deg2rad(31.0)))
+    assert np.all(np.isclose(df["radLon"], np.deg2rad(35.0)))
+    assert np.all(np.isclose(df["mAlt"], 0))
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])

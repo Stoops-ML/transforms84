@@ -36,6 +36,17 @@ def test_point_int_unrolled(dtype):
 
 
 @pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
+def test_point_int_unrolled_list(dtype):
+    in_arr = DDM2RRM(np.array([[31.0], [35.0], [100]], dtype=dtype))
+    df = pd.DataFrame(in_arr.T, columns=["lat", "lon", "alt"])
+    out_x, out_y = geodetic2UTM(
+        df["lat"].tolist(), df["lon"].tolist(), df["alt"].tolist(), WGS84.a, WGS84.b
+    )
+    assert np.isclose(out_x, 690950.46)
+    assert np.isclose(out_y, 3431318.84)
+
+
+@pytest.mark.parametrize("dtype", [np.int64, np.int32, np.int16])
 def test_point_int_unrolled_pandas(dtype):
     in_arr = DDM2RRM(np.array([[31.0], [35.0], [100]], dtype=dtype))
     df = pd.DataFrame(in_arr.T, columns=["lat", "lon", "alt"])
@@ -75,6 +86,17 @@ def test_points_int(dtype):
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_point_unrolled_list(dtype):
+    in_arr = DDM2RRM(np.array([[31.750000], [35.550000], [100]], dtype=dtype))
+    df = pd.DataFrame(in_arr.T, columns=["lat", "lon", "alt"])
+    out_x, out_y = geodetic2UTM(
+        df["lat"].tolist(), df["lon"].tolist(), df["alt"].tolist(), WGS84.a, WGS84.b
+    )
+    assert np.all(np.isclose(out_x, 741548.22))
+    assert np.all(np.isclose(out_y, 3515555.26))
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
 def test_point_unrolled_pandas(dtype):
     in_arr = DDM2RRM(np.array([[31.750000], [35.550000], [100]], dtype=dtype))
     df = pd.DataFrame(in_arr.T, columns=["lat", "lon", "alt"])
@@ -97,6 +119,29 @@ def test_point(dtype):
     out = geodetic2UTM(DDM2RRM(in_arr), WGS84.a, WGS84.b)
     assert np.all(np.isclose(out[0, 0], 741548.22))
     assert np.all(np.isclose(out[1, 0], 3515555.26))
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_points_unrolled_list(dtype):
+    in_arr = np.array(
+        [
+            [[np.deg2rad(31.750000)], [np.deg2rad(35.550000)], [5]],
+            [[np.deg2rad(31.750000)], [np.deg2rad(35.550000)], [5]],
+        ],
+        dtype=dtype,
+    )
+    df = pd.DataFrame(
+        {
+            "lat": in_arr[:, 0, 0],
+            "lon": in_arr[:, 1, 0],
+            "alt": in_arr[:, 2, 0],
+        }
+    )
+    out_x, out_y = geodetic2UTM(
+        df["lat"].tolist(), df["lon"].tolist(), df["alt"].tolist(), WGS84.a, WGS84.b
+    )
+    assert np.all(np.isclose(out_x, 741548.22))
+    assert np.all(np.isclose(out_y, 3515555.26))
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
@@ -152,6 +197,27 @@ def test_points(dtype):
     out = geodetic2UTM(in_arr, WGS84.a, WGS84.b)
     assert np.all(np.isclose(out[:, 0, 0], 741548.22))
     assert np.all(np.isclose(out[:, 1, 0], 3515555.26))
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_parallel_unrolled_list(dtype):
+    in_arr = np.ascontiguousarray(
+        np.tile(
+            np.array([[np.deg2rad(31.75)], [np.deg2rad(35.55)], [5]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "lat": in_arr[:, 0, 0],
+            "lon": in_arr[:, 1, 0],
+            "alt": in_arr[:, 2, 0],
+        }
+    )
+    out_x, out_y = geodetic2UTM(
+        df["lat"].tolist(), df["lon"].tolist(), df["alt"].tolist(), WGS84.a, WGS84.b
+    )
+    assert np.all(np.isclose(out_x, 741548.22))
+    assert np.all(np.isclose(out_y, 3515555.26))
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])

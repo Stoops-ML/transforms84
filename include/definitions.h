@@ -19,6 +19,13 @@ PyArrayObject* get_numpy_array(PyObject* obj) {
     }
     else if (PyArray_Check(obj))  // numpy array
         numpy_array = (PyArrayObject*)obj;
+    else if (PyList_Check(obj)) {  // list
+        PyObject* array = PyArray_FROM_OTF(obj, NPY_FLOAT64, NPY_ARRAY_IN_ARRAY);
+        if (array && PyArray_Check(array))
+            numpy_array = (PyArrayObject*)array;
+        else
+            return NULL;
+    }
     else
         return NULL;
 

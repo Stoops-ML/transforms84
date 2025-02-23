@@ -249,6 +249,48 @@ def test_NED2ECEF_different_dtypes(dtype0, dtype1, tol):
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_rtol), (np.float32, tol_float_rtol)]
 )
+def test_NED2ECEF_points_unrolled_list(dtype, tol):
+    XYZ = np.array(
+        [
+            [[1334.3], [-2544.4], [360.0]],
+            [[1334.3], [-2544.4], [360.0]],
+        ],
+        dtype=dtype,
+    )
+    ref_point = DDM2RRM(
+        np.array(
+            [[[44.532], [-72.782], [1.699]], [[44.532], [-72.782], [1.699]]],
+            dtype=dtype,
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "ref_x": ref_point[:, 0, 0],
+            "ref_y": ref_point[:, 1, 0],
+            "ref_z": ref_point[:, 2, 0],
+            "x": XYZ[:, 0, 0],
+            "y": XYZ[:, 1, 0],
+            "z": XYZ[:, 2, 0],
+        }
+    )
+    m_x, m_y, m_z = NED2ECEF(
+        df["ref_x"].tolist(),
+        df["ref_y"].tolist(),
+        df["ref_z"].tolist(),
+        df["x"].tolist(),
+        df["y"].tolist(),
+        df["z"].tolist(),
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.all(np.isclose(m_x, 1.3457e06, rtol=tol))
+    assert np.all(np.isclose(m_y, -4.3509e06, rtol=tol))
+    assert np.all(np.isclose(m_z, 4.4523e06, rtol=tol))
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_rtol), (np.float32, tol_float_rtol)]
+)
 def test_NED2ECEF_points_unrolled_pandas(dtype, tol):
     XYZ = np.array(
         [
@@ -418,6 +460,43 @@ def test_NED2ECEF_one2many_float_unrolled(dtype):
     assert np.all(np.isclose(m_x, m_x1))
     assert np.all(np.isclose(m_y, m_y1))
     assert np.all(np.isclose(m_z, m_z1))
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32])
+def test_NED2ECEF_one2many_float_unrolled_list(dtype):
+    num_repeats = 3
+    rrm_local = DDM2RRM(np.array([[44.532], [-72.782], [1.699]], dtype=dtype))
+    rrm_locals = np.ascontiguousarray(
+        np.tile(rrm_local, num_repeats).T.reshape((-1, 3, 1))
+    )
+    ecef_target = np.array([[1334.3], [-2544.4], [360.0]], dtype=dtype)
+    ecef_targets = np.ascontiguousarray(
+        np.tile(ecef_target, num_repeats).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "ref_x": rrm_locals[:, 0, 0],
+            "ref_y": rrm_locals[:, 1, 0],
+            "ref_z": rrm_locals[:, 2, 0],
+            "x": ecef_targets[:, 0, 0],
+            "y": ecef_targets[:, 1, 0],
+            "z": ecef_targets[:, 2, 0],
+        }
+    )
+    m_x, m_y, m_z = NED2ECEF(
+        df["ref_x"].tolist(),
+        df["ref_y"].tolist(),
+        df["ref_z"].tolist(),
+        df["x"].tolist(),
+        df["y"].tolist(),
+        df["z"].tolist(),
+        WGS84.a,
+        WGS84.b,
+    )
+    xyz = NED2ECEF(rrm_local, ecef_targets, WGS84.a, WGS84.b)
+    assert np.all(np.isclose(m_x, xyz[:, 0, 0]))
+    assert np.all(np.isclose(m_y, xyz[:, 1, 0]))
+    assert np.all(np.isclose(m_z, xyz[:, 2, 0]))
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])

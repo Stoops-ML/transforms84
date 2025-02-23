@@ -87,6 +87,43 @@ def test_ECEF2ENUv_parallel(dtype, tol):
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
+def test_ECEF2ENUv_parallel_unrolled_list(dtype, tol):
+    rrm_local = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[17.4114], [78.2700], [0]], dtype=dtype)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    uvw = np.ascontiguousarray(
+        np.tile(
+            np.array([[27.9799], [-1.0990], [-15.7723]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "radLat": rrm_local[:, 0, 0],
+            "radLon": rrm_local[:, 1, 0],
+            "mAlt": rrm_local[:, 2, 0],
+            "u": uvw[:, 0, 0],
+            "v": uvw[:, 1, 0],
+            "w": uvw[:, 2, 0],
+        }
+    )
+    e, n, u = ECEF2ENUv(
+        df["radLat"].tolist(),
+        df["radLon"].tolist(),
+        df["mAlt"].tolist(),
+        df["u"].tolist(),
+        df["v"].tolist(),
+        df["w"].tolist(),
+    )
+    assert np.all(np.isclose(e, [-27.6190], atol=tol))
+    assert np.all(np.isclose(n, [-16.4298], atol=tol))
+    assert np.all(np.isclose(u, [-0.3186], atol=tol))
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
 def test_ECEF2ENUv_parallel_unrolled_pandas(dtype, tol):
     rrm_local = np.ascontiguousarray(
         np.tile(
