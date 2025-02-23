@@ -109,13 +109,13 @@ Again, we can achieve the same result by splitting the arrays over each coordian
       }
   )
 >> df["e"], df["n"], df["u"] = ECEF2ENU(
-    df["radLatOrigin"].to_numpy(),
-    df["radLonOrigin"].to_numpy(),
-    df["mAltOrigin"].to_numpy(),
+    df["radLatOrigin"],
+    df["radLonOrigin"],
+    df["mAltOrigin"],
     *geodetic2ECEF(
-        df["radLatTarget"].to_numpy(),
-        df["radLonTarget"].to_numpy(),
-        df["mAltTarget"].to_numpy(),
+        df["radLatTarget"],
+        df["radLonTarget"],
+        df["mAltTarget"],
         WGS84.a,
         WGS84.b,
     ),
