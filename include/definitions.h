@@ -17,7 +17,7 @@ PyArrayObject* get_numpy_array(PyObject* obj) {
         else
             return NULL;
     }
-    else if (PyObject_TypeCheck(obj, &PyArray_Type))  // numpy array
+    else if (PyArray_Check(obj))  // numpy array
         numpy_array = (PyArrayObject*)obj;
     else
         return NULL;

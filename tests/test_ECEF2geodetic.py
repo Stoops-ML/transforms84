@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import pytest
 
 from transforms84.systems import WGS84
@@ -41,6 +42,24 @@ def test_ECEF2geodetic_point_int(dtype, tol):
 @pytest.mark.parametrize(
     "dtype,tol", [(np.int64, tol_double_atol), (np.int32, tol_float_atol)]
 )
+def test_ECEF2geodetic_point_int_unrolled_pandas(dtype, tol):
+    in_arr = np.array([[5010306], [2336344], [3170376]], dtype=dtype)
+    df = pd.DataFrame(
+        {
+            "x": in_arr[0],
+            "y": in_arr[1],
+            "z": in_arr[2],
+        }
+    )
+    rad_lat, rad_lon, m_alt = ECEF2geodetic(df["x"], df["y"], df["z"], WGS84.a, WGS84.b)
+    assert np.isclose(rad_lat, np.deg2rad(29.9999981))
+    assert np.isclose(rad_lon, np.deg2rad(24.99999946))
+    assert np.isclose(m_alt, 4.89436751, atol=tol)
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.int64, tol_double_atol), (np.int32, tol_float_atol)]
+)
 def test_ECEF2geodetic_point_int_unrolled(dtype, tol):
     in_arr = np.array([[5010306], [2336344], [3170376]], dtype=dtype)
     rad_lat, rad_lon, m_alt = ECEF2geodetic(
@@ -61,6 +80,24 @@ def test_ECEF2geodetic_point_int16(dtype, tol):
     assert np.isclose(out[0, 0], np.deg2rad(29.9999981))
     assert np.isclose(out[1, 0], np.deg2rad(24.99999946))
     assert np.isclose(out[2, 0], 4.89436751, atol=tol)
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_ECEF2geodetic_point_unrolled_pandas(dtype, tol):
+    in_arr = np.array([[5010306], [2336344], [3170376.2]], dtype=dtype)
+    df = pd.DataFrame(
+        {
+            "x": in_arr[0],
+            "y": in_arr[1],
+            "z": in_arr[2],
+        }
+    )
+    rad_lat, rad_lon, m_alt = ECEF2geodetic(df["x"], df["y"], df["z"], WGS84.a, WGS84.b)
+    assert np.isclose(rad_lat, np.deg2rad(30))
+    assert np.isclose(rad_lon, np.deg2rad(25))
+    assert np.isclose(m_alt, 5, atol=tol)
 
 
 @pytest.mark.parametrize(
@@ -113,6 +150,30 @@ def test_ECEF2geodetic_points_int_unrolled(dtype, tol):
 @pytest.mark.parametrize(
     "dtype,tol", [(np.int64, tol_double_atol), (np.int32, tol_float_atol)]
 )
+def test_ECEF2geodetic_points_int_unrolled_pandas(dtype, tol):
+    in_arr = np.array(
+        [
+            [[5010306], [2336344], [3170376]],
+            [[5010306], [2336344], [3170376]],
+        ],
+        dtype=dtype,
+    )
+    df = pd.DataFrame(
+        {
+            "x": in_arr[:, 0, 0],
+            "y": in_arr[:, 1, 0],
+            "z": in_arr[:, 2, 0],
+        }
+    )
+    rad_lat, rad_lon, m_alt = ECEF2geodetic(df["x"], df["y"], df["z"], WGS84.a, WGS84.b)
+    assert np.all(np.isclose(rad_lat, np.deg2rad(29.9999981)))
+    assert np.all(np.isclose(rad_lon, np.deg2rad(24.99999946)))
+    assert np.all(np.isclose(m_alt, 4.89436751, atol=tol))
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.int64, tol_double_atol), (np.int32, tol_float_atol)]
+)
 def test_ECEF2geodetic_points_int(dtype, tol):
     in_arr = np.array(
         [
@@ -143,6 +204,30 @@ def test_ECEF2geodetic_points_int16(dtype, tol):
     assert np.all(np.isclose(out[:, 0, 0], np.deg2rad(29.9999981)))
     assert np.all(np.isclose(out[:, 1, 0], np.deg2rad(24.99999946)))
     assert np.all(np.isclose(out[:, 2, 0], 5, atol=tol))
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_ECEF2geodetic_points_unrolled_pandas(dtype, tol):
+    in_arr = np.array(
+        [
+            [[5010306], [2336344], [3170376.2]],
+            [[5010306], [2336344], [3170376.2]],
+        ],
+        dtype=dtype,
+    )
+    df = pd.DataFrame(
+        {
+            "x": in_arr[:, 0, 0],
+            "y": in_arr[:, 1, 0],
+            "z": in_arr[:, 2, 0],
+        }
+    )
+    rad_lat, rad_lon, m_alt = ECEF2geodetic(df["x"], df["y"], df["z"], WGS84.a, WGS84.b)
+    assert np.all(np.isclose(rad_lat, np.deg2rad(30)))
+    assert np.all(np.isclose(rad_lon, np.deg2rad(25)))
+    assert np.all(np.isclose(m_alt, 5, atol=tol))
 
 
 @pytest.mark.parametrize(
@@ -183,6 +268,29 @@ def test_ECEF2geodetic_points(dtype, tol):
     assert np.all(np.isclose(out[:, 0, 0], np.deg2rad(30)))
     assert np.all(np.isclose(out[:, 1, 0], np.deg2rad(25)))
     assert np.all(np.isclose(out[:, 2, 0], 5, atol=tol))
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_ECEF2geodetic_parallel_unrolled_pandas(dtype, tol):
+    in_arr = np.ascontiguousarray(
+        np.tile(
+            np.array([[5010306], [2336344], [3170376.2]], dtype=dtype), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "x": in_arr[:, 0, 0],
+            "y": in_arr[:, 1, 0],
+            "z": in_arr[:, 2, 0],
+        }
+    )
+    rad_lat, rad_lon, m_alt = ECEF2geodetic(df["x"], df["y"], df["z"], WGS84.a, WGS84.b)
+
+    assert np.all(np.isclose(rad_lat, np.deg2rad(30)))
+    assert np.all(np.isclose(rad_lon, np.deg2rad(25)))
+    assert np.all(np.isclose(m_alt, 5, atol=tol))
 
 
 @pytest.mark.parametrize(
