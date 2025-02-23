@@ -247,9 +247,15 @@ def ECEF2ENU(
 
 @overload
 def ECEF2ENU(
-    rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
     m_X_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_Y_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_Z_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
@@ -311,9 +317,15 @@ def ECEF2NED(
 
 @overload
 def ECEF2NED(
-    rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
     m_X_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_Y_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_Z_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
@@ -351,9 +363,15 @@ def ECEF2NED(
 
 @overload
 def ECEF2ENUv(
-    rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
     m_X_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_Y_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_Z_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
@@ -421,9 +439,15 @@ def ECEF2NEDv(
 
 @overload
 def ECEF2NEDv(
-    rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
     m_X_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_Y_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_Z_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
@@ -455,9 +479,15 @@ def ECEF2NEDv(
 
 @overload
 def ENU2ECEF(
-    rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
     m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_up: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
@@ -519,9 +549,15 @@ def ENU2ECEF(
 
 @overload
 def NED2ECEF(
-    rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
     m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_down: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
@@ -583,9 +619,15 @@ def NED2ECEF(
 
 @overload
 def ENU2ECEFv(
-    rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
     m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_up: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
@@ -635,9 +677,15 @@ def ENU2ECEFv(
 
 @overload
 def NED2ECEFv(
-    rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
     m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_down: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
