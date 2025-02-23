@@ -117,7 +117,7 @@ def test_NED2AER_points_unrolled(dtype, tol):
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
-def test_NED2AER_points_unrolled(dtype, tol):
+def test_NED2AER_points_unrolled_pandas(dtype, tol):
     NED = np.array(
         [
             [[-9.1013], [4.1617], [4.2812]],

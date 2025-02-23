@@ -67,7 +67,7 @@ def test_ECEF2NEDv_parallel_unrolled(dtype, tol):
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
-def test_ECEF2NEDv_parallel_unrolled(dtype, tol):
+def test_ECEF2NEDv_parallel_unrolled_pandas(dtype, tol):
     rrm_local = np.ascontiguousarray(
         np.tile(
             DDM2RRM(np.array([[61.64], [30.70], [0]], dtype=dtype)), 1000
