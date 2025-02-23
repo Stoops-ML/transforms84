@@ -161,6 +161,8 @@ legacy_tox_ini = """
         {quality}: {env:PYTHON:python3}
     setenv =
         PYTHONUNBUFFERED = yes
+    deps =
+        .[dev]
     extras = tests
     commands =
         pytest --cov transforms84 --cov-report=term-missing
@@ -169,8 +171,6 @@ legacy_tox_ini = """
     [testenv:quality]
     description = checks code quality
     deps =
-        ruff
-        numpy
         setuptools-scm
         setuptools
     skip_install = true
