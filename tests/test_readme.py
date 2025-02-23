@@ -43,23 +43,35 @@ def test_example1():
     assert np.all(out1 == out2)
 
     # part 3
-    rad_lat_target = np.deg2rad(np.array([31, 31, 31], dtype=np.float64))
-    rad_lon_target = np.deg2rad(np.array([32, 32, 32], dtype=np.float64))
-    m_alt_target = np.array([0, 0, 0], dtype=np.float64)
-    rad_lat_origin = np.deg2rad(np.array([30, 30, 30], dtype=np.float64))
-    rad_lon_origin = np.deg2rad(np.array([31, 31, 31], dtype=np.float64))
-    m_alt_origin = np.array([0, 0, 0], dtype=np.float64)
-    e, n, u = ECEF2ENU(
-        rad_lat_origin,
-        rad_lon_origin,
-        m_alt_origin,
-        *geodetic2ECEF(rad_lat_target, rad_lon_target, m_alt_target, WGS84.a, WGS84.b),
+    import pandas as pd
+
+    df = pd.DataFrame(
+        {
+            "radLatTarget": rrm_target[:, 0, 0],
+            "radLonTarget": rrm_target[:, 1, 0],
+            "mAltTarget": rrm_target[:, 2, 0],
+            "radLatOrigin": rrm_local[:, 0, 0],
+            "radLonOrigin": rrm_local[:, 1, 0],
+            "mAltOrigin": rrm_local[:, 2, 0],
+        }
+    )
+    df["e"], df["n"], df["u"] = ECEF2ENU(
+        df["radLatOrigin"].to_numpy(),
+        df["radLonOrigin"].to_numpy(),
+        df["mAltOrigin"].to_numpy(),
+        *geodetic2ECEF(
+            df["radLatTarget"].to_numpy(),
+            df["radLonTarget"].to_numpy(),
+            df["mAltTarget"].to_numpy(),
+            WGS84.a,
+            WGS84.b,
+        ),
         WGS84.a,
         WGS84.b,
     )
-    assert np.all(out1[:, 0, 0] == e)
-    assert np.all(out1[:, 1, 0] == n)
-    assert np.all(out1[:, 2, 0] == u)
+    assert np.all(np.isclose(out1[:, 0, 0], df["e"].to_numpy()))
+    assert np.all(np.isclose(out1[:, 1, 0], df["n"].to_numpy()))
+    assert np.all(np.isclose(out1[:, 2, 0], df["u"].to_numpy()))
 
 
 def test_example2():
