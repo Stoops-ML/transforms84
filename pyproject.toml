@@ -54,6 +54,7 @@ dev = [
     "setuptools-scm",
     "build>=1.2.1",
     "pandas>=2.0.0",
+    "pandas-stubs>=2.0.0",
 ]
 examples = [
     "jupyterlab>=4.2.4",
