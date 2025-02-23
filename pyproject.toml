@@ -161,9 +161,6 @@ legacy_tox_ini = """
 
     [testenv:quality]
     description = checks code quality
-    deps =
-        setuptools-scm
-        setuptools
     skip_install = true
     commands =
         python -m ruff check
