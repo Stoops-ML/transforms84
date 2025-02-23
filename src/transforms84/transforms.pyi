@@ -1,6 +1,7 @@
-from typing import Tuple, overload
+from typing import Tuple, Union, overload
 
 import numpy.typing as npt
+import pandas as pd
 
 from .definitions import SUPPORTED_TYPES
 
@@ -84,8 +85,8 @@ def UTM2geodetic(
 
 @overload
 def UTM2geodetic(
-    m_X: npt.NDArray[SUPPORTED_TYPES],
-    m_Y: npt.NDArray[SUPPORTED_TYPES],
+    m_X: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series],
+    m_Y: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series],
     zone_number: int,
     zone_letter: str,
     m_semi_major_axis: float,

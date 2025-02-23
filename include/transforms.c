@@ -2286,8 +2286,20 @@ UTM2geodeticUnrolledWrapper(PyObject* self, PyObject* args)
     char* ZoneLetter;
 
     // checks
-    if (!PyArg_ParseTuple(args, "O!O!Osdd", &PyArray_Type, &mX, &PyArray_Type, &mY, &ZoneNumberPy, &ZoneLetter, &a, &b))
+    if (!PyArg_ParseTuple(args, "OOOsdd", &mX, &mY, &ZoneNumberPy, &ZoneLetter, &a, &b))
         return NULL;
+    if (!PyObject_TypeCheck(mX, &PyArray_Type) && (mX = numpy_array_from_pandas_series(mX)) == NULL)  {
+        PyErr_SetString(PyExc_ValueError, "mX must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(mX);
+        Py_XDECREF(mY);
+        return NULL;
+    }
+    if (!PyObject_TypeCheck(mY, &PyArray_Type) && (mY = numpy_array_from_pandas_series(mY)) == NULL)  {
+        PyErr_SetString(PyExc_ValueError, "mY must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(mX);
+        Py_XDECREF(mY);
+        return NULL;
+    }
     if (!PyLong_Check(ZoneNumberPy)) {
         PyErr_SetString(PyExc_TypeError, "Zone number must be an integer");
         return NULL;
