@@ -2288,13 +2288,13 @@ UTM2geodeticUnrolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "OOOsdd", &mX, &mY, &ZoneNumberPy, &ZoneLetter, &a, &b))
         return NULL;
-    if (!PyObject_TypeCheck(mX, &PyArray_Type) && (mX = numpy_array_from_pandas_series(mX)) == NULL)  {
+    if ((mX = get_numpy_array(mX)) == NULL)  {
         PyErr_SetString(PyExc_ValueError, "mX must either be a numpy ndarray or a pandas Series.");
         Py_XDECREF(mX);
         Py_XDECREF(mY);
         return NULL;
     }
-    if (!PyObject_TypeCheck(mY, &PyArray_Type) && (mY = numpy_array_from_pandas_series(mY)) == NULL)  {
+    if ((mY = get_numpy_array(mY)) == NULL)  {
         PyErr_SetString(PyExc_ValueError, "mY must either be a numpy ndarray or a pandas Series.");
         Py_XDECREF(mX);
         Py_XDECREF(mY);
