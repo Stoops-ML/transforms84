@@ -1,5 +1,5 @@
-import pandas as pd
 import numpy as np
+import pandas as pd
 import pytest
 
 from transforms84.helpers import DDM2RRM
@@ -249,7 +249,7 @@ def test_NED2ECEF_different_dtypes(dtype0, dtype1, tol):
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_rtol), (np.float32, tol_float_rtol)]
 )
-def test_NED2ECEF_points_unrolled(dtype, tol):
+def test_NED2ECEF_points_unrolled_pandas(dtype, tol):
     XYZ = np.array(
         [
             [[1334.3], [-2544.4], [360.0]],
