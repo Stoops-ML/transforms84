@@ -56,22 +56,22 @@ def test_example1():
         }
     )
     df["e"], df["n"], df["u"] = ECEF2ENU(
-        df["radLatOrigin"].to_numpy(),
-        df["radLonOrigin"].to_numpy(),
-        df["mAltOrigin"].to_numpy(),
+        df["radLatOrigin"],
+        df["radLonOrigin"],
+        df["mAltOrigin"],
         *geodetic2ECEF(
-            df["radLatTarget"].to_numpy(),
-            df["radLonTarget"].to_numpy(),
-            df["mAltTarget"].to_numpy(),
+            df["radLatTarget"],
+            df["radLonTarget"],
+            df["mAltTarget"],
             WGS84.a,
             WGS84.b,
         ),
         WGS84.a,
         WGS84.b,
     )
-    assert np.all(np.isclose(out1[:, 0, 0], df["e"].to_numpy()))
-    assert np.all(np.isclose(out1[:, 1, 0], df["n"].to_numpy()))
-    assert np.all(np.isclose(out1[:, 2, 0], df["u"].to_numpy()))
+    assert np.all(np.isclose(out1[:, 0, 0], df["e"]))
+    assert np.all(np.isclose(out1[:, 1, 0], df["n"]))
+    assert np.all(np.isclose(out1[:, 2, 0], df["u"]))
 
 
 def test_example2():

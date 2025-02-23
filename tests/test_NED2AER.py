@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import pytest
 
 from transforms84.helpers import DDM2RRM
@@ -69,6 +70,30 @@ def test_NED2AER_point_unrolled(dtype, tol):
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )
+def test_NED2AER_point_unrolled_list(dtype, tol):
+    NED = np.array([[-9.1013], [4.1617], [4.2812]], dtype=dtype)
+    df = pd.DataFrame(NED.T, columns=["N", "E", "D"])
+    a, e, r = NED2AER(df["N"].tolist(), df["E"].tolist(), df["D"].tolist())
+    assert np.isclose(a, np.deg2rad(155.4271), atol=tol)
+    assert np.isclose(e, np.deg2rad(-23.1609), atol=tol)
+    assert np.isclose(r, 10.8849, atol=tol)
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_NED2AER_point_unrolled_pandas(dtype, tol):
+    NED = np.array([[-9.1013], [4.1617], [4.2812]], dtype=dtype)
+    df = pd.DataFrame(NED.T, columns=["N", "E", "D"])
+    a, e, r = NED2AER(df["N"], df["E"], df["D"])
+    assert np.isclose(a, np.deg2rad(155.4271), atol=tol)
+    assert np.isclose(e, np.deg2rad(-23.1609), atol=tol)
+    assert np.isclose(r, 10.8849, atol=tol)
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
 def test_NED2AER_point(dtype, tol):
     NED = np.array([[-9.1013], [4.1617], [4.2812]], dtype=dtype)
     assert np.all(
@@ -96,6 +121,54 @@ def test_NED2AER_points_unrolled(dtype, tol):
         np.ascontiguousarray(NED[:, 1, 0]),
         np.ascontiguousarray(NED[:, 2, 0]),
     )
+    assert np.all(np.isclose(a, np.deg2rad(155.4271), atol=tol))
+    assert np.all(np.isclose(e, np.deg2rad(-23.1609), atol=tol))
+    assert np.all(np.isclose(r, 10.8849, atol=tol))
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_NED2AER_points_unrolled_list(dtype, tol):
+    NED = np.array(
+        [
+            [[-9.1013], [4.1617], [4.2812]],
+            [[-9.1013], [4.1617], [4.2812]],
+        ],
+        dtype=dtype,
+    )
+    df = pd.DataFrame(
+        {
+            "N": NED[:, 0, 0],
+            "E": NED[:, 1, 0],
+            "D": NED[:, 2, 0],
+        }
+    )
+    a, e, r = NED2AER(df["N"].tolist(), df["E"].tolist(), df["D"].tolist())
+    assert np.all(np.isclose(a, np.deg2rad(155.4271), atol=tol))
+    assert np.all(np.isclose(e, np.deg2rad(-23.1609), atol=tol))
+    assert np.all(np.isclose(r, 10.8849, atol=tol))
+
+
+@pytest.mark.parametrize(
+    "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
+)
+def test_NED2AER_points_unrolled_pandas(dtype, tol):
+    NED = np.array(
+        [
+            [[-9.1013], [4.1617], [4.2812]],
+            [[-9.1013], [4.1617], [4.2812]],
+        ],
+        dtype=dtype,
+    )
+    df = pd.DataFrame(
+        {
+            "N": NED[:, 0, 0],
+            "E": NED[:, 1, 0],
+            "D": NED[:, 2, 0],
+        }
+    )
+    a, e, r = NED2AER(df["N"], df["E"], df["D"])
     assert np.all(np.isclose(a, np.deg2rad(155.4271), atol=tol))
     assert np.all(np.isclose(e, np.deg2rad(-23.1609), atol=tol))
     assert np.all(np.isclose(r, 10.8849, atol=tol))

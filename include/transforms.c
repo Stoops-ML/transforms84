@@ -2068,8 +2068,15 @@ geodetic2UTMUnrolledWrapper(PyObject* self, PyObject* args)
     double a, b;
 
     // checks
-    if (!PyArg_ParseTuple(args, "O!O!O!dd", &PyArray_Type, &radLat, &PyArray_Type, &radLon, &PyArray_Type, &mAlt, &a, &b))
+    if (!PyArg_ParseTuple(args, "OOOdd", &radLat, &radLon, &mAlt, &a, &b))
         return NULL;
+    if (((radLat = get_numpy_array(radLat)) == NULL) || ((radLon = get_numpy_array(radLon)) == NULL) || ((mAlt = get_numpy_array(mAlt)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(radLat);
+        Py_XDECREF(radLon);
+        Py_XDECREF(mAlt);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(radLat)) && (PyArray_ISCONTIGUOUS(radLon)) && (PyArray_ISCONTIGUOUS(mAlt)))) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
@@ -2286,8 +2293,14 @@ UTM2geodeticUnrolledWrapper(PyObject* self, PyObject* args)
     char* ZoneLetter;
 
     // checks
-    if (!PyArg_ParseTuple(args, "O!O!Osdd", &PyArray_Type, &mX, &PyArray_Type, &mY, &ZoneNumberPy, &ZoneLetter, &a, &b))
+    if (!PyArg_ParseTuple(args, "OOOsdd", &mX, &mY, &ZoneNumberPy, &ZoneLetter, &a, &b))
         return NULL;
+    if (((mX = get_numpy_array(mX)) == NULL) || ((mY = get_numpy_array(mY)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(mX);
+        Py_XDECREF(mY);
+        return NULL;
+    }
     if (!PyLong_Check(ZoneNumberPy)) {
         PyErr_SetString(PyExc_TypeError, "Zone number must be an integer");
         return NULL;
@@ -2466,8 +2479,15 @@ geodetic2ECEFUnrolledWrapper(PyObject* self, PyObject* args)
     double a, b;
 
     // checks
-    if (!PyArg_ParseTuple(args, "O!O!O!dd", &PyArray_Type, &radLat, &PyArray_Type, &radLon, &PyArray_Type, &mAlt, &a, &b))
+    if (!PyArg_ParseTuple(args, "OOOdd", &radLat, &radLon, &mAlt, &a, &b))
         return NULL;
+    if (((radLat = get_numpy_array(radLat)) == NULL) || ((radLon = get_numpy_array(radLon)) == NULL) || ((mAlt = get_numpy_array(mAlt)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(radLat);
+        Py_XDECREF(radLon);
+        Py_XDECREF(mAlt);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(radLat)) && (PyArray_ISCONTIGUOUS(radLon)) && (PyArray_ISCONTIGUOUS(mAlt)))) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
@@ -2602,8 +2622,15 @@ ECEF2geodeticUnrolledWrapper(PyObject* self, PyObject* args)
     double a, b;
 
     // checks
-    if (!PyArg_ParseTuple(args, "O!O!O!dd", &PyArray_Type, &mX, &PyArray_Type, &mY, &PyArray_Type, &mZ, &a, &b))
+    if (!PyArg_ParseTuple(args, "OOOdd", &mX, &mY, &mZ, &a, &b))
         return NULL;
+    if (((mX = get_numpy_array(mX)) == NULL) || ((mY = get_numpy_array(mY)) == NULL) || ((mZ = get_numpy_array(mZ)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(mX);
+        Py_XDECREF(mY);
+        Py_XDECREF(mZ);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(mX)) && (PyArray_ISCONTIGUOUS(mY)) && (PyArray_ISCONTIGUOUS(mZ)))) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
@@ -2800,22 +2827,26 @@ ECEF2ENUUnrolledWrapper(PyObject* self, PyObject* args)
 
     // checks
     if (!PyArg_ParseTuple(args,
-            "O!O!O!O!O!O!dd",
-            &PyArray_Type,
+            "OOOOOOdd",
             &radLatOrigin,
-            &PyArray_Type,
             &radLonOrigin,
-            &PyArray_Type,
             &mAltOrigin,
-            &PyArray_Type,
             &mXTarget,
-            &PyArray_Type,
             &mYTarget,
-            &PyArray_Type,
             &mZTarget,
             &a,
             &b))
         return NULL;
+    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mXTarget = get_numpy_array(mXTarget)) == NULL) || ((mYTarget = get_numpy_array(mYTarget)) == NULL) || ((mZTarget = get_numpy_array(mZTarget)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(radLatOrigin);
+        Py_XDECREF(radLonOrigin);
+        Py_XDECREF(mAltOrigin);
+        Py_XDECREF(mXTarget);
+        Py_XDECREF(mYTarget);
+        Py_XDECREF(mZTarget);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mXTarget)) && (PyArray_ISCONTIGUOUS(mYTarget)) && (PyArray_ISCONTIGUOUS(mZTarget)))) {
             PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
@@ -3119,22 +3150,26 @@ ECEF2NEDUnrolledWrapper(PyObject* self, PyObject* args)
 
     // checks
     if (!PyArg_ParseTuple(args,
-            "O!O!O!O!O!O!dd",
-            &PyArray_Type,
+            "OOOOOOdd",
             &radLatOrigin,
-            &PyArray_Type,
             &radLonOrigin,
-            &PyArray_Type,
             &mAltOrigin,
-            &PyArray_Type,
             &mXTarget,
-            &PyArray_Type,
             &mYTarget,
-            &PyArray_Type,
             &mZTarget,
             &a,
             &b))
         return NULL;
+    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mXTarget = get_numpy_array(mXTarget)) == NULL) || ((mYTarget = get_numpy_array(mYTarget)) == NULL) || ((mZTarget = get_numpy_array(mZTarget)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(radLatOrigin);
+        Py_XDECREF(radLonOrigin);
+        Py_XDECREF(mAltOrigin);
+        Py_XDECREF(mXTarget);
+        Py_XDECREF(mYTarget);
+        Py_XDECREF(mZTarget);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mXTarget)) && (PyArray_ISCONTIGUOUS(mYTarget)) && (PyArray_ISCONTIGUOUS(mZTarget)))) {
             PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
@@ -3531,20 +3566,24 @@ ECEF2NEDvUnrolledWrapper(PyObject* self, PyObject* args)
 
     // checks
     if (!PyArg_ParseTuple(args,
-            "O!O!O!O!O!O!",
-            &PyArray_Type,
-            &radLatOrigin,
-            &PyArray_Type,
-            &radLonOrigin,
-            &PyArray_Type,
-            &mAltOrigin,
-            &PyArray_Type,
-            &mXTarget,
-            &PyArray_Type,
-            &mYTarget,
-            &PyArray_Type,
-            &mZTarget))
+        "OOOOOO",
+        &radLatOrigin,
+        &radLonOrigin,
+        &mAltOrigin,
+        &mXTarget,
+        &mYTarget,
+        &mZTarget))
         return NULL;
+    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mXTarget = get_numpy_array(mXTarget)) == NULL) || ((mYTarget = get_numpy_array(mYTarget)) == NULL) || ((mZTarget = get_numpy_array(mZTarget)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(radLatOrigin);
+        Py_XDECREF(radLonOrigin);
+        Py_XDECREF(mAltOrigin);
+        Py_XDECREF(mXTarget);
+        Py_XDECREF(mYTarget);
+        Py_XDECREF(mZTarget);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mXTarget)) && (PyArray_ISCONTIGUOUS(mYTarget)) && (PyArray_ISCONTIGUOUS(mZTarget)))) {
             PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
@@ -3844,20 +3883,24 @@ ECEF2ENUvUnrolledWrapper(PyObject* self, PyObject* args)
 
     // checks
     if (!PyArg_ParseTuple(args,
-            "O!O!O!O!O!O!",
-            &PyArray_Type,
-            &radLatOrigin,
-            &PyArray_Type,
-            &radLonOrigin,
-            &PyArray_Type,
-            &mAltOrigin,
-            &PyArray_Type,
-            &mXTarget,
-            &PyArray_Type,
-            &mYTarget,
-            &PyArray_Type,
-            &mZTarget))
+        "OOOOOO",
+        &radLatOrigin,
+        &radLonOrigin,
+        &mAltOrigin,
+        &mXTarget,
+        &mYTarget,
+        &mZTarget))
         return NULL;
+    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mXTarget = get_numpy_array(mXTarget)) == NULL) || ((mYTarget = get_numpy_array(mYTarget)) == NULL) || ((mZTarget = get_numpy_array(mZTarget)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(radLatOrigin);
+        Py_XDECREF(radLonOrigin);
+        Py_XDECREF(mAltOrigin);
+        Py_XDECREF(mXTarget);
+        Py_XDECREF(mYTarget);
+        Py_XDECREF(mZTarget);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mXTarget)) && (PyArray_ISCONTIGUOUS(mYTarget)) && (PyArray_ISCONTIGUOUS(mZTarget)))) {
             PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
@@ -4064,22 +4107,24 @@ NED2ECEFUnrolledWrapper(PyObject* self, PyObject* args)
 
     // checks
     if (!PyArg_ParseTuple(args,
-            "O!O!O!O!O!O!dd",
-            &PyArray_Type,
-            &radLatOrigin,
-            &PyArray_Type,
-            &radLonOrigin,
-            &PyArray_Type,
-            &mAltOrigin,
-            &PyArray_Type,
-            &mNLocal,
-            &PyArray_Type,
-            &mELocal,
-            &PyArray_Type,
-            &mDLocal,
-            &a,
-            &b))
+        "OOOOOOdd",
+        &radLatOrigin,
+        &radLonOrigin,
+        &mAltOrigin,
+        &mNLocal,
+        &mELocal,
+        &mDLocal, &a, &b))
         return NULL;
+    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mNLocal = get_numpy_array(mNLocal)) == NULL) || ((mELocal = get_numpy_array(mELocal)) == NULL) || ((mDLocal = get_numpy_array(mDLocal)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(radLatOrigin);
+        Py_XDECREF(radLonOrigin);
+        Py_XDECREF(mAltOrigin);
+        Py_XDECREF(mNLocal);
+        Py_XDECREF(mELocal);
+        Py_XDECREF(mDLocal);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mNLocal)) && (PyArray_ISCONTIGUOUS(mELocal)) && (PyArray_ISCONTIGUOUS(mDLocal)))) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
@@ -4382,22 +4427,26 @@ ENU2ECEFUnrolledWrapper(PyObject* self, PyObject* args)
 
     // checks
     if (!PyArg_ParseTuple(args,
-            "O!O!O!O!O!O!dd",
-            &PyArray_Type,
-            &radLatOrigin,
-            &PyArray_Type,
-            &radLonOrigin,
-            &PyArray_Type,
-            &mAltOrigin,
-            &PyArray_Type,
-            &mNLocal,
-            &PyArray_Type,
-            &mELocal,
-            &PyArray_Type,
-            &mDLocal,
+        "OOOOOOdd",
+        &radLatOrigin,
+        &radLonOrigin,
+        &mAltOrigin,
+        &mNLocal,
+        &mELocal,
+        &mDLocal,
             &a,
             &b))
         return NULL;
+    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mNLocal = get_numpy_array(mNLocal)) == NULL) || ((mELocal = get_numpy_array(mELocal)) == NULL) || ((mDLocal = get_numpy_array(mDLocal)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(radLatOrigin);
+        Py_XDECREF(radLonOrigin);
+        Py_XDECREF(mAltOrigin);
+        Py_XDECREF(mNLocal);
+        Py_XDECREF(mELocal);
+        Py_XDECREF(mDLocal);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mNLocal)) && (PyArray_ISCONTIGUOUS(mELocal)) && (PyArray_ISCONTIGUOUS(mDLocal)))) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
@@ -4792,20 +4841,24 @@ ENU2ECEFvUnrolledWrapper(PyObject* self, PyObject* args)
 
     // checks
     if (!PyArg_ParseTuple(args,
-        "O!O!O!O!O!O!",
-        &PyArray_Type,
+        "OOOOOO",
         &radLatOrigin,
-        &PyArray_Type,
         &radLonOrigin,
-        &PyArray_Type,
         &mAltOrigin,
-        &PyArray_Type,
         &mNLocal,
-        &PyArray_Type,
         &mELocal,
-        &PyArray_Type,
         &mDLocal))
-    return NULL;
+        return NULL;
+    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mNLocal = get_numpy_array(mNLocal)) == NULL) || ((mELocal = get_numpy_array(mELocal)) == NULL) || ((mDLocal = get_numpy_array(mDLocal)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(radLatOrigin);
+        Py_XDECREF(radLonOrigin);
+        Py_XDECREF(mAltOrigin);
+        Py_XDECREF(mNLocal);
+        Py_XDECREF(mELocal);
+        Py_XDECREF(mDLocal);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mNLocal)) && (PyArray_ISCONTIGUOUS(mELocal)) && (PyArray_ISCONTIGUOUS(mDLocal)))) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
@@ -5012,20 +5065,24 @@ NED2ECEFvUnrolledWrapper(PyObject* self, PyObject* args)
 
     // checks
     if (!PyArg_ParseTuple(args,
-        "O!O!O!O!O!O!",
-        &PyArray_Type,
+        "OOOOOO",
         &radLatOrigin,
-        &PyArray_Type,
         &radLonOrigin,
-        &PyArray_Type,
         &mAltOrigin,
-        &PyArray_Type,
         &mNLocal,
-        &PyArray_Type,
         &mELocal,
-        &PyArray_Type,
         &mDLocal))
-    return NULL;
+        return NULL;
+    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mNLocal = get_numpy_array(mNLocal)) == NULL) || ((mELocal = get_numpy_array(mELocal)) == NULL) || ((mDLocal = get_numpy_array(mDLocal)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(radLatOrigin);
+        Py_XDECREF(radLonOrigin);
+        Py_XDECREF(mAltOrigin);
+        Py_XDECREF(mNLocal);
+        Py_XDECREF(mELocal);
+        Py_XDECREF(mDLocal);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(radLatOrigin)) && (PyArray_ISCONTIGUOUS(radLonOrigin)) && (PyArray_ISCONTIGUOUS(mAltOrigin)) && (PyArray_ISCONTIGUOUS(mNLocal)) && (PyArray_ISCONTIGUOUS(mELocal)) && (PyArray_ISCONTIGUOUS(mDLocal)))) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
@@ -5324,17 +5381,15 @@ ENU2AERUnrolledWrapper(PyObject* self, PyObject* args)
     PyArrayObject *mE, *mN, *mU;
 
     // checks
-    // checks
-    if (!PyArg_ParseTuple(args,
-        "O!O!O!",
-        &PyArray_Type,
-        &mE,
-        &PyArray_Type,
-        &mN,
-        &PyArray_Type,
-        &mU
-        ))
-    return NULL;
+    if (!PyArg_ParseTuple(args, "OOO", &mE, &mN, &mU))
+        return NULL;
+    if (((mE = get_numpy_array(mE)) == NULL) || ((mN = get_numpy_array(mN)) == NULL) || ((mU = get_numpy_array(mU)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(mE);
+        Py_XDECREF(mN);
+        Py_XDECREF(mU);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(mE)) && (PyArray_ISCONTIGUOUS(mN)) && (PyArray_ISCONTIGUOUS(mU)))) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
@@ -5537,17 +5592,15 @@ NED2AERUnrolledWrapper(PyObject* self, PyObject* args)
     PyArrayObject *mN, *mE, *mD;
 
     // checks
-    // checks
-    if (!PyArg_ParseTuple(args,
-        "O!O!O!",
-        &PyArray_Type,
-        &mN,
-        &PyArray_Type,
-        &mE,
-        &PyArray_Type,
-        &mD
-        ))
-    return NULL;
+    if (!PyArg_ParseTuple(args, "OOO", &mN, &mE, &mD))
+        return NULL;
+    if (((mN = get_numpy_array(mN)) == NULL) || ((mE = get_numpy_array(mE)) == NULL) || ((mD = get_numpy_array(mD)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(mN);
+        Py_XDECREF(mE);
+        Py_XDECREF(mD);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(mN)) && (PyArray_ISCONTIGUOUS(mE)) && (PyArray_ISCONTIGUOUS(mD)))) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
@@ -5811,16 +5864,15 @@ AER2NEDUnrolledWrapper(PyObject* self, PyObject* args)
     PyArrayObject *radAz, *radEl, *mRange;
 
     // checks
-    if (!PyArg_ParseTuple(args,
-        "O!O!O!",
-        &PyArray_Type,
-        &radAz,
-        &PyArray_Type,
-        &radEl,
-        &PyArray_Type,
-        &mRange
-        ))
-    return NULL;
+    if (!PyArg_ParseTuple(args, "OOO", &radAz, &radEl, &mRange))
+        return NULL;
+    if (((radAz = get_numpy_array(radAz)) == NULL) || ((radEl = get_numpy_array(radEl)) == NULL) || ((mRange = get_numpy_array(mRange)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(radAz);
+        Py_XDECREF(radEl);
+        Py_XDECREF(mRange);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(radAz)) && (PyArray_ISCONTIGUOUS(radEl)) && (PyArray_ISCONTIGUOUS(mRange)))) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;
@@ -6024,16 +6076,15 @@ AER2ENUUnrolledWrapper(PyObject* self, PyObject* args)
     PyArrayObject *radAz, *radEl, *mRange;
 
     // checks
-    if (!PyArg_ParseTuple(args,
-        "O!O!O!",
-        &PyArray_Type,
-        &radAz,
-        &PyArray_Type,
-        &radEl,
-        &PyArray_Type,
-        &mRange
-        ))
-    return NULL;
+    if (!PyArg_ParseTuple(args, "OOO", &radAz, &radEl, &mRange))
+        return NULL;
+    if (((radAz = get_numpy_array(radAz)) == NULL) || ((radEl = get_numpy_array(radEl)) == NULL) || ((mRange = get_numpy_array(mRange)) == NULL)) {
+        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
+        Py_XDECREF(radAz);
+        Py_XDECREF(radEl);
+        Py_XDECREF(mRange);
+        return NULL;
+    }
     if (!((PyArray_ISCONTIGUOUS(radAz)) && (PyArray_ISCONTIGUOUS(radEl)) && (PyArray_ISCONTIGUOUS(mRange)))) {
         PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
         return NULL;

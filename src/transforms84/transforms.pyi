@@ -1,6 +1,7 @@
-from typing import Tuple, overload
+from typing import List, Set, Tuple, Union, overload
 
 import numpy.typing as npt
+import pandas as pd
 
 from .definitions import SUPPORTED_TYPES
 
@@ -27,9 +28,9 @@ def geodetic2UTM(
 
 @overload
 def geodetic2UTM(
-    rad_lat: npt.NDArray[SUPPORTED_TYPES],
-    rad_lon: npt.NDArray[SUPPORTED_TYPES],
-    m_alt: npt.NDArray[SUPPORTED_TYPES],
+    rad_lat: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    rad_lon: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_alt: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
 ) -> Tuple[
@@ -39,12 +40,12 @@ def geodetic2UTM(
     """
     Convert geodetic coordinates (latitude, longitude, altitude) to UTM coordinates.
 
-    :param rad_lat: The latitude in radians as a NumPy array.
-    :type rad_lat: npt.NDArray[SUPPORTED_TYPES]
-    :param rad_lon: The longitude in radians as a NumPy array.
-    :type rad_lon: npt.NDArray[SUPPORTED_TYPES]
-    :param m_alt: The altitude in meters as a NumPy array.
-    :type m_alt: npt.NDArray[SUPPORTED_TYPES]
+    :param rad_lat: The latitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lat: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param rad_lon: The longitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lon: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_alt: The altitude in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_alt: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
     :param m_semi_major_axis: The semi-major axis of the ellipsoid.
     :type m_semi_major_axis: float
     :param m_semi_minor_axis: The semi-minor axis of the ellipsoid.
@@ -84,8 +85,8 @@ def UTM2geodetic(
 
 @overload
 def UTM2geodetic(
-    m_X: npt.NDArray[SUPPORTED_TYPES],
-    m_Y: npt.NDArray[SUPPORTED_TYPES],
+    m_X: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_Y: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     zone_number: int,
     zone_letter: str,
     m_semi_major_axis: float,
@@ -98,10 +99,10 @@ def UTM2geodetic(
     """
     Convert UTM coordinates to geodetic coordinates (latitude, longitude, altitude).
 
-    :param m_X: The UTM easting coordinates as a NumPy array.
-    :type m_X: npt.NDArray[SUPPORTED_TYPES]
-    :param m_Y: The UTM northing coordinates as a NumPy array.
-    :type m_Y: npt.NDArray[SUPPORTED_TYPES]
+    :param m_X: The UTM easting coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_X: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_Y: The UTM northing coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_Y: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
     :param zone_number: The UTM zone number.
     :type zone_number: int
     :param zone_letter: The UTM zone letter.
@@ -139,9 +140,9 @@ def geodetic2ECEF(
 
 @overload
 def geodetic2ECEF(
-    rad_lat: npt.NDArray[SUPPORTED_TYPES],
-    rad_lon: npt.NDArray[SUPPORTED_TYPES],
-    m_alt: npt.NDArray[SUPPORTED_TYPES],
+    rad_lat: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    rad_lon: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_alt: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
 ) -> Tuple[
@@ -152,12 +153,12 @@ def geodetic2ECEF(
     """
     Convert geodetic coordinates (latitude, longitude, altitude) to ECEF (Earth-Centered, Earth-Fixed) coordinates.
 
-    :param rad_lat: The latitude in radians as a NumPy array.
-    :type rad_lat: npt.NDArray[SUPPORTED_TYPES]
-    :param rad_lon: The longitude in radians as a NumPy array.
-    :type rad_lon: npt.NDArray[SUPPORTED_TYPES]
-    :param m_alt: The altitude in meters as a NumPy array.
-    :type m_alt: npt.NDArray[SUPPORTED_TYPES]
+    :param rad_lat: The latitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lat: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param rad_lon: The longitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lon: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_alt: The altitude in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_alt: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
     :param m_semi_major_axis: The semi-major axis of the ellipsoid.
     :type m_semi_major_axis: float
     :param m_semi_minor_axis: The semi-minor axis of the ellipsoid.
@@ -191,9 +192,9 @@ def ECEF2geodetic(
 
 @overload
 def ECEF2geodetic(
-    m_X: npt.NDArray[SUPPORTED_TYPES],
-    m_Y: npt.NDArray[SUPPORTED_TYPES],
-    m_Z: npt.NDArray[SUPPORTED_TYPES],
+    m_X: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_Y: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_Z: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
 ) -> Tuple[
@@ -204,12 +205,12 @@ def ECEF2geodetic(
     """
     Convert ECEF (Earth-Centered, Earth-Fixed) coordinates to geodetic coordinates (latitude, longitude, altitude).
 
-    :param m_X: The ECEF X coordinates as a NumPy array.
-    :type m_X: npt.NDArray[SUPPORTED_TYPES]
-    :param m_Y: The ECEF Y coordinates as a NumPy array.
-    :type m_Y: npt.NDArray[SUPPORTED_TYPES]
-    :param m_Z: The ECEF Z coordinates as a NumPy array.
-    :type m_Z: npt.NDArray[SUPPORTED_TYPES]
+    :param m_X: The ECEF X coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_X: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_Y: The ECEF Y coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_Y: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_Z: The ECEF Z coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_Z: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
     :param m_semi_major_axis: The semi-major axis of the ellipsoid.
     :type m_semi_major_axis: float
     :param m_semi_minor_axis: The semi-minor axis of the ellipsoid.
@@ -246,12 +247,18 @@ def ECEF2ENU(
 
 @overload
 def ECEF2ENU(
-    rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_X_target: npt.NDArray[SUPPORTED_TYPES],
-    m_Y_target: npt.NDArray[SUPPORTED_TYPES],
-    m_Z_target: npt.NDArray[SUPPORTED_TYPES],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_X_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_Y_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_Z_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
 ) -> Tuple[
@@ -262,18 +269,18 @@ def ECEF2ENU(
     """
     Convert ECEF (Earth-Centered, Earth-Fixed) coordinates to ENU (East-North-Up) coordinates.
 
-    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array.
-    :type rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array.
-    :type rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array.
-    :type m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_X_target: The target ECEF X coordinates as a NumPy array.
-    :type m_X_target: npt.NDArray[SUPPORTED_TYPES]
-    :param m_Y_target: The target ECEF Y coordinates as a NumPy array.
-    :type m_Y_target: npt.NDArray[SUPPORTED_TYPES]
-    :param m_Z_target: The target ECEF Z coordinates as a NumPy array.
-    :type m_Z_target: npt.NDArray[SUPPORTED_TYPES]
+    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_X_target: The target ECEF X coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_X_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_Y_target: The target ECEF Y coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_Y_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_Z_target: The target ECEF Z coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_Z_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
     :param m_semi_major_axis: The semi-major axis of the ellipsoid.
     :type m_semi_major_axis: float
     :param m_semi_minor_axis: The semi-minor axis of the ellipsoid.
@@ -310,12 +317,18 @@ def ECEF2NED(
 
 @overload
 def ECEF2NED(
-    rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_X_target: npt.NDArray[SUPPORTED_TYPES],
-    m_Y_target: npt.NDArray[SUPPORTED_TYPES],
-    m_Z_target: npt.NDArray[SUPPORTED_TYPES],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_X_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_Y_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_Z_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
 ) -> Tuple[
@@ -326,18 +339,18 @@ def ECEF2NED(
     """
     Convert ECEF (Earth-Centered, Earth-Fixed) coordinates to NED (North-East-Down) coordinates.
 
-    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array.
-    :type rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array.
-    :type rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array.
-    :type m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_X_target: The target ECEF X coordinates as a NumPy array.
-    :type m_X_target: npt.NDArray[SUPPORTED_TYPES]
-    :param m_Y_target: The target ECEF Y coordinates as a NumPy array.
-    :type m_Y_target: npt.NDArray[SUPPORTED_TYPES]
-    :param m_Z_target: The target ECEF Z coordinates as a NumPy array.
-    :type m_Z_target: npt.NDArray[SUPPORTED_TYPES]
+    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_X_target: The target ECEF X coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_X_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_Y_target: The target ECEF Y coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_Y_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_Z_target: The target ECEF Z coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_Z_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
     :param m_semi_major_axis: The semi-major axis of the ellipsoid.
     :type m_semi_major_axis: float
     :param m_semi_minor_axis: The semi-minor axis of the ellipsoid.
@@ -350,12 +363,18 @@ def ECEF2NED(
 
 @overload
 def ECEF2ENUv(
-    rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_X_target: npt.NDArray[SUPPORTED_TYPES],
-    m_Y_target: npt.NDArray[SUPPORTED_TYPES],
-    m_Z_target: npt.NDArray[SUPPORTED_TYPES],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_X_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_Y_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_Z_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
 ) -> Tuple[
     npt.NDArray[SUPPORTED_TYPES],
     npt.NDArray[SUPPORTED_TYPES],
@@ -364,18 +383,18 @@ def ECEF2ENUv(
     """
     Convert ECEF (Earth-Centered, Earth-Fixed) velocity coordinates to ENU (East-North-Up) velocity coordinates.
 
-    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array.
-    :type rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array.
-    :type rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array.
-    :type m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_X_target: The target ECEF X velocity coordinates as a NumPy array.
-    :type m_X_target: npt.NDArray[SUPPORTED_TYPES]
-    :param m_Y_target: The target ECEF Y velocity coordinates as a NumPy array.
-    :type m_Y_target: npt.NDArray[SUPPORTED_TYPES]
-    :param m_Z_target: The target ECEF Z velocity coordinates as a NumPy array.
-    :type m_Z_target: npt.NDArray[SUPPORTED_TYPES]
+    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_X_target: The target ECEF X velocity coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_X_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_Y_target: The target ECEF Y velocity coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_Y_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_Z_target: The target ECEF Z velocity coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_Z_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
 
     :return: The ENU velocity coordinates (East, North, Up) as a tuple of NumPy arrays.
     :rtype: Tuple[npt.NDArray[SUPPORTED_TYPES], npt.NDArray[SUPPORTED_TYPES], npt.NDArray[SUPPORTED_TYPES]]
@@ -420,12 +439,18 @@ def ECEF2NEDv(
 
 @overload
 def ECEF2NEDv(
-    rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_X_target: npt.NDArray[SUPPORTED_TYPES],
-    m_Y_target: npt.NDArray[SUPPORTED_TYPES],
-    m_Z_target: npt.NDArray[SUPPORTED_TYPES],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_X_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_Y_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_Z_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
 ) -> Tuple[
     npt.NDArray[SUPPORTED_TYPES],
     npt.NDArray[SUPPORTED_TYPES],
@@ -434,18 +459,18 @@ def ECEF2NEDv(
     """
     Convert ECEF (Earth-Centered, Earth-Fixed) velocity coordinates to NED (North-East-Down) velocity coordinates.
 
-    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array.
-    :type rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array.
-    :type rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array.
-    :type m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_X_target: The target ECEF X velocity coordinates as a NumPy array.
-    :type m_X_target: npt.NDArray[SUPPORTED_TYPES]
-    :param m_Y_target: The target ECEF Y velocity coordinates as a NumPy array.
-    :type m_Y_target: npt.NDArray[SUPPORTED_TYPES]
-    :param m_Z_target: The target ECEF Z velocity coordinates as a NumPy array.
-    :type m_Z_target: npt.NDArray[SUPPORTED_TYPES]
+    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_X_target: The target ECEF X velocity coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_X_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_Y_target: The target ECEF Y velocity coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_Y_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_Z_target: The target ECEF Z velocity coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_Z_target: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
 
     :return: The NED velocity coordinates (North, East, Down) as a tuple of NumPy arrays.
     :rtype: Tuple[npt.NDArray[SUPPORTED_TYPES], npt.NDArray[SUPPORTED_TYPES], npt.NDArray[SUPPORTED_TYPES]]
@@ -454,12 +479,18 @@ def ECEF2NEDv(
 
 @overload
 def ENU2ECEF(
-    rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_east: npt.NDArray[SUPPORTED_TYPES],
-    m_north: npt.NDArray[SUPPORTED_TYPES],
-    m_up: npt.NDArray[SUPPORTED_TYPES],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_up: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
 ) -> Tuple[
@@ -470,18 +501,18 @@ def ENU2ECEF(
     """
     Convert ENU (East-North-Up) coordinates to ECEF (Earth-Centered, Earth-Fixed) coordinates.
 
-    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array.
-    :type rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array.
-    :type rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array.
-    :type m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_east: The East coordinate in meters as a NumPy array.
-    :type m_east: npt.NDArray[SUPPORTED_TYPES]
-    :param m_north: The North coordinate in meters as a NumPy array.
-    :type m_north: npt.NDArray[SUPPORTED_TYPES]
-    :param m_up: The Up coordinate in meters as a NumPy array.
-    :type m_up: npt.NDArray[SUPPORTED_TYPES]
+    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_east: The East coordinate in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_north: The North coordinate in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_up: The Up coordinate in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_up: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
     :param m_semi_major_axis: The semi-major axis of the ellipsoid.
     :type m_semi_major_axis: float
     :param m_semi_minor_axis: The semi-minor axis of the ellipsoid.
@@ -518,12 +549,18 @@ def ENU2ECEF(
 
 @overload
 def NED2ECEF(
-    rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_north: npt.NDArray[SUPPORTED_TYPES],
-    m_east: npt.NDArray[SUPPORTED_TYPES],
-    m_down: npt.NDArray[SUPPORTED_TYPES],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_down: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
 ) -> Tuple[
@@ -534,18 +571,18 @@ def NED2ECEF(
     """
     Convert NED (North-East-Down) coordinates to ECEF (Earth-Centered, Earth-Fixed) coordinates.
 
-    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array.
-    :type rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array.
-    :type rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array.
-    :type m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_north: The North coordinate in meters as a NumPy array.
-    :type m_north: npt.NDArray[SUPPORTED_TYPES]
-    :param m_east: The East coordinate in meters as a NumPy array.
-    :type m_east: npt.NDArray[SUPPORTED_TYPES]
-    :param m_down: The Down coordinate in meters as a NumPy array.
-    :type m_down: npt.NDArray[SUPPORTED_TYPES]
+    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_north: The North coordinate in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_east: The East coordinate in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_down: The Down coordinate in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_down: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
     :param m_semi_major_axis: The semi-major axis of the ellipsoid.
     :type m_semi_major_axis: float
     :param m_semi_minor_axis: The semi-minor axis of the ellipsoid.
@@ -582,12 +619,18 @@ def NED2ECEF(
 
 @overload
 def ENU2ECEFv(
-    rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_east: npt.NDArray[SUPPORTED_TYPES],
-    m_north: npt.NDArray[SUPPORTED_TYPES],
-    m_up: npt.NDArray[SUPPORTED_TYPES],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_up: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
 ) -> Tuple[
     npt.NDArray[SUPPORTED_TYPES],
     npt.NDArray[SUPPORTED_TYPES],
@@ -596,18 +639,18 @@ def ENU2ECEFv(
     """
     Convert ENU (East-North-Up) velocity coordinates to ECEF (Earth-Centered, Earth-Fixed) velocity coordinates.
 
-    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array.
-    :type rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array.
-    :type rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array.
-    :type m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_east: The East coordinate in meters as a NumPy array.
-    :type m_east: npt.NDArray[SUPPORTED_TYPES]
-    :param m_north: The North coordinate in meters as a NumPy array.
-    :type m_north: npt.NDArray[SUPPORTED_TYPES]
-    :param m_up: The Up coordinate in meters as a NumPy array.
-    :type m_up: npt.NDArray[SUPPORTED_TYPES]
+    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_east: The East coordinate in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_north: The North coordinate in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_up: The Up coordinate in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_up: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
 
     :return: The ECEF velocity coordinates (X, Y, Z) as a tuple of NumPy arrays.
     :rtype: Tuple[npt.NDArray[SUPPORTED_TYPES], npt.NDArray[SUPPORTED_TYPES], npt.NDArray[SUPPORTED_TYPES]]
@@ -634,12 +677,18 @@ def ENU2ECEFv(
 
 @overload
 def NED2ECEFv(
-    rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES],
-    m_north: npt.NDArray[SUPPORTED_TYPES],
-    m_east: npt.NDArray[SUPPORTED_TYPES],
-    m_down: npt.NDArray[SUPPORTED_TYPES],
+    rad_lat_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    rad_lon_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_alt_local_origin: Union[
+        npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]
+    ],
+    m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_down: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
 ) -> Tuple[
     npt.NDArray[SUPPORTED_TYPES],
     npt.NDArray[SUPPORTED_TYPES],
@@ -648,18 +697,18 @@ def NED2ECEFv(
     """
     Convert NED (North-East-Down) velocity coordinates to ECEF (Earth-Centered, Earth-Fixed) velocity coordinates.
 
-    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array.
-    :type rad_lat_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array.
-    :type rad_lon_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array.
-    :type m_alt_local_origin: npt.NDArray[SUPPORTED_TYPES]
-    :param m_north: The North velocity coordinate in meters as a NumPy array.
-    :type m_north: npt.NDArray[SUPPORTED_TYPES]
-    :param m_east: The East velocity coordinate in meters as a NumPy array.
-    :type m_east: npt.NDArray[SUPPORTED_TYPES]
-    :param m_down: The Down velocity coordinate in meters as a NumPy array.
-    :type m_down: npt.NDArray[SUPPORTED_TYPES]
+    :param rad_lat_local_origin: The local origin latitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lat_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param rad_lon_local_origin: The local origin longitude in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_lon_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_alt_local_origin: The local origin altitude in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_alt_local_origin: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_north: The North velocity coordinate in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_east: The East velocity coordinate in meters as a NumPy array, pandas Series, or list of floats.
+    :type m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_down: The Down velocity coordinate in meters as a NumPy array, pandas
+    :type m_down: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float]]
 
     :return: The ECEF velocity coordinates (X, Y, Z) as a tuple of NumPy arrays.
     :rtype: Tuple[npt.NDArray[SUPPORTED_TYPES], npt.NDArray[SUPPORTED_TYPES], npt.NDArray[SUPPORTED_TYPES]]
@@ -686,9 +735,9 @@ def NED2ECEFv(
 
 @overload
 def ENU2AER(
-    m_east: npt.NDArray[SUPPORTED_TYPES],
-    m_north: npt.NDArray[SUPPORTED_TYPES],
-    m_up: npt.NDArray[SUPPORTED_TYPES],
+    m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_up: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
 ) -> Tuple[
     npt.NDArray[SUPPORTED_TYPES],
     npt.NDArray[SUPPORTED_TYPES],
@@ -698,11 +747,11 @@ def ENU2AER(
     Convert ENU (East-North-Up) coordinates to AER (Azimuth-Elevation-Range) coordinates.
 
     :param m_east: Array of East coordinates.
-    :type m_east: npt.NDArray[SUPPORTED_TYPES]
+    :type m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
     :param m_north: Array of North coordinates.
-    :type m_north: npt.NDArray[SUPPORTED_TYPES]
+    :type m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
     :param m_up: Array of Up coordinates.
-    :type m_up: npt.NDArray[SUPPORTED_TYPES]
+    :type m_up: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
 
     :returns: Tuple containing arrays of Azimuth, Elevation, and Range coordinates.
     :rtype: Tuple[npt.NDArray[SUPPORTED_TYPES],
@@ -726,9 +775,24 @@ def ENU2AER(mmm_ENU: npt.NDArray[SUPPORTED_TYPES]) -> npt.NDArray[SUPPORTED_TYPE
 
 @overload
 def AER2ENU(
-    rad_az: npt.NDArray[SUPPORTED_TYPES],
-    rad_el: npt.NDArray[SUPPORTED_TYPES],
-    m_range: npt.NDArray[SUPPORTED_TYPES],
+    rad_az: Union[
+        npt.NDArray[SUPPORTED_TYPES],
+        pd.Series[float],
+        List[float],
+        Set[float],
+    ],
+    rad_el: Union[
+        npt.NDArray[SUPPORTED_TYPES],
+        pd.Series[float],
+        List[float],
+        Set[float],
+    ],
+    m_range: Union[
+        npt.NDArray[SUPPORTED_TYPES],
+        pd.Series[float],
+        List[float],
+        Set[float],
+    ],
 ) -> Tuple[
     npt.NDArray[SUPPORTED_TYPES],
     npt.NDArray[SUPPORTED_TYPES],
@@ -737,17 +801,15 @@ def AER2ENU(
     """
     Convert AER (Azimuth-Elevation-Range) coordinates to ENU (East-North-Up) coordinates.
 
-    :param rad_az: Array of Azimuth angles in radians.
-    :type rad_az: npt.NDArray[SUPPORTED_TYPES]
-    :param rad_el: Array of Elevation angles in radians.
-    :type rad_el: npt.NDArray[SUPPORTED_TYPES]
-    :param m_range: Array of Range distances.
-    :type m_range: npt.NDArray[SUPPORTED_TYPES]
+    :param rad_az: Array of Azimuth angles in radians as a NumPy array, pandas Series, list, or set.
+    :type rad_az: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float], Set[float]]
+    :param rad_el: Array of Elevation angles in radians as a NumPy array, pandas Series, list, or set.
+    :type rad_el: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float], Set[float]]
+    :param m_range: Array of Range distances as a NumPy array, pandas Series, list, or set.
+    :type m_range: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float], Set[float]]
 
     :returns: Tuple containing arrays of East, North, and Up coordinates.
-    :rtype: Tuple[npt.NDArray[SUPPORTED_TYPES],
-                npt.NDArray[SUPPORTED_TYPES],
-                npt.NDArray[SUPPORTED_TYPES]]
+    :rtype: Tuple[npt.NDArray[SUPPORTED_TYPES], npt.NDArray[SUPPORTED_TYPES], npt.NDArray[SUPPORTED_TYPES]]
     """
     ...
 
@@ -779,9 +841,9 @@ def NED2AER(mmm_NED: npt.NDArray[SUPPORTED_TYPES]) -> npt.NDArray[SUPPORTED_TYPE
 
 @overload
 def NED2AER(
-    m_north: npt.NDArray[SUPPORTED_TYPES],
-    m_east: npt.NDArray[SUPPORTED_TYPES],
-    m_down: npt.NDArray[SUPPORTED_TYPES],
+    m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_down: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
 ) -> Tuple[
     npt.NDArray[SUPPORTED_TYPES],
     npt.NDArray[SUPPORTED_TYPES],
@@ -790,12 +852,12 @@ def NED2AER(
     """
     Convert NED (North-East-Down) coordinates to AER (Azimuth-Elevation-Range) coordinates.
 
-    :param m_north: Array of North coordinates.
-    :type m_north: npt.NDArray[SUPPORTED_TYPES]
-    :param m_east: Array of East coordinates.
-    :type m_east: npt.NDArray[SUPPORTED_TYPES]
-    :param m_down: Array of Down coordinates.
-    :type m_down: npt.NDArray[SUPPORTED_TYPES]
+    :param m_north: Array of North coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_north: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_east: Array of East coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_east: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_down: Array of Down coordinates as a NumPy array, pandas Series, or list of floats.
+    :type m_down: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
 
     :returns: Tuple containing arrays of Azimuth, Elevation, and Range coordinates.
     :rtype: Tuple[npt.NDArray[SUPPORTED_TYPES],
@@ -819,9 +881,9 @@ def AER2NED(rrm_AER: npt.NDArray[SUPPORTED_TYPES]) -> npt.NDArray[SUPPORTED_TYPE
 
 @overload
 def AER2NED(
-    rad_az: npt.NDArray[SUPPORTED_TYPES],
-    rad_el: npt.NDArray[SUPPORTED_TYPES],
-    m_range: npt.NDArray[SUPPORTED_TYPES],
+    rad_az: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    rad_el: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    m_range: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
 ) -> Tuple[
     npt.NDArray[SUPPORTED_TYPES],
     npt.NDArray[SUPPORTED_TYPES],
@@ -830,12 +892,12 @@ def AER2NED(
     """
     Convert AER (Azimuth-Elevation-Range) coordinates to NED (North-East-Down) coordinates.
 
-    :param rad_az: Array of Azimuth angles in radians.
-    :type rad_az: npt.NDArray[SUPPORTED_TYPES]
-    :param rad_el: Array of Elevation angles in radians.
-    :type rad_el: npt.NDArray[SUPPORTED_TYPES]
-    :param m_range: Array of Range distances.
-    :type m_range: npt.NDArray[SUPPORTED_TYPES]
+    :param rad_az: Array of Azimuth angles in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_az: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param rad_el: Array of Elevation angles in radians as a NumPy array, pandas Series, or list of floats.
+    :type rad_el: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :param m_range: Array of Range distances as a NumPy array, pandas Series, or list of floats.
+    :type m_range: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
 
     :returns: Tuple containing arrays of North, East, and Down coordinates.
     :rtype: Tuple[npt.NDArray[SUPPORTED_TYPES],
