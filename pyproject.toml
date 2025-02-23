@@ -53,11 +53,13 @@ dev = [
     "setuptools>=72.2.0",
     "setuptools-scm",
     "build>=1.2.1",
+    "pandas>=2.0.0",
 ]
 examples = [
     "jupyterlab>=4.2.4",
     "shapely>=2.0.5",
     "czml3>=1.0.2",
+    "pandas>=2.0.0",
 ]
 
 [project.urls]

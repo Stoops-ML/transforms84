@@ -97,25 +97,36 @@ array(
 
 Again, we can achieve the same result by splitting the arrays over each coordiante system axis:
 ```
->> rad_lat_target = np.deg2rad(np.array([31, 31, 31], dtype=np.float64))
->> rad_lon_target = np.deg2rad(np.array([32, 32, 32], dtype=np.float64))
->> m_alt_target = np.array([0, 0, 0], dtype=np.float64)
->> rad_lat_origin = np.deg2rad(np.array([30, 30, 30], dtype=np.float64))
->> rad_lon_origin = np.deg2rad(np.array([31, 31, 31], dtype=np.float64))
->> m_alt_origin = np.array([0, 0, 0], dtype=np.float64)
->> ECEF2ENU(
-      rad_lat_origin,
-      rad_lon_origin,
-      m_alt_origin,
-      *geodetic2ECEF(rad_lat_target, rad_lon_target, m_alt_target, WGS84.a, WGS84.b),
-      WGS84.a,
-      WGS84.b,
+>> import pandas as pd
+>> df = pd.DataFrame(
+      {
+          "radLatTarget": rrm_target[:, 0, 0],
+          "radLonTarget": rrm_target[:, 1, 0],
+          "mAltTarget": rrm_target[:, 2, 0],
+          "radLatOrigin": rrm_local[:, 0, 0],
+          "radLonOrigin": rrm_local[:, 1, 0],
+          "mAltOrigin": rrm_local[:, 2, 0],
+      }
   )
-(
-    array([95499.41373564, 95499.41373564, 95499.41373564]),
-    array([111272.00245298, 111272.00245298, 111272.00245298]),
-    array([-1689.19916788, -1689.19916788, -1689.19916788]),
+>> df["e"], df["n"], df["u"] = ECEF2ENU(
+    df["radLatOrigin"].to_numpy(),
+    df["radLonOrigin"].to_numpy(),
+    df["mAltOrigin"].to_numpy(),
+    *geodetic2ECEF(
+        df["radLatTarget"].to_numpy(),
+        df["radLonTarget"].to_numpy(),
+        df["mAltTarget"].to_numpy(),
+        WGS84.a,
+        WGS84.b,
+    ),
+    WGS84.a,
+    WGS84.b,
 )
+>> df[["e", "n", "u"]]
+              e              n            u
+0  95499.413736  111272.002453 -1689.199168
+1  95499.413736  111272.002453 -1689.199168
+2  95499.413736  111272.002453 -1689.199168
 ```
 
 ### World Geodetic Systems Standards
