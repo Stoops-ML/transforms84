@@ -166,8 +166,8 @@ legacy_tox_ini = """
         .[dev]
     extras = tests
     commands =
-        pytest --cov transforms84 --cov-report=term-missing
-        mypy
+        python -m pytest --cov transforms84 --cov-report=term-missing
+        python -m mypy
 
     [testenv:quality]
     description = checks code quality
@@ -176,7 +176,7 @@ legacy_tox_ini = """
         setuptools
     skip_install = true
     commands =
-        ruff check
-        ruff format --diff
+        python -m ruff check
+        python -m ruff format --diff
         python setup.py build_ext --inplace -f
 """
