@@ -5,19 +5,7 @@ import pytest
 from transforms84.helpers import DDM2RRM
 from transforms84.transforms import ENU2AER
 
-from .conftest import tol_double_atol, tol_float_atol
-
-
-def test_ENU2AER_raise_wrong_dtype():
-    ENU = np.array([[8.4504], [12.4737], [1.1046]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        ENU2AER(ENU)  # type: ignore
-
-
-def test_ENU2AER_raise_wrong_dtype_unrolled():
-    ENU = np.array([[8.4504], [12.4737], [1.1046]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        ENU2AER(ENU[0], ENU[1], ENU[2])
+from .conftest import float_type_pairs, tol_double_atol, tol_float_atol
 
 
 @pytest.mark.parametrize(
@@ -197,6 +185,89 @@ def test_ENU2AER_parallel_unrolled_list(dtype, tol):
     assert np.all(np.isclose(a, np.deg2rad(34.1160), atol=tol))
     assert np.all(np.isclose(e, np.deg2rad(4.1931), atol=tol))
     assert np.all(np.isclose(r, 15.1070, atol=tol))
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_ENU2AER_parallel_unrolled_numbers_int(dtype_num):
+    ENU = np.ascontiguousarray(
+        np.tile(
+            np.array([[8.4504], [12.4737], [1.1046]], dtype=np.float64), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "E": ENU[:, 0, 0],
+            "N": ENU[:, 1, 0],
+            "U": ENU[:, 2, 0],
+        }
+    )
+    a, e, r = ENU2AER(dtype_num(df["E"]), dtype_num(df["N"]), dtype_num(df["U"]))
+    a64, e64, r64 = ENU2AER(
+        np.float64(dtype_num(df["E"])),
+        np.float64(dtype_num(df["N"])),
+        np.float64(dtype_num(df["U"])),
+    )
+    assert np.all(np.isclose(a, a64))
+    assert np.all(np.isclose(e, e64))
+    assert np.all(np.isclose(r, r64))
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_ENU2AER_parallel_unrolled_numbers_loop_int(dtype_num):
+    ENU = np.ascontiguousarray(
+        np.tile(
+            np.array([[8.4504], [12.4737], [1.1046]], dtype=np.float64), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "E": ENU[:, 0, 0],
+            "N": ENU[:, 1, 0],
+            "U": ENU[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        a, e, r = ENU2AER(
+            dtype_num(df.loc[i_row, "E"]),
+            dtype_num(df.loc[i_row, "N"]),
+            dtype_num(df.loc[i_row, "U"]),
+        )
+        a64, e64, r64 = ENU2AER(
+            np.float64(dtype_num(df["E"])),
+            np.float64(dtype_num(df["N"])),
+            np.float64(dtype_num(df["U"])),
+        )
+        assert np.all(np.isclose(a, a64))
+        assert np.all(np.isclose(e, e64))
+        assert np.all(np.isclose(r, r64))
+        assert a.dtype == np.float64
+        assert e.dtype == np.float64
+        assert r.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_arr,dtype_num", float_type_pairs)
+def test_ENU2AER_parallel_unrolled_numbers_loop(dtype_arr, dtype_num):
+    ENU = np.ascontiguousarray(
+        np.tile(
+            np.array([[8.4504], [12.4737], [1.1046]], dtype=dtype_arr), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "E": ENU[:, 0, 0],
+            "N": ENU[:, 1, 0],
+            "U": ENU[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        a, e, r = ENU2AER(
+            dtype_num(df.loc[i_row, "E"]),
+            dtype_num(df.loc[i_row, "N"]),
+            dtype_num(df.loc[i_row, "U"]),
+        )
+        assert np.all(np.isclose(a, np.deg2rad(34.1160), atol=tol_float_atol))
+        assert np.all(np.isclose(e, np.deg2rad(4.1931), atol=tol_float_atol))
+        assert np.all(np.isclose(r, 15.1070, atol=tol_float_atol))
 
 
 @pytest.mark.parametrize(

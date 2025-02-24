@@ -1,5 +1,12 @@
-from typing import Union
+from typing import List, Union
 
 import numpy as np
+import numpy.typing as npt
+import pandas as pd
 
-SUPPORTED_TYPES = Union[np.float32, np.float64, np.int8, np.int16, np.int32, np.int64]
+NumberLikePy = Union[float, int]
+NumberLikeNpy = Union[np.integer, np.floating]
+NumberLike = Union[NumberLikePy, NumberLikeNpy]
+ArrayLike = Union[
+    npt.NDArray[NumberLikeNpy], "pd.Series[Union[float | int]]", List[NumberLike]
+]

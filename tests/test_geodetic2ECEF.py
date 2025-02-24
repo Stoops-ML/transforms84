@@ -5,17 +5,7 @@ import pytest
 from transforms84.systems import WGS84
 from transforms84.transforms import geodetic2ECEF
 
-
-def test_geodetic2ECEF_raise_wrong_dtype():
-    in_arr = np.array([[np.deg2rad(30)], [np.deg2rad(25)], [5]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        geodetic2ECEF(in_arr, WGS84.a, WGS84.b)  # type: ignore
-
-
-def test_geodetic2ECEF_raise_wrong_dtype_unrolled():
-    in_arr = np.array([np.deg2rad(30)], dtype=np.float16)
-    with pytest.raises(ValueError):
-        geodetic2ECEF(in_arr, in_arr, in_arr, WGS84.a, WGS84.b)  # type: ignore
+from .conftest import float_type_pairs
 
 
 def test_geodetic2ECEF_raise_wrong_size():
@@ -201,6 +191,94 @@ def test_geodetic2ECEF_point_unrolled_list(dtype):
     assert np.all(np.isclose(out_x, 5010302.11))
     assert np.all(np.isclose(out_y, 2336342.24))
     assert np.all(np.isclose(out_z, 3170373.78))
+
+
+@pytest.mark.parametrize("dtype_num", [int, np.int32, np.int64])
+def test_geodetic2ECEF_point_unrolled_numbers_int(dtype_num):
+    in_arr = np.array([[np.deg2rad(30)], [np.deg2rad(25)], [5]], dtype=np.float64)
+    df = pd.DataFrame(
+        {
+            "radLat": in_arr[0],
+            "radLon": in_arr[1],
+            "mAlt": in_arr[2],
+        }
+    )
+    out_x, out_y, out_z = geodetic2ECEF(
+        dtype_num(df["radLat"]),
+        dtype_num(df["radLon"]),
+        dtype_num(df["mAlt"]),
+        WGS84.a,
+        WGS84.b,
+    )
+    out_x64, out_y64, out_z64 = geodetic2ECEF(
+        np.float64(dtype_num(df["radLat"])),
+        np.float64(dtype_num(df["radLon"])),
+        np.float64(dtype_num(df["mAlt"])),
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.all(np.isclose(out_x, out_x64))
+    assert np.all(np.isclose(out_y, out_y64))
+    assert np.all(np.isclose(out_z, out_z64))
+    assert out_x.dtype == np.float64
+    assert out_y.dtype == np.float64
+    assert out_z.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_geodetic2ECEF_point_unrolled_numbers_loop_int(dtype_num):
+    in_arr = np.array([[np.deg2rad(30)], [np.deg2rad(25)], [5]], dtype=np.float64)
+    df = pd.DataFrame(
+        {
+            "radLat": in_arr[0],
+            "radLon": in_arr[1],
+            "mAlt": in_arr[2],
+        }
+    )
+    for i_row in df.index:
+        out_x, out_y, out_z = geodetic2ECEF(
+            dtype_num(df.loc[i_row, "radLat"]),
+            dtype_num(df.loc[i_row, "radLon"]),
+            dtype_num(df.loc[i_row, "mAlt"]),
+            WGS84.a,
+            WGS84.b,
+        )
+        out_x64, out_y64, out_z64 = geodetic2ECEF(
+            np.float64(dtype_num(df.loc[i_row, "radLat"])),
+            np.float64(dtype_num(df.loc[i_row, "radLon"])),
+            np.float64(dtype_num(df.loc[i_row, "mAlt"])),
+            WGS84.a,
+            WGS84.b,
+        )
+        assert np.all(np.isclose(out_x, out_x64))
+        assert np.all(np.isclose(out_y, out_y64))
+        assert np.all(np.isclose(out_z, out_z64))
+        assert out_x.dtype == np.float64
+        assert out_y.dtype == np.float64
+        assert out_z.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_arr,dtype_num", float_type_pairs)
+def test_geodetic2ECEF_point_unrolled_numbers_loop(dtype_arr, dtype_num):
+    in_arr = np.array([[np.deg2rad(30)], [np.deg2rad(25)], [5]], dtype=dtype_arr)
+    df = pd.DataFrame(
+        {
+            "radLat": in_arr[0],
+            "radLon": in_arr[1],
+            "mAlt": in_arr[2],
+        }
+    )
+    for i_row in df.index:
+        out_x, out_y, out_z = geodetic2ECEF(
+            dtype_num(df.loc[i_row, "radLat"]),
+            dtype_num(df.loc[i_row, "radLon"]),
+            dtype_num(df.loc[i_row, "mAlt"]),
+            WGS84.a,
+            WGS84.b,
+        )
+        assert np.all(np.isclose(out_x, 5010302.11))
+        assert np.all(np.isclose(out_y, 2336342.24))
+        assert np.all(np.isclose(out_z, 3170373.78))
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])

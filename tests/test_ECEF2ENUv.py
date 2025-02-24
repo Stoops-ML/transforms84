@@ -5,7 +5,7 @@ import pytest
 from transforms84.helpers import DDM2RRM
 from transforms84.transforms import ECEF2ENUv
 
-from .conftest import tol_double_atol, tol_float_atol
+from .conftest import float_type_pairs, tol_double_atol, tol_float_atol
 
 
 @pytest.mark.parametrize(
@@ -119,6 +119,132 @@ def test_ECEF2ENUv_parallel_unrolled_list(dtype, tol):
     assert np.all(np.isclose(e, [-27.6190], atol=tol))
     assert np.all(np.isclose(n, [-16.4298], atol=tol))
     assert np.all(np.isclose(u, [-0.3186], atol=tol))
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_ECEF2ENUv_parallel_unrolled_numbers_int(dtype_num):
+    rrm_local = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[17.4114], [78.2700], [0]], dtype=np.float64)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    uvw = np.ascontiguousarray(
+        np.tile(
+            np.array([[27.9799], [-1.0990], [-15.7723]], dtype=np.float64), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "radLat": rrm_local[:, 0, 0],
+            "radLon": rrm_local[:, 1, 0],
+            "mAlt": rrm_local[:, 2, 0],
+            "u": uvw[:, 0, 0],
+            "v": uvw[:, 1, 0],
+            "w": uvw[:, 2, 0],
+        }
+    )
+    e, n, u = ECEF2ENUv(
+        dtype_num(df["radLat"]),
+        dtype_num(df["radLon"]),
+        dtype_num(df["mAlt"]),
+        dtype_num(df["u"]),
+        dtype_num(df["v"]),
+        dtype_num(df["w"]),
+    )
+    e64, n64, u64 = ECEF2ENUv(
+        np.float64(dtype_num(df["radLat"])),
+        np.float64(dtype_num(df["radLon"])),
+        np.float64(dtype_num(df["mAlt"])),
+        np.float64(dtype_num(df["u"])),
+        np.float64(dtype_num(df["v"])),
+        np.float64(dtype_num(df["w"])),
+    )
+    assert np.all(np.isclose(e, e64))
+    assert np.all(np.isclose(n, n64))
+    assert np.all(np.isclose(u, u64))
+
+
+@pytest.mark.parametrize("dtype_num", [int, np.int32, np.int64])
+def test_ECEF2ENUv_parallel_unrolled_numbers_int_loop(dtype_num):
+    rrm_local = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[17.4114], [78.2700], [0]], dtype=np.float64)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    uvw = np.ascontiguousarray(
+        np.tile(
+            np.array([[27.9799], [-1.0990], [-15.7723]], dtype=np.float64), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "radLat": rrm_local[:, 0, 0],
+            "radLon": rrm_local[:, 1, 0],
+            "mAlt": rrm_local[:, 2, 0],
+            "u": uvw[:, 0, 0],
+            "v": uvw[:, 1, 0],
+            "w": uvw[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        e, n, u = ECEF2ENUv(
+            dtype_num(df.loc[i_row, "radLat"]),
+            dtype_num(df.loc[i_row, "radLon"]),
+            dtype_num(df.loc[i_row, "mAlt"]),
+            dtype_num(df.loc[i_row, "u"]),
+            dtype_num(df.loc[i_row, "v"]),
+            dtype_num(df.loc[i_row, "w"]),
+        )
+        e64, n64, u64 = ECEF2ENUv(
+            np.float64(dtype_num(df.loc[i_row, "radLat"])),
+            np.float64(dtype_num(df.loc[i_row, "radLon"])),
+            np.float64(dtype_num(df.loc[i_row, "mAlt"])),
+            np.float64(dtype_num(df.loc[i_row, "u"])),
+            np.float64(dtype_num(df.loc[i_row, "v"])),
+            np.float64(dtype_num(df.loc[i_row, "w"])),
+        )
+        assert np.all(np.isclose(e, e64))
+        assert np.all(np.isclose(n, n64))
+        assert np.all(np.isclose(u, u64))
+        assert e.dtype == np.float64
+        assert n.dtype == np.float64
+        assert u.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_arr,dtype_num", float_type_pairs)
+def test_ECEF2ENUv_parallel_unrolled_numbers_loop(dtype_arr, dtype_num):
+    rrm_local = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[17.4114], [78.2700], [0]], dtype=dtype_arr)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    uvw = np.ascontiguousarray(
+        np.tile(
+            np.array([[27.9799], [-1.0990], [-15.7723]], dtype=dtype_arr), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "radLat": rrm_local[:, 0, 0],
+            "radLon": rrm_local[:, 1, 0],
+            "mAlt": rrm_local[:, 2, 0],
+            "u": uvw[:, 0, 0],
+            "v": uvw[:, 1, 0],
+            "w": uvw[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        e, n, u = ECEF2ENUv(
+            dtype_num(df.loc[i_row, "radLat"]),
+            dtype_num(df.loc[i_row, "radLon"]),
+            dtype_num(df.loc[i_row, "mAlt"]),
+            dtype_num(df.loc[i_row, "u"]),
+            dtype_num(df.loc[i_row, "v"]),
+            dtype_num(df.loc[i_row, "w"]),
+        )
+        assert np.all(np.isclose(e, [-27.6190], atol=tol_double_atol))
+        assert np.all(np.isclose(n, [-16.4298], atol=tol_double_atol))
+        assert np.all(np.isclose(u, [-0.3186], atol=tol_double_atol))
 
 
 @pytest.mark.parametrize(

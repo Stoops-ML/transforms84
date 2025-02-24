@@ -144,162 +144,39 @@ HaversineUnrolledWrapper(PyObject* self, PyObject* args)
             &mAltEnd,
             &mRadiusSphere))
         return NULL;
-    if (((radLatStart = get_numpy_array(radLatStart)) == NULL) || ((radLonStart = get_numpy_array(radLonStart)) == NULL) || ((mAltStart = get_numpy_array(mAltStart)) == NULL) || ((radLatEnd = get_numpy_array(radLatEnd)) == NULL) || ((radLonEnd = get_numpy_array(radLonEnd)) == NULL) || ((mAltEnd = get_numpy_array(mAltEnd)) == NULL)) {
-        PyErr_SetString(PyExc_ValueError, "Inputs must either be a numpy ndarray or a pandas Series.");
-        Py_XDECREF(radLatStart);
-        Py_XDECREF(radLonStart);
-        Py_XDECREF(mAltStart);
-        Py_XDECREF(radLatEnd);
-        Py_XDECREF(radLonEnd);
-        Py_XDECREF(mAltEnd);
+    if (((radLatStart = get_numpy_array(radLatStart)) == NULL) || ((radLonStart = get_numpy_array(radLonStart)) == NULL) || ((mAltStart = get_numpy_array(mAltStart)) == NULL) || ((radLatEnd = get_numpy_array(radLatEnd)) == NULL) || ((radLonEnd = get_numpy_array(radLonEnd)) == NULL) || ((mAltEnd = get_numpy_array(mAltEnd)) == NULL))
         return NULL;
+    PyArrayObject *arrays[] = {radLatStart, radLonStart, mAltStart, radLatEnd, radLonEnd, mAltEnd};
+    if (check_arrays_same_float_dtype(6, arrays) == 0) {
+        radLatStart = (PyArrayObject *)PyArray_CastToType(radLatStart, PyArray_DescrFromType(NPY_FLOAT64), 0);
+        radLonStart = (PyArrayObject *)PyArray_CastToType(radLonStart, PyArray_DescrFromType(NPY_FLOAT64), 0);
+        mAltStart = (PyArrayObject *)PyArray_CastToType(mAltStart, PyArray_DescrFromType(NPY_FLOAT64), 0);
+        radLatEnd = (PyArrayObject *)PyArray_CastToType(radLatEnd, PyArray_DescrFromType(NPY_FLOAT64), 0);
+        radLonEnd = (PyArrayObject *)PyArray_CastToType(radLonEnd, PyArray_DescrFromType(NPY_FLOAT64), 0);
+        mAltEnd = (PyArrayObject *)PyArray_CastToType(mAltEnd, PyArray_DescrFromType(NPY_FLOAT64), 0);
     }
-    if (!(PyArray_ISCONTIGUOUS(radLatStart)) || !(PyArray_ISCONTIGUOUS(radLonStart)) || !(PyArray_ISCONTIGUOUS(mAltStart)) || !(PyArray_ISCONTIGUOUS(radLatEnd)) || !(PyArray_ISCONTIGUOUS(radLonEnd)) || !(PyArray_ISCONTIGUOUS(mAltEnd))) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
+    if (check_arrays_same_size(6, arrays) == 0)
         return NULL;
-    }
-    if (!((PyArray_SIZE(radLatStart) == PyArray_SIZE(radLonStart)) && (PyArray_SIZE(radLatStart) == PyArray_SIZE(mAltStart)) && (PyArray_SIZE(radLatStart) == PyArray_SIZE(radLatEnd)) && (PyArray_SIZE(radLatStart) == PyArray_SIZE(radLonEnd)) && (PyArray_SIZE(radLatStart) == PyArray_SIZE(mAltEnd)))) {
-        PyErr_SetString(PyExc_ValueError,
-            "Input arrays must have the same size.");
-        return NULL;
-    }
-
-    // ensure matching floating point types
-    PyArrayObject *inArrayLatStart, *inArrayLonStart, *inArrayAltStart, *inArrayLatEnd, *inArrayLonEnd, *inArrayAltEnd;
-    if (PyArray_ISINTEGER(radLatStart) == 0)
-        inArrayLatStart = radLatStart;
-    else {
-        inArrayLatStart = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(radLatStart), PyArray_SHAPE(radLatStart), NPY_DOUBLE);
-        if (inArrayLatStart == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
-            return NULL;
-        }
-        if (PyArray_CopyInto(inArrayLatStart, radLatStart) < 0) {
-            Py_DECREF(inArrayLatStart);
-            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
-            return NULL;
-        }
-        if (!(PyArray_ISCONTIGUOUS(inArrayLatStart))) {
-            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
-            return NULL;
-        }
-    }
-    if (PyArray_ISINTEGER(radLonStart) == 0)
-        inArrayLonStart = radLonStart;
-    else {
-        inArrayLonStart = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(radLonStart), PyArray_SHAPE(radLonStart), NPY_DOUBLE);
-        if (inArrayLonStart == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
-            return NULL;
-        }
-        if (PyArray_CopyInto(inArrayLonStart, radLonStart) < 0) {
-            Py_DECREF(inArrayLonStart);
-            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
-            return NULL;
-        }
-        if (!(PyArray_ISCONTIGUOUS(inArrayLonStart))) {
-            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
-            return NULL;
-        }
-    }
-    if (PyArray_ISINTEGER(mAltStart) == 0)
-        inArrayAltStart = mAltStart;
-    else {
-        inArrayAltStart = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(mAltStart), PyArray_SHAPE(mAltStart), NPY_DOUBLE);
-        if (inArrayAltStart == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
-            return NULL;
-        }
-        if (PyArray_CopyInto(inArrayAltStart, mAltStart) < 0) {
-            Py_DECREF(inArrayAltStart);
-            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
-            return NULL;
-        }
-        if (!(PyArray_ISCONTIGUOUS(inArrayAltStart))) {
-            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
-            return NULL;
-        }
-    }
-    if (PyArray_ISINTEGER(radLatEnd) == 0)
-        inArrayLatEnd = radLatEnd;
-    else {
-        inArrayLatEnd = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(radLatEnd), PyArray_SHAPE(radLatEnd), NPY_DOUBLE);
-        if (inArrayLatEnd == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
-            return NULL;
-        }
-        if (PyArray_CopyInto(inArrayLatEnd, radLatEnd) < 0) {
-            Py_DECREF(inArrayLatEnd);
-            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
-            return NULL;
-        }
-        if (!(PyArray_ISCONTIGUOUS(inArrayLatEnd))) {
-            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
-            return NULL;
-        }
-    }
-    if (PyArray_ISINTEGER(radLonEnd) == 0)
-        inArrayLonEnd = radLonEnd;
-    else {
-        inArrayLonEnd = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(radLonEnd), PyArray_SHAPE(radLonEnd), NPY_DOUBLE);
-        if (inArrayLonEnd == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
-            return NULL;
-        }
-        if (PyArray_CopyInto(inArrayLonEnd, radLonEnd) < 0) {
-            Py_DECREF(inArrayLonEnd);
-            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
-            return NULL;
-        }
-        if (!(PyArray_ISCONTIGUOUS(inArrayLonEnd))) {
-            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
-            return NULL;
-        }
-    }
-    if (PyArray_ISINTEGER(mAltEnd) == 0)
-        inArrayAltEnd = mAltEnd;
-    else {
-        inArrayAltEnd = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(mAltEnd), PyArray_SHAPE(mAltEnd), NPY_DOUBLE);
-        if (inArrayAltEnd == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
-            return NULL;
-        }
-        if (PyArray_CopyInto(inArrayAltEnd, mAltEnd) < 0) {
-            Py_DECREF(inArrayAltEnd);
-            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
-            return NULL;
-        }
-        if (!(PyArray_ISCONTIGUOUS(inArrayAltEnd))) {
-            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
-            return NULL;
-        }
-    }
 
     // prepare inputs
     PyArrayObject *outRange;
     outRange = (PyArrayObject*)PyArray_SimpleNew(
-        PyArray_NDIM(inArrayAltEnd), PyArray_SHAPE(inArrayAltEnd), PyArray_TYPE(inArrayAltEnd));
+        PyArray_NDIM(radLatEnd), PyArray_SHAPE(radLatEnd), PyArray_TYPE(radLatEnd));
     if (outRange == NULL) {
         PyErr_SetString(PyExc_ValueError, "Failed to initialise output array.");
         return NULL;
     }
-    long nPoints = (int)PyArray_SIZE(inArrayAltEnd);
+    long nPoints = (int)PyArray_SIZE(radLatEnd);
 
     // run function
     switch (PyArray_TYPE(outRange)) {
     case NPY_DOUBLE:
         HaversineDoubleUnrolled(
-            (double*)PyArray_DATA(inArrayLatStart), (double*)PyArray_DATA(inArrayLonStart), (double*)PyArray_DATA(inArrayAltStart), (double*)PyArray_DATA(inArrayLatEnd), (double*)PyArray_DATA(inArrayLonEnd), (double*)PyArray_DATA(inArrayAltEnd), (long)nPoints, 1, mRadiusSphere, (double*)PyArray_DATA(outRange));
+            (double*)PyArray_DATA(radLatStart), (double*)PyArray_DATA(radLonStart), (double*)PyArray_DATA(mAltStart), (double*)PyArray_DATA(radLatEnd), (double*)PyArray_DATA(radLonEnd), (double*)PyArray_DATA(radLatEnd), (long)nPoints, 1, mRadiusSphere, (double*)PyArray_DATA(outRange));
         break;
     case NPY_FLOAT:
         HaversineFloatUnrolled(
-            (float*)PyArray_DATA(inArrayLatStart), (float*)PyArray_DATA(inArrayLonStart), (float*)PyArray_DATA(inArrayAltStart), (float*)PyArray_DATA(inArrayLatEnd), (float*)PyArray_DATA(inArrayLonEnd), (float*)PyArray_DATA(inArrayAltEnd), (long)nPoints, 1, (float)(mRadiusSphere), (float*)PyArray_DATA(outRange));
+            (float*)PyArray_DATA(radLatStart), (float*)PyArray_DATA(radLonStart), (float*)PyArray_DATA(mAltStart), (float*)PyArray_DATA(radLatEnd), (float*)PyArray_DATA(radLonEnd), (float*)PyArray_DATA(radLatEnd), (long)nPoints, 1, (float)(mRadiusSphere), (float*)PyArray_DATA(outRange));
         break;
     default:
         PyErr_SetString(PyExc_ValueError,
@@ -316,17 +193,15 @@ HaversineRolledWrapper(PyObject* self, PyObject* args)
     double mRadiusSphere;
 
     // checks
-    if (!PyArg_ParseTuple(args,
-            "O!O!d",
-            &PyArray_Type,
-            &rrmStart,
-            &PyArray_Type,
-            &rrmEnd,
-            &mRadiusSphere))
+    if (!PyArg_ParseTuple(args, "OOd", &rrmStart, &rrmEnd, &mRadiusSphere))
         return NULL;
-    if (!(PyArray_ISCONTIGUOUS(rrmStart)) || !(PyArray_ISCONTIGUOUS(rrmEnd))) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
+    rrmStart = get_numpy_array(rrmStart);
+    rrmEnd = get_numpy_array(rrmEnd);
+    if (PyErr_Occurred())
         return NULL;
+    if (check_arrays_same_float_dtype(2, (PyArrayObject *[]){rrmStart, rrmEnd}) == 0) {
+        rrmStart = (PyArrayObject *)PyArray_CastToType(rrmStart, PyArray_DescrFromType(NPY_FLOAT64), 0);
+        rrmEnd = (PyArrayObject *)PyArray_CastToType(rrmEnd, PyArray_DescrFromType(NPY_FLOAT64), 0);
     }
     if (!((PyArray_NDIM(rrmStart) == PyArray_NDIM(rrmEnd)) && (PyArray_SIZE(rrmStart) == PyArray_SIZE(rrmEnd)) || ((PyArray_SIZE(rrmStart) == NCOORDSIN3D) && (PyArray_SIZE(rrmStart) <= PyArray_SIZE(rrmEnd))))) {
         PyErr_SetString(PyExc_ValueError,
@@ -340,50 +215,11 @@ HaversineRolledWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    // ensure matching floating point types
-    PyArrayObject *inArrayStart, *inArrayEnd;
-    if (((PyArray_TYPE(rrmStart) == NPY_FLOAT) && (PyArray_TYPE(rrmEnd) == NPY_DOUBLE)) || (PyArray_ISFLOAT(rrmStart) == 0)) {
-        inArrayStart = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(rrmStart), PyArray_SHAPE(rrmStart), NPY_DOUBLE);
-        if (inArrayStart == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
-            return NULL;
-        }
-        if (PyArray_CopyInto(inArrayStart, rrmStart) < 0) {
-            Py_DECREF(inArrayStart);
-            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
-            return NULL;
-        }
-        if (!(PyArray_ISCONTIGUOUS(inArrayStart))) {
-            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
-            return NULL;
-        }
-    } else
-        inArrayStart = rrmStart;
-    if (((PyArray_TYPE(rrmEnd) == NPY_FLOAT) && (PyArray_TYPE(rrmStart) == NPY_DOUBLE)) || (PyArray_ISFLOAT(rrmEnd) == 0)) {
-        inArrayEnd = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(rrmEnd), PyArray_SHAPE(rrmEnd), NPY_DOUBLE);
-        if (inArrayEnd == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
-            return NULL;
-        }
-        if (PyArray_CopyInto(inArrayEnd, rrmEnd) < 0) {
-            Py_DECREF(inArrayEnd);
-            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
-            return NULL;
-        }
-        if (!(PyArray_ISCONTIGUOUS(inArrayEnd))) {
-            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
-            return NULL;
-        }
-    } else
-        inArrayEnd = rrmEnd;
-
     // prepare inputs
     npy_intp nPoints = PyArray_SIZE(rrmEnd) / NCOORDSIN3D;
-    int isArraysSizeEqual = (PyArray_Size((PyObject*)inArrayStart) == PyArray_Size((PyObject*)inArrayEnd));
+    int isArraysSizeEqual = (PyArray_Size((PyObject*)rrmStart) == PyArray_Size((PyObject*)rrmEnd));
     PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
-        1, &nPoints, PyArray_TYPE(inArrayEnd));
+        1, &nPoints, PyArray_TYPE(rrmEnd));
     if (result_array == NULL)
         return NULL;
 
@@ -391,11 +227,11 @@ HaversineRolledWrapper(PyObject* self, PyObject* args)
     switch (PyArray_TYPE(result_array)) {
     case NPY_DOUBLE:
         HaversineDoubleRolled(
-            (double*)PyArray_DATA(inArrayStart), (double*)PyArray_DATA(inArrayEnd), (long)nPoints, isArraysSizeEqual, mRadiusSphere, (double*)PyArray_DATA(result_array));
+            (double*)PyArray_DATA(rrmStart), (double*)PyArray_DATA(rrmEnd), (long)nPoints, isArraysSizeEqual, mRadiusSphere, (double*)PyArray_DATA(result_array));
         break;
     case NPY_FLOAT:
         HaversineFloatRolled(
-            (float*)PyArray_DATA(inArrayStart), (float*)PyArray_DATA(inArrayEnd), (long)nPoints, isArraysSizeEqual, (float)(mRadiusSphere), (float*)PyArray_DATA(result_array));
+            (float*)PyArray_DATA(rrmStart), (float*)PyArray_DATA(rrmEnd), (long)nPoints, isArraysSizeEqual, (float)(mRadiusSphere), (float*)PyArray_DATA(result_array));
         break;
     default:
         PyErr_SetString(PyExc_ValueError,

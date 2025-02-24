@@ -59,26 +59,6 @@ def _test_Haversine_omp():
 #     _test_Haversine_omp()
 
 
-def test_Haersine_raise_wrong_dtype_unrolled():
-    rrm_start = np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        Haversine(
-            rrm_start[0],
-            rrm_start[1],
-            rrm_start[2],
-            rrm_start[0],
-            rrm_start[1],
-            rrm_start[2],
-            WGS84.mean_radius,
-        )
-
-
-def test_Haersine_raise_wrong_dtype():
-    rrm_start = np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        Haversine(rrm_start, rrm_start, WGS84.mean_radius)  # type: ignore
-
-
 def test_Haersine_raise_wrong_size():
     rrm_start = np.array(
         [[np.deg2rad(33)], [np.deg2rad(34)], [0], [1]], dtype=np.float32
@@ -846,6 +826,152 @@ def test_Haversine_parallel_unrolled_pandas(dtype):
             391225.574516907,
         )
     )
+
+
+@pytest.mark.parametrize("dtype", [np.float64, np.float32, float])
+def test_Haversine_parallel_unrolled_numbers(dtype):
+    rrm_start = np.ascontiguousarray(
+        np.tile(
+            np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=np.float64), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    rrm_end = np.ascontiguousarray(
+        np.tile(
+            np.array([[np.deg2rad(32)], [np.deg2rad(38)], [0]], dtype=np.float64), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "radStartLat": rrm_start[:, 0, 0],
+            "radStartLon": rrm_start[:, 1, 0],
+            "mStartHeight": rrm_start[:, 2, 0],
+            "radEndLat": rrm_end[:, 0, 0],
+            "radEndLon": rrm_end[:, 1, 0],
+            "mEndHeight": rrm_end[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        assert np.all(
+            np.isclose(
+                Haversine(
+                    dtype(df.loc[i_row, "radStartLat"]),
+                    dtype(df.loc[i_row, "radStartLon"]),
+                    dtype(df.loc[i_row, "mStartHeight"]),
+                    dtype(df.loc[i_row, "radEndLat"]),
+                    dtype(df.loc[i_row, "radEndLon"]),
+                    dtype(df.loc[i_row, "mEndHeight"]),
+                    WGS84.mean_radius,
+                ),
+                391225.574516907,
+            )
+        )
+        assert np.all(
+            np.isclose(
+                Haversine(
+                    dtype(df.loc[i_row, "radEndLat"]),
+                    dtype(df.loc[i_row, "radEndLon"]),
+                    dtype(df.loc[i_row, "mEndHeight"]),
+                    dtype(df.loc[i_row, "radStartLat"]),
+                    dtype(df.loc[i_row, "radStartLon"]),
+                    dtype(df.loc[i_row, "mStartHeight"]),
+                    WGS84.mean_radius,
+                ),
+                391225.574516907,
+            )
+        )
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_Haversine_parallel_unrolled_numbers_int(dtype_num):
+    rrm_start = np.ascontiguousarray(
+        np.tile(
+            np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=np.float64), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    rrm_end = np.ascontiguousarray(
+        np.tile(
+            np.array([[np.deg2rad(32)], [np.deg2rad(38)], [0]], dtype=np.float64), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "radStartLat": rrm_start[:, 0, 0],
+            "radStartLon": rrm_start[:, 1, 0],
+            "mStartHeight": rrm_start[:, 2, 0],
+            "radEndLat": rrm_end[:, 0, 0],
+            "radEndLon": rrm_end[:, 1, 0],
+            "mEndHeight": rrm_end[:, 2, 0],
+        }
+    )
+    assert np.all(
+        np.isclose(
+            Haversine(
+                np.float64(dtype_num(df["radStartLat"])),
+                np.float64(dtype_num(df["radStartLon"])),
+                np.float64(dtype_num(df["mStartHeight"])),
+                np.float64(dtype_num(df["radEndLat"])),
+                np.float64(dtype_num(df["radEndLon"])),
+                np.float64(dtype_num(df["mEndHeight"])),
+                WGS84.mean_radius,
+            ),
+            Haversine(
+                dtype_num(df["radEndLat"]),
+                dtype_num(df["radEndLon"]),
+                dtype_num(df["mEndHeight"]),
+                dtype_num(df["radStartLat"]),
+                dtype_num(df["radStartLon"]),
+                dtype_num(df["mStartHeight"]),
+                WGS84.mean_radius,
+            ),
+        )
+    )
+
+
+@pytest.mark.parametrize("dtype_num", [int, np.int32, np.int64])
+def test_Haversine_parallel_unrolled_numbers_int_loop(dtype_num):
+    rrm_start = np.ascontiguousarray(
+        np.tile(
+            np.array([[np.deg2rad(33)], [np.deg2rad(34)], [0]], dtype=np.float64), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    rrm_end = np.ascontiguousarray(
+        np.tile(
+            np.array([[np.deg2rad(32)], [np.deg2rad(38)], [0]], dtype=np.float64), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "radStartLat": rrm_start[:, 0, 0],
+            "radStartLon": rrm_start[:, 1, 0],
+            "mStartHeight": rrm_start[:, 2, 0],
+            "radEndLat": rrm_end[:, 0, 0],
+            "radEndLon": rrm_end[:, 1, 0],
+            "mEndHeight": rrm_end[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        assert np.all(
+            np.isclose(
+                Haversine(
+                    np.float64(dtype_num(df.loc[i_row, "radStartLat"])),
+                    np.float64(dtype_num(df.loc[i_row, "radStartLon"])),
+                    np.float64(dtype_num(df.loc[i_row, "mStartHeight"])),
+                    np.float64(dtype_num(df.loc[i_row, "radEndLat"])),
+                    np.float64(dtype_num(df.loc[i_row, "radEndLon"])),
+                    np.float64(dtype_num(df.loc[i_row, "mEndHeight"])),
+                    WGS84.mean_radius,
+                ),
+                Haversine(
+                    dtype_num(df.loc[i_row, "radEndLat"]),
+                    dtype_num(df.loc[i_row, "radEndLon"]),
+                    dtype_num(df.loc[i_row, "mEndHeight"]),
+                    dtype_num(df.loc[i_row, "radStartLat"]),
+                    dtype_num(df.loc[i_row, "radStartLon"]),
+                    dtype_num(df.loc[i_row, "mStartHeight"]),
+                    WGS84.mean_radius,
+                ),
+            )
+        )
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])

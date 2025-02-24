@@ -6,7 +6,7 @@ from transforms84.helpers import DDM2RRM
 from transforms84.systems import WGS84
 from transforms84.transforms import ECEF2ENU, geodetic2ECEF
 
-from .conftest import tol_double_atol, tol_float_atol
+from .conftest import float_type_pairs, tol_double_atol, tol_float_atol
 
 # https://www.lddgo.net/en/coordinate/ecef-enu
 
@@ -17,67 +17,19 @@ def test_ECEF2ENU_raise_wrong_dtype():
         [[3906.67536618], [2732.16708], [1519.47079847], [1]], dtype=np.float32
     )
     with pytest.raises(ValueError):
-        ECEF2ENU(ref_point, ENU, WGS84.a, WGS84.b)  # type: ignore
+        ECEF2ENU(ref_point, ENU, WGS84.a, WGS84.b)
     ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float32)
     ENU = np.array(
         [[3906.67536618], [2732.16708], [1519.47079847], [1]], dtype=np.float16
     )
     with pytest.raises(ValueError):
-        ECEF2ENU(ref_point, ENU, WGS84.a, WGS84.b)  # type: ignore
+        ECEF2ENU(ref_point, ENU, WGS84.a, WGS84.b)
     ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float16)
     ENU = np.array(
         [[3906.67536618], [2732.16708], [1519.47079847], [1]], dtype=np.float16
     )
     with pytest.raises(ValueError):
-        ECEF2ENU(ref_point, ENU, WGS84.a, WGS84.b)  # type: ignore
-
-
-def test_ECEF2ENU_raise_wrong_dtype_unrolled():
-    ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float16)
-    ENU = np.array(
-        [[3906.67536618], [2732.16708], [1519.47079847], [1]], dtype=np.float32
-    )
-    with pytest.raises(ValueError):
-        ECEF2ENU(
-            ref_point[0],
-            ref_point[1],
-            ref_point[2],
-            ENU[0],
-            ENU[1],
-            ENU[2],
-            WGS84.a,
-            WGS84.b,
-        )
-    ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float32)
-    ENU = np.array(
-        [[3906.67536618], [2732.16708], [1519.47079847], [1]], dtype=np.float16
-    )
-    with pytest.raises(ValueError):
-        ECEF2ENU(
-            ref_point[0],
-            ref_point[1],
-            ref_point[2],
-            ENU[0],
-            ENU[1],
-            ENU[2],
-            WGS84.a,
-            WGS84.b,
-        )
-    ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float16)
-    ENU = np.array(
-        [[3906.67536618], [2732.16708], [1519.47079847], [1]], dtype=np.float16
-    )
-    with pytest.raises(ValueError):
-        ECEF2ENU(
-            ref_point[0],
-            ref_point[1],
-            ref_point[2],
-            ENU[0],
-            ENU[1],
-            ENU[2],
-            WGS84.a,
-            WGS84.b,
-        )
+        ECEF2ENU(ref_point, ENU, WGS84.a, WGS84.b)
 
 
 def test_ECEF2ENU_raise_wrong_size():
@@ -127,6 +79,121 @@ def test_ECEF2ENU_point_int_unrolled_pandas(dtype, tol):
     assert np.isclose(m_x, 0, atol=tol)
     assert np.isclose(m_y, 19458.6147548328, atol=tol)
     assert np.isclose(m_z, -6363502.5003553545, atol=tol)
+
+
+@pytest.mark.parametrize("dtype_num", [int, np.int32, np.int64])
+def test_ECEF2ENU_point_int_unrolled_numbers_int(dtype_num):
+    XYZ = np.array([[0], [0], [0]], dtype=np.float64)
+    ref_point = np.array([[1], [1], [500]], dtype=np.float64)
+    df = pd.DataFrame(
+        {
+            "radLatOrigin": ref_point[0],
+            "radLonOrigin": ref_point[1],
+            "mAltOrigin": ref_point[2],
+            "mETarget": XYZ[0],
+            "mYTarget": XYZ[1],
+            "mZTarget": XYZ[2],
+        }
+    )
+    m_x, m_y, m_z = ECEF2ENU(
+        dtype_num(df["radLatOrigin"]),
+        dtype_num(df["radLonOrigin"]),
+        dtype_num(df["mAltOrigin"]),
+        dtype_num(df["mETarget"]),
+        dtype_num(df["mYTarget"]),
+        dtype_num(df["mZTarget"]),
+        WGS84.a,
+        WGS84.b,
+    )
+    m_x64, m_y64, m_z64 = ECEF2ENU(
+        np.float64(dtype_num(df["radLatOrigin"])),
+        np.float64(dtype_num(df["radLonOrigin"])),
+        np.float64(dtype_num(df["mAltOrigin"])),
+        np.float64(dtype_num(df["mETarget"])),
+        np.float64(dtype_num(df["mYTarget"])),
+        np.float64(dtype_num(df["mZTarget"])),
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.isclose(m_x, m_x64)
+    assert np.isclose(m_y, m_y64)
+    assert np.isclose(m_z, m_z64)
+
+
+@pytest.mark.parametrize("dtype_num", [int, np.int32, np.int64])
+def test_ECEF2ENU_point_int_unrolled_numbers_int_loop(dtype_num):
+    XYZ = np.array([[0], [0], [0]], dtype=np.float64)
+    ref_point = np.array([[1], [1], [500]], dtype=np.float64)
+    df = pd.DataFrame(
+        {
+            "radLatOrigin": ref_point[0],
+            "radLonOrigin": ref_point[1],
+            "mAltOrigin": ref_point[2],
+            "mETarget": XYZ[0],
+            "mYTarget": XYZ[1],
+            "mZTarget": XYZ[2],
+        }
+    )
+    for i_row in df.index:
+        m_x, m_y, m_z = ECEF2ENU(
+            dtype_num(df.loc[i_row, "radLatOrigin"]),
+            dtype_num(df.loc[i_row, "radLonOrigin"]),
+            dtype_num(df.loc[i_row, "mAltOrigin"]),
+            dtype_num(df.loc[i_row, "mETarget"]),
+            dtype_num(df.loc[i_row, "mYTarget"]),
+            dtype_num(df.loc[i_row, "mZTarget"]),
+            WGS84.a,
+            WGS84.b,
+        )
+        m_x64, m_y64, m_z64 = ECEF2ENU(
+            np.float64(dtype_num(df.loc[i_row, "radLatOrigin"])),
+            np.float64(dtype_num(df.loc[i_row, "radLonOrigin"])),
+            np.float64(dtype_num(df.loc[i_row, "mAltOrigin"])),
+            np.float64(dtype_num(df.loc[i_row, "mETarget"])),
+            np.float64(dtype_num(df.loc[i_row, "mYTarget"])),
+            np.float64(dtype_num(df.loc[i_row, "mZTarget"])),
+            WGS84.a,
+            WGS84.b,
+        )
+        assert np.isclose(m_x, m_x64)
+        assert np.isclose(m_y, m_y64)
+        assert np.isclose(m_z, m_z64)
+        assert m_x.dtype == np.float64
+        assert m_y.dtype == np.float64
+        assert m_z.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_arr,dtype_num", float_type_pairs)
+def test_ECEF2ENU_point_int_unrolled_numbers_loop(dtype_arr, dtype_num):
+    XYZ = np.array([[0], [0], [0]], dtype=dtype_arr)
+    ref_point = np.array([[1], [1], [500]], dtype=dtype_arr)
+    df = pd.DataFrame(
+        {
+            "radLatOrigin": ref_point[0],
+            "radLonOrigin": ref_point[1],
+            "mAltOrigin": ref_point[2],
+            "mETarget": XYZ[0],
+            "mYTarget": XYZ[1],
+            "mZTarget": XYZ[2],
+        }
+    )
+    for i_row in df.index:
+        m_x, m_y, m_z = ECEF2ENU(
+            dtype_num(df.loc[i_row, "radLatOrigin"]),
+            dtype_num(df.loc[i_row, "radLonOrigin"]),
+            dtype_num(df.loc[i_row, "mAltOrigin"]),
+            dtype_num(df.loc[i_row, "mETarget"]),
+            dtype_num(df.loc[i_row, "mYTarget"]),
+            dtype_num(df.loc[i_row, "mZTarget"]),
+            WGS84.a,
+            WGS84.b,
+        )
+        assert np.isclose(m_x, 0, atol=tol_float_atol)
+        assert np.isclose(m_y, 19458.6147548328, atol=tol_float_atol)
+        assert np.isclose(m_z, -6363502.5003553545, atol=tol_float_atol)
+        assert isinstance(m_x, dtype_num) or m_x.dtype == np.float64
+        assert isinstance(m_y, dtype_num) or m_y.dtype == np.float64
+        assert isinstance(m_z, dtype_num) or m_z.dtype == np.float64
 
 
 @pytest.mark.parametrize(
@@ -862,6 +929,53 @@ def test_ECEF2ENU_parllel_unrolled_list(dtype):
         [df.loc[0, "radLatOrigin"]],  # type: ignore
         [df.loc[0, "radLonOrigin"]],  # type: ignore
         [df.loc[0, "mAltOrigin"]],  # type: ignore
+        df["mETarget"].tolist(),
+        df["mYTarget"].tolist(),
+        df["mZTarget"].tolist(),
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.all(np.isclose(m_ENU_x, m_ENU_x1))
+    assert np.all(np.isclose(m_ENU_y, m_ENU_y1))
+    assert np.all(np.isclose(m_ENU_z, m_ENU_z1))
+
+
+@pytest.mark.parametrize("dtype_arr,dtype_num", float_type_pairs)
+def test_ECEF2ENU_parllel_unrolled_numbers(dtype_arr, dtype_num):
+    rrm_target = DDM2RRM(np.array([[31], [32], [0]], dtype=dtype_arr))
+    num_repeats = 1000
+    rrm_targets = np.ascontiguousarray(
+        np.tile(rrm_target, num_repeats).T.reshape((-1, 3, 1))
+    )
+    rrm_local = DDM2RRM(np.array([[30], [31], [0]], dtype=dtype_arr))
+    rrm_locals = np.ascontiguousarray(
+        np.tile(rrm_local, rrm_targets.shape[0]).T.reshape((-1, 3, 1))
+    )
+    mmm_ECEF_traget = geodetic2ECEF(rrm_targets, WGS84.a, WGS84.b)
+    df = pd.DataFrame(
+        {
+            "radLatOrigin": rrm_locals[:, 0, 0],
+            "radLonOrigin": rrm_locals[:, 1, 0],
+            "mAltOrigin": rrm_locals[:, 2, 0],
+            "mETarget": mmm_ECEF_traget[:, 0, 0],
+            "mYTarget": mmm_ECEF_traget[:, 1, 0],
+            "mZTarget": mmm_ECEF_traget[:, 2, 0],
+        }
+    )
+    m_ENU_x, m_ENU_y, m_ENU_z = ECEF2ENU(
+        df["radLatOrigin"].tolist(),
+        df["radLonOrigin"].tolist(),
+        df["mAltOrigin"].tolist(),
+        df["mETarget"].tolist(),
+        df["mYTarget"].tolist(),
+        df["mZTarget"].tolist(),
+        WGS84.a,
+        WGS84.b,
+    )
+    m_ENU_x1, m_ENU_y1, m_ENU_z1 = ECEF2ENU(
+        dtype_num(df.loc[0, "radLatOrigin"]),
+        dtype_num(df.loc[0, "radLonOrigin"]),
+        dtype_num(df.loc[0, "mAltOrigin"]),
         df["mETarget"].tolist(),
         df["mYTarget"].tolist(),
         df["mZTarget"].tolist(),
