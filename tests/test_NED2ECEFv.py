@@ -5,7 +5,7 @@ import pytest
 from transforms84.helpers import DDM2RRM
 from transforms84.transforms import NED2ECEFv
 
-from .conftest import tol_double_atol, tol_float_atol
+from .conftest import float_type_pairs, tol_double_atol, tol_float_atol
 
 
 @pytest.mark.parametrize(
@@ -120,6 +120,135 @@ def test_NED2ECEFv_parallel_unrolled_list(dtype, tol):
     assert np.all(np.isclose(x, 530.2445, atol=tol))
     assert np.all(np.isclose(y, 492.1283, atol=tol))
     assert np.all(np.isclose(z, 396.3459, atol=tol))
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_NED2ECEFv_parallel_unrolled_numbers_int(dtype_num):
+    rrm_local = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[61.64], [30.70], [0]], dtype=np.float64)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    uvw = np.ascontiguousarray(
+        np.tile(
+            np.array([[-434.0403], [152.4451], [-684.6964]], dtype=np.float64), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "rrm_local_0": rrm_local[:, 0, 0],
+            "rrm_local_1": rrm_local[:, 1, 0],
+            "rrm_local_2": rrm_local[:, 2, 0],
+            "uvw_0": uvw[:, 0, 0],
+            "uvw_1": uvw[:, 1, 0],
+            "uvw_2": uvw[:, 2, 0],
+        }
+    )
+    x, y, z = NED2ECEFv(
+        dtype_num(df["rrm_local_0"]),
+        dtype_num(df["rrm_local_1"]),
+        dtype_num(df["rrm_local_2"]),
+        dtype_num(df["uvw_0"]),
+        dtype_num(df["uvw_1"]),
+        dtype_num(df["uvw_2"]),
+    )
+    x64, y64, z64 = NED2ECEFv(
+        np.float64(dtype_num(df["rrm_local_0"])),
+        np.float64(dtype_num(df["rrm_local_1"])),
+        np.float64(dtype_num(df["rrm_local_2"])),
+        np.float64(dtype_num(df["uvw_0"])),
+        np.float64(dtype_num(df["uvw_1"])),
+        np.float64(dtype_num(df["uvw_2"])),
+    )
+    assert np.all(np.isclose(x, x64))
+    assert np.all(np.isclose(y, y64))
+    assert np.all(np.isclose(z, z64))
+    assert x.dtype == np.float64
+    assert y.dtype == np.float64
+    assert z.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_NED2ECEFv_parallel_unrolled_numbers_int_loop(dtype_num):
+    rrm_local = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[61.64], [30.70], [0]], dtype=np.float64)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    uvw = np.ascontiguousarray(
+        np.tile(
+            np.array([[-434.0403], [152.4451], [-684.6964]], dtype=np.float64), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "rrm_local_0": rrm_local[:, 0, 0],
+            "rrm_local_1": rrm_local[:, 1, 0],
+            "rrm_local_2": rrm_local[:, 2, 0],
+            "uvw_0": uvw[:, 0, 0],
+            "uvw_1": uvw[:, 1, 0],
+            "uvw_2": uvw[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        x, y, z = NED2ECEFv(
+            dtype_num(df.loc[i_row, "rrm_local_0"]),
+            dtype_num(df.loc[i_row, "rrm_local_1"]),
+            dtype_num(df.loc[i_row, "rrm_local_2"]),
+            dtype_num(df.loc[i_row, "uvw_0"]),
+            dtype_num(df.loc[i_row, "uvw_1"]),
+            dtype_num(df.loc[i_row, "uvw_2"]),
+        )
+        x64, y64, z64 = NED2ECEFv(
+            np.float64(dtype_num(df.loc[i_row, "rrm_local_0"])),
+            np.float64(dtype_num(df.loc[i_row, "rrm_local_1"])),
+            np.float64(dtype_num(df.loc[i_row, "rrm_local_2"])),
+            np.float64(dtype_num(df.loc[i_row, "uvw_0"])),
+            np.float64(dtype_num(df.loc[i_row, "uvw_1"])),
+            np.float64(dtype_num(df.loc[i_row, "uvw_2"])),
+        )
+        assert np.all(np.isclose(x, x64))
+        assert np.all(np.isclose(y, y64))
+        assert np.all(np.isclose(z, z64))
+        assert x.dtype == np.float64
+        assert y.dtype == np.float64
+        assert z.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_arr,dtype_num", float_type_pairs)
+def test_NED2ECEFv_parallel_unrolled_numbers_loop(dtype_arr, dtype_num):
+    rrm_local = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[61.64], [30.70], [0]], dtype=dtype_arr)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    uvw = np.ascontiguousarray(
+        np.tile(
+            np.array([[-434.0403], [152.4451], [-684.6964]], dtype=dtype_arr), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "rrm_local_0": rrm_local[:, 0, 0],
+            "rrm_local_1": rrm_local[:, 1, 0],
+            "rrm_local_2": rrm_local[:, 2, 0],
+            "uvw_0": uvw[:, 0, 0],
+            "uvw_1": uvw[:, 1, 0],
+            "uvw_2": uvw[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        x, y, z = NED2ECEFv(
+            dtype_num(df.loc[i_row, "rrm_local_0"]),
+            dtype_num(df.loc[i_row, "rrm_local_1"]),
+            dtype_num(df.loc[i_row, "rrm_local_2"]),
+            dtype_num(df.loc[i_row, "uvw_0"]),
+            dtype_num(df.loc[i_row, "uvw_1"]),
+            dtype_num(df.loc[i_row, "uvw_2"]),
+        )
+        assert np.all(np.isclose(x, 530.2445, atol=tol_float_atol))
+        assert np.all(np.isclose(y, 492.1283, atol=tol_float_atol))
+        assert np.all(np.isclose(z, 396.3459, atol=tol_float_atol))
 
 
 @pytest.mark.parametrize(

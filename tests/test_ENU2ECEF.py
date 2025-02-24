@@ -6,32 +6,9 @@ from transforms84.helpers import DDM2RRM
 from transforms84.systems import WGS84
 from transforms84.transforms import ENU2ECEF, geodetic2ECEF
 
-from .conftest import tol_double_atol, tol_float_atol
+from .conftest import float_type_pairs, tol_double_atol, tol_float_atol
 
 # https://www.lddgo.net/en/coordinate/ecef-enu
-
-
-def test_ENU2ECEF_raise_wrong_dtype_unrolled():
-    XYZ = np.array([[3906.67536618], [2732.16708], [1519.47079847]], dtype=np.float16)
-    ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        ENU2ECEF(
-            ref_point[0],
-            ref_point[1],
-            ref_point[2],
-            XYZ[0],
-            XYZ[1],
-            XYZ[2],
-            WGS84.a,
-            WGS84.b,
-        )
-
-
-def test_ENU2ECEF_raise_wrong_dtype():
-    XYZ = np.array([[3906.67536618], [2732.16708], [1519.47079847]], dtype=np.float16)
-    ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        ENU2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)  # type: ignore
 
 
 def test_ENU2ECEF_raise_wrong_size():
@@ -551,6 +528,157 @@ def test_ENU2ECEF_parallel_unrolled_list(dtype, tol):
     assert np.all(np.isclose(m_x, 3906.67536618, atol=tol))
     assert np.all(np.isclose(m_y, 2732.16708, atol=tol))
     assert np.all(np.isclose(m_z, 1519.47079847, atol=tol))
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_ENU2ECEF_parallel_unrolled_numbers_int(dtype_num):
+    XYZ = np.ascontiguousarray(
+        np.tile(
+            np.array(
+                [[1901.5690521235], [5316.9485968901], [-6378422.76482545]],
+                dtype=np.float64,
+            ),
+            1000,
+        ).T.reshape((-1, 3, 1000))
+    )
+    ref_point = np.ascontiguousarray(
+        np.tile(np.array([[0.1], [0.2], [5000]], dtype=np.float64), 1000).T.reshape(
+            (-1, 3, 1000)
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "ref_x": ref_point[:, 0, 0],
+            "ref_y": ref_point[:, 1, 0],
+            "ref_z": ref_point[:, 2, 0],
+            "x": XYZ[:, 0, 0],
+            "y": XYZ[:, 1, 0],
+            "z": XYZ[:, 2, 0],
+        }
+    )
+    m_x, m_y, m_z = ENU2ECEF(
+        dtype_num(df["ref_x"]),
+        dtype_num(df["ref_y"]),
+        dtype_num(df["ref_z"]),
+        dtype_num(df["x"]),
+        dtype_num(df["y"]),
+        dtype_num(df["z"]),
+        WGS84.a,
+        WGS84.b,
+    )
+    m_x64, m_y64, m_z64 = ENU2ECEF(
+        dtype_num(df["ref_x"]),
+        dtype_num(df["ref_y"]),
+        dtype_num(df["ref_z"]),
+        dtype_num(df["x"]),
+        dtype_num(df["y"]),
+        dtype_num(df["z"]),
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.all(np.isclose(m_x, m_x64))
+    assert np.all(np.isclose(m_y, m_y64))
+    assert np.all(np.isclose(m_z, m_z64))
+    assert m_x.dtype == np.float64
+    assert m_y.dtype == np.float64
+    assert m_z.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_arr,dtype_num", float_type_pairs)
+def test_ENU2ECEF_parallel_unrolled_numbers_loop(dtype_arr, dtype_num):
+    XYZ = np.ascontiguousarray(
+        np.tile(
+            np.array(
+                [[1901.5690521235], [5316.9485968901], [-6378422.76482545]],
+                dtype=dtype_arr,
+            ),
+            1000,
+        ).T.reshape((-1, 3, 1000))
+    )
+    ref_point = np.ascontiguousarray(
+        np.tile(np.array([[0.1], [0.2], [5000]], dtype=dtype_arr), 1000).T.reshape(
+            (-1, 3, 1000)
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "ref_x": ref_point[:, 0, 0],
+            "ref_y": ref_point[:, 1, 0],
+            "ref_z": ref_point[:, 2, 0],
+            "x": XYZ[:, 0, 0],
+            "y": XYZ[:, 1, 0],
+            "z": XYZ[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        m_x, m_y, m_z = ENU2ECEF(
+            dtype_num(df.loc[i_row, "ref_x"]),
+            dtype_num(df.loc[i_row, "ref_y"]),
+            dtype_num(df.loc[i_row, "ref_z"]),
+            dtype_num(df.loc[i_row, "x"]),
+            dtype_num(df.loc[i_row, "y"]),
+            dtype_num(df.loc[i_row, "z"]),
+            WGS84.a,
+            WGS84.b,
+        )
+        assert np.all(np.isclose(m_x, 3906.67536618, atol=tol_float_atol))
+        assert np.all(np.isclose(m_y, 2732.16708, atol=tol_float_atol))
+        assert np.all(np.isclose(m_z, 1519.47079847, atol=tol_float_atol))
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_ENU2ECEF_parallel_unrolled_numbers_loop_int(dtype_num):
+    XYZ = np.ascontiguousarray(
+        np.tile(
+            np.array(
+                [[1901.5690521235], [5316.9485968901], [-6378422.76482545]],
+                dtype=np.float64,
+            ),
+            1000,
+        ).T.reshape((-1, 3, 1000))
+    )
+    ref_point = np.ascontiguousarray(
+        np.tile(np.array([[0.1], [0.2], [5000]], dtype=np.float64), 1000).T.reshape(
+            (-1, 3, 1000)
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "ref_x": ref_point[:, 0, 0],
+            "ref_y": ref_point[:, 1, 0],
+            "ref_z": ref_point[:, 2, 0],
+            "x": XYZ[:, 0, 0],
+            "y": XYZ[:, 1, 0],
+            "z": XYZ[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        m_x, m_y, m_z = ENU2ECEF(
+            dtype_num(df.loc[i_row, "ref_x"]),
+            dtype_num(df.loc[i_row, "ref_y"]),
+            dtype_num(df.loc[i_row, "ref_z"]),
+            dtype_num(df.loc[i_row, "x"]),
+            dtype_num(df.loc[i_row, "y"]),
+            dtype_num(df.loc[i_row, "z"]),
+            WGS84.a,
+            WGS84.b,
+        )
+        m_x64, m_y64, m_z64 = ENU2ECEF(
+            np.float64(dtype_num(df.loc[i_row, "ref_x"])),
+            np.float64(dtype_num(df.loc[i_row, "ref_y"])),
+            np.float64(dtype_num(df.loc[i_row, "ref_z"])),
+            np.float64(dtype_num(df.loc[i_row, "x"])),
+            np.float64(dtype_num(df.loc[i_row, "y"])),
+            np.float64(dtype_num(df.loc[i_row, "z"])),
+            WGS84.a,
+            WGS84.b,
+        )
+        assert np.isclose(m_x, m_x64)
+        assert np.isclose(m_y, m_y64)
+        assert np.isclose(m_z, m_z64)
+        assert m_x.dtype == np.float64
+        assert m_y.dtype == np.float64
+        assert m_z.dtype == np.float64
 
 
 @pytest.mark.parametrize(

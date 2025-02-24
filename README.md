@@ -103,15 +103,12 @@ Again, we can achieve the same result by splitting the arrays over each coordian
           "radLatTarget": rrm_target[:, 0, 0],
           "radLonTarget": rrm_target[:, 1, 0],
           "mAltTarget": rrm_target[:, 2, 0],
-          "radLatOrigin": rrm_local[:, 0, 0],
-          "radLonOrigin": rrm_local[:, 1, 0],
-          "mAltOrigin": rrm_local[:, 2, 0],
       }
   )
 >> df["e"], df["n"], df["u"] = ECEF2ENU(
-    df["radLatOrigin"],
-    df["radLonOrigin"],
-    df["mAltOrigin"],
+    np.deg2rad(30),
+    np.deg2rad(31),
+    0,
     *geodetic2ECEF(
         df["radLatTarget"],
         df["radLonTarget"],

@@ -5,19 +5,7 @@ import pytest
 from transforms84.helpers import DDM2RRM
 from transforms84.transforms import NED2AER
 
-from .conftest import tol_double_atol, tol_float_atol
-
-
-def test_NED2AER_raise_wrong_dtype():
-    NED = np.array([[-9.1013], [4.1617], [4.2812]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        NED2AER(NED)  # type: ignore
-
-
-def test_NED2AER_raise_wrong_dtype_unrolled():
-    NED = np.array([[-9.1013], [4.1617], [4.2812]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        NED2AER(NED[0], NED[1], NED[2])
+from .conftest import float_type_pairs, tol_double_atol, tol_float_atol
 
 
 @pytest.mark.skip(reason="Get check data")
@@ -148,6 +136,98 @@ def test_NED2AER_points_unrolled_list(dtype, tol):
     assert np.all(np.isclose(a, np.deg2rad(155.4271), atol=tol))
     assert np.all(np.isclose(e, np.deg2rad(-23.1609), atol=tol))
     assert np.all(np.isclose(r, 10.8849, atol=tol))
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_NED2AER_points_unrolled_numbers_loop_int(dtype_num):
+    NED = np.array(
+        [
+            [[-9.1013], [4.1617], [4.2812]],
+            [[-9.1013], [4.1617], [4.2812]],
+        ],
+        dtype=np.float64,
+    )
+    df = pd.DataFrame(
+        {
+            "N": NED[:, 0, 0],
+            "E": NED[:, 1, 0],
+            "D": NED[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        a, e, r = NED2AER(
+            dtype_num(df.loc[i_row, "N"]),
+            dtype_num(df.loc[i_row, "E"]),
+            dtype_num(df.loc[i_row, "D"]),
+        )
+        a64, e64, r64 = NED2AER(
+            np.float64(dtype_num(df.loc[i_row, "N"])),
+            np.float64(dtype_num(df.loc[i_row, "E"])),
+            dtype_num(df.loc[i_row, "D"]),
+        )
+        assert np.all(np.isclose(a, a64))
+        assert np.all(np.isclose(e, e64))
+        assert np.all(np.isclose(r, r64))
+        assert a.dtype == np.float64
+        assert e.dtype == np.float64
+        assert r.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_NED2AER_points_unrolled_numbers_int(dtype_num):
+    NED = np.array(
+        [
+            [[-9.1013], [4.1617], [4.2812]],
+            [[-9.1013], [4.1617], [4.2812]],
+        ],
+        dtype=np.float64,
+    )
+    df = pd.DataFrame(
+        {
+            "N": NED[:, 0, 0],
+            "E": NED[:, 1, 0],
+            "D": NED[:, 2, 0],
+        }
+    )
+    a, e, r = NED2AER(dtype_num(df["N"]), dtype_num(df["E"]), dtype_num(df["D"]))
+    a64, e64, r64 = NED2AER(
+        np.float64(dtype_num(df["N"])),
+        np.float64(dtype_num(df["E"])),
+        dtype_num(df["D"]),
+    )
+    assert np.all(np.isclose(a, a64))
+    assert np.all(np.isclose(e, e64))
+    assert np.all(np.isclose(r, r64))
+    assert a.dtype == np.float64
+    assert e.dtype == np.float64
+    assert r.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_arr,dtype_num", float_type_pairs)
+def test_NED2AER_points_unrolled_numbers_loop(dtype_arr, dtype_num):
+    NED = np.array(
+        [
+            [[-9.1013], [4.1617], [4.2812]],
+            [[-9.1013], [4.1617], [4.2812]],
+        ],
+        dtype=dtype_arr,
+    )
+    df = pd.DataFrame(
+        {
+            "N": NED[:, 0, 0],
+            "E": NED[:, 1, 0],
+            "D": NED[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        a, e, r = NED2AER(
+            dtype_num(df.loc[i_row, "N"]),
+            dtype_num(df.loc[i_row, "E"]),
+            dtype_num(df.loc[i_row, "D"]),
+        )
+        assert np.all(np.isclose(a, np.deg2rad(155.4271), atol=tol_float_atol))
+        assert np.all(np.isclose(e, np.deg2rad(-23.1609), atol=tol_float_atol))
+        assert np.all(np.isclose(r, 10.8849, atol=tol_float_atol))
 
 
 @pytest.mark.parametrize(

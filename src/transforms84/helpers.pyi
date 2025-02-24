@@ -3,13 +3,13 @@ from typing import Union
 import numpy as np
 import numpy.typing as npt
 
-from .definitions import SUPPORTED_TYPES
+from .definitions import NumberLikeNpy
 
 def deg_angular_difference(
-    angle1: Union[float, npt.NDArray[SUPPORTED_TYPES]],
-    angle2: Union[float, npt.NDArray[SUPPORTED_TYPES]],
+    angle1: Union[float, npt.NDArray[NumberLikeNpy]],
+    angle2: Union[float, npt.NDArray[NumberLikeNpy]],
     smallest_angle: bool,
-) -> Union[float, npt.NDArray[SUPPORTED_TYPES]]:
+) -> Union[float, npt.NDArray[NumberLikeNpy]]:
     """
     Calculate the angular difference between two angles in degrees.
 
@@ -26,10 +26,10 @@ def deg_angular_difference(
     ...
 
 def rad_angular_difference(
-    angle1: Union[float, npt.NDArray[SUPPORTED_TYPES]],
-    angle2: Union[float, npt.NDArray[SUPPORTED_TYPES]],
+    angle1: Union[float, npt.NDArray[NumberLikeNpy]],
+    angle2: Union[float, npt.NDArray[NumberLikeNpy]],
     smallest_angle: bool,
-) -> Union[float, npt.NDArray[SUPPORTED_TYPES]]:
+) -> Union[float, npt.NDArray[NumberLikeNpy]]:
     """
     Calculate the angular difference between two angles in radians.
 
@@ -45,7 +45,9 @@ def rad_angular_difference(
     """
     ...
 
-def RRM2DDM(rrm_position: npt.NDArray[SUPPORTED_TYPES]) -> npt.NDArray[SUPPORTED_TYPES]:
+def RRM2DDM(
+    rrm_position: npt.NDArray[NumberLikeNpy],
+) -> npt.NDArray[NumberLikeNpy]:
     """Convert array with units radians, radians, X to array with units degrees, degrees, X
 
     :param rrm_position: Array with units radians, radians, X
@@ -55,7 +57,9 @@ def RRM2DDM(rrm_position: npt.NDArray[SUPPORTED_TYPES]) -> npt.NDArray[SUPPORTED
     """
     ...
 
-def DDM2RRM(ddm_position: npt.NDArray[SUPPORTED_TYPES]) -> npt.NDArray[SUPPORTED_TYPES]:
+def DDM2RRM(
+    ddm_position: npt.NDArray[NumberLikeNpy],
+) -> npt.NDArray[NumberLikeNpy]:
     """Convert array with units degrees, degrees, X to array with units radians, radians, X
 
     :param rrm_position: Array with units degrees, degrees, X
@@ -81,7 +85,7 @@ def wrap(
         int,
         npt.NDArray[Union[np.float32, np.float64]],
     ],
-) -> Union[float, npt.NDArray[SUPPORTED_TYPES]]:
+) -> Union[float, npt.NDArray[NumberLikeNpy]]:
     """
     Wrap a number or array of numbers within a specified range.
 

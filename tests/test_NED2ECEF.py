@@ -6,32 +6,9 @@ from transforms84.helpers import DDM2RRM
 from transforms84.systems import WGS84
 from transforms84.transforms import NED2ECEF
 
-from .conftest import tol_double_rtol, tol_float_rtol
+from .conftest import float_type_pairs, tol_double_rtol, tol_float_rtol
 
 # https://www.lddgo.net/en/coordinate/ecef-NED
-
-
-def test_NED2ECEF_raise_wrong_dtype_unrolled():
-    XYZ = np.array([[1.3457e06], [-4.3509e06], [4.4523e06]], dtype=np.float16)
-    ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        NED2ECEF(
-            ref_point[0],
-            ref_point[1],
-            ref_point[2],
-            XYZ[0],
-            XYZ[1],
-            XYZ[2],
-            WGS84.a,
-            WGS84.b,
-        )
-
-
-def test_NED2ECEF_raise_wrong_dtype():
-    XYZ = np.array([[1.3457e06], [-4.3509e06], [4.4523e06]], dtype=np.float16)
-    ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        NED2ECEF(ref_point, XYZ, WGS84.a, WGS84.b)  # type: ignore
 
 
 def test_NED2ECEF_raise_wrong_size():
@@ -286,6 +263,154 @@ def test_NED2ECEF_points_unrolled_list(dtype, tol):
     assert np.all(np.isclose(m_x, 1.3457e06, rtol=tol))
     assert np.all(np.isclose(m_y, -4.3509e06, rtol=tol))
     assert np.all(np.isclose(m_z, 4.4523e06, rtol=tol))
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_NED2ECEF_points_unrolled_numbers_int_loop(dtype_num):
+    XYZ = np.array(
+        [
+            [[1334.3], [-2544.4], [360.0]],
+            [[1334.3], [-2544.4], [360.0]],
+        ],
+        dtype=np.float64,
+    )
+    ref_point = DDM2RRM(
+        np.array(
+            [[[44.532], [-72.782], [1.699]], [[44.532], [-72.782], [1.699]]],
+            dtype=np.float64,
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "ref_x": ref_point[:, 0, 0],
+            "ref_y": ref_point[:, 1, 0],
+            "ref_z": ref_point[:, 2, 0],
+            "x": XYZ[:, 0, 0],
+            "y": XYZ[:, 1, 0],
+            "z": XYZ[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        m_x, m_y, m_z = NED2ECEF(
+            dtype_num(df.loc[i_row, "ref_x"]),
+            dtype_num(df.loc[i_row, "ref_y"]),
+            dtype_num(df.loc[i_row, "ref_z"]),
+            dtype_num(df.loc[i_row, "x"]),
+            dtype_num(df.loc[i_row, "y"]),
+            dtype_num(df.loc[i_row, "z"]),
+            WGS84.a,
+            WGS84.b,
+        )
+        m_x64, m_y64, m_z64 = NED2ECEF(
+            np.float64(dtype_num(df.loc[i_row, "ref_x"])),
+            np.float64(dtype_num(df.loc[i_row, "ref_y"])),
+            np.float64(dtype_num(df.loc[i_row, "ref_z"])),
+            np.float64(dtype_num(df.loc[i_row, "x"])),
+            np.float64(dtype_num(df.loc[i_row, "y"])),
+            np.float64(dtype_num(df.loc[i_row, "z"])),
+            WGS84.a,
+            WGS84.b,
+        )
+        assert np.all(np.isclose(m_x, m_x64))
+        assert np.all(np.isclose(m_y, m_y64))
+        assert np.all(np.isclose(m_z, m_z64))
+        assert m_x.dtype == np.float64
+        assert m_y.dtype == np.float64
+        assert m_z.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_NED2ECEF_points_unrolled_numbers_int(dtype_num):
+    XYZ = np.array(
+        [
+            [[1334.3], [-2544.4], [360.0]],
+            [[1334.3], [-2544.4], [360.0]],
+        ],
+        dtype=np.float64,
+    )
+    ref_point = DDM2RRM(
+        np.array(
+            [[[44.532], [-72.782], [1.699]], [[44.532], [-72.782], [1.699]]],
+            dtype=np.float64,
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "ref_x": ref_point[:, 0, 0],
+            "ref_y": ref_point[:, 1, 0],
+            "ref_z": ref_point[:, 2, 0],
+            "x": XYZ[:, 0, 0],
+            "y": XYZ[:, 1, 0],
+            "z": XYZ[:, 2, 0],
+        }
+    )
+    m_x, m_y, m_z = NED2ECEF(
+        dtype_num(df["ref_x"]),
+        dtype_num(df["ref_y"]),
+        dtype_num(df["ref_z"]),
+        dtype_num(df["x"]),
+        dtype_num(df["y"]),
+        dtype_num(df["z"]),
+        WGS84.a,
+        WGS84.b,
+    )
+    m_x64, m_y64, m_z64 = NED2ECEF(
+        np.float64(dtype_num(df["ref_x"])),
+        np.float64(dtype_num(df["ref_y"])),
+        np.float64(dtype_num(df["ref_z"])),
+        np.float64(dtype_num(df["x"])),
+        np.float64(dtype_num(df["y"])),
+        np.float64(dtype_num(df["z"])),
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.all(np.isclose(m_x, m_x64))
+    assert np.all(np.isclose(m_y, m_y64))
+    assert np.all(np.isclose(m_z, m_z64))
+    assert m_x.dtype == np.float64
+    assert m_y.dtype == np.float64
+    assert m_z.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_arr,dtype_num", float_type_pairs)
+def test_NED2ECEF_points_unrolled_numbers_loop(dtype_arr, dtype_num):
+    XYZ = np.array(
+        [
+            [[1334.3], [-2544.4], [360.0]],
+            [[1334.3], [-2544.4], [360.0]],
+        ],
+        dtype=dtype_arr,
+    )
+    ref_point = DDM2RRM(
+        np.array(
+            [[[44.532], [-72.782], [1.699]], [[44.532], [-72.782], [1.699]]],
+            dtype=dtype_arr,
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "ref_x": ref_point[:, 0, 0],
+            "ref_y": ref_point[:, 1, 0],
+            "ref_z": ref_point[:, 2, 0],
+            "x": XYZ[:, 0, 0],
+            "y": XYZ[:, 1, 0],
+            "z": XYZ[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        m_x, m_y, m_z = NED2ECEF(
+            dtype_num(df.loc[i_row, "ref_x"]),
+            dtype_num(df.loc[i_row, "ref_y"]),
+            dtype_num(df.loc[i_row, "ref_z"]),
+            dtype_num(df.loc[i_row, "x"]),
+            dtype_num(df.loc[i_row, "y"]),
+            dtype_num(df.loc[i_row, "z"]),
+            WGS84.a,
+            WGS84.b,
+        )
+        assert np.all(np.isclose(m_x, 1.3457e06, rtol=tol_float_rtol))
+        assert np.all(np.isclose(m_y, -4.3509e06, rtol=tol_float_rtol))
+        assert np.all(np.isclose(m_z, 4.4523e06, rtol=tol_float_rtol))
 
 
 @pytest.mark.parametrize(

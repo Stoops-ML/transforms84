@@ -1,16 +1,15 @@
-from typing import List, Union, overload
+from typing import Union, overload
 
 import numpy.typing as npt
-import pandas as pd
 
-from .definitions import SUPPORTED_TYPES
+from .definitions import ArrayLike, NumberLike, NumberLikeNpy
 
 @overload
 def Haversine(
-    rrmStart: npt.NDArray[SUPPORTED_TYPES],
-    rrmEnd: npt.NDArray[SUPPORTED_TYPES],
+    rrmStart: npt.NDArray[NumberLikeNpy],
+    rrmEnd: npt.NDArray[NumberLikeNpy],
     m_radius_sphere: float,
-) -> Union[float, npt.NDArray[SUPPORTED_TYPES]]:
+) -> Union[float, npt.NDArray[NumberLikeNpy]]:
     """Calculate the Haversine distance between two points on a sphere.
 
     :param rrmStart: The starting point coordinates as a NumPy array.
@@ -27,29 +26,29 @@ def Haversine(
 
 @overload
 def Haversine(
-    rad_lat_start: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    rad_lon_start: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    m_alt_start: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    rad_lat_end: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    rad_lon_end: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
-    m_alt_end: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]],
+    rad_lat_start: Union[NumberLike, ArrayLike],
+    rad_lon_start: Union[NumberLike, ArrayLike],
+    m_alt_start: Union[NumberLike, ArrayLike],
+    rad_lat_end: Union[NumberLike, ArrayLike],
+    rad_lon_end: Union[NumberLike, ArrayLike],
+    m_alt_end: Union[NumberLike, ArrayLike],
     m_radius_sphere: float,
-) -> npt.NDArray[SUPPORTED_TYPES]:
+) -> npt.NDArray[NumberLikeNpy]:
     """
     Calculate the Haversine distance between two points on a sphere.
 
     :param rad_lat_start: The starting point latitude in radians as a NumPy array, pandas Series, or list of floats.
-    :type rad_lat_start: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :type rad_lat_start: Union[NumberLike, ArrayLike]
     :param rad_lon_start: The starting point longitude in radians as a NumPy array, pandas Series, or list of floats.
-    :type rad_lon_start: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :type rad_lon_start: Union[NumberLike, ArrayLike]
     :param m_alt_start: The starting point altitude in meters as a NumPy array, pandas Series, or list of floats.
-    :type m_alt_start: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :type m_alt_start: Union[NumberLike, ArrayLike]
     :param rad_lat_end: The ending point latitude in radians as a NumPy array, pandas Series, or list of floats.
-    :type rad_lat_end: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :type rad_lat_end: Union[NumberLike, ArrayLike]
     :param rad_lon_end: The ending point longitude in radians as a NumPy array, pandas Series, or list of floats.
-    :type rad_lon_end: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :type rad_lon_end: Union[NumberLike, ArrayLike]
     :param m_alt_end: The ending point altitude in meters as a NumPy array, pandas Series, or list of floats.
-    :type m_alt_end: Union[npt.NDArray[SUPPORTED_TYPES], pd.Series[float], List[float]]
+    :type m_alt_end: Union[NumberLike, ArrayLike]
     :param m_radius_sphere: The radius of the sphere in meters.
     :type m_radius_sphere: float
 

@@ -6,55 +6,9 @@ from transforms84.helpers import DDM2RRM
 from transforms84.systems import WGS84
 from transforms84.transforms import ECEF2NED, geodetic2ECEF
 
+from .conftest import float_type_pairs
+
 # https://www.lddgo.net/en/coordinate/ecef-enu
-
-
-def test_ECEF2NED_raise_wrong_dtype_unrolled():
-    ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float16)
-    NED = np.array(
-        [[3906.67536618], [2732.16708], [1519.47079847], [1]], dtype=np.float32
-    )
-    with pytest.raises(ValueError):
-        ECEF2NED(
-            ref_point[0],
-            ref_point[1],
-            ref_point[2],
-            NED[0],
-            NED[1],
-            NED[2],
-            WGS84.a,
-            WGS84.b,
-        )
-    ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float32)
-    NED = np.array(
-        [[3906.67536618], [2732.16708], [1519.47079847], [1]], dtype=np.float16
-    )
-    with pytest.raises(ValueError):
-        ECEF2NED(
-            ref_point[0],
-            ref_point[1],
-            ref_point[2],
-            NED[0],
-            NED[1],
-            NED[2],
-            WGS84.a,
-            WGS84.b,
-        )
-    ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float16)
-    NED = np.array(
-        [[3906.67536618], [2732.16708], [1519.47079847], [1]], dtype=np.float16
-    )
-    with pytest.raises(ValueError):
-        ECEF2NED(
-            ref_point[0],
-            ref_point[1],
-            ref_point[2],
-            NED[0],
-            NED[1],
-            NED[2],
-            WGS84.a,
-            WGS84.b,
-        )
 
 
 def test_ECEF2NED_raise_wrong_dtype():
@@ -63,19 +17,19 @@ def test_ECEF2NED_raise_wrong_dtype():
         [[3906.67536618], [2732.16708], [1519.47079847], [1]], dtype=np.float32
     )
     with pytest.raises(ValueError):
-        ECEF2NED(ref_point, NED, WGS84.a, WGS84.b)  # type: ignore
+        ECEF2NED(ref_point, NED, WGS84.a, WGS84.b)
     ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float32)
     NED = np.array(
         [[3906.67536618], [2732.16708], [1519.47079847], [1]], dtype=np.float16
     )
     with pytest.raises(ValueError):
-        ECEF2NED(ref_point, NED, WGS84.a, WGS84.b)  # type: ignore
+        ECEF2NED(ref_point, NED, WGS84.a, WGS84.b)
     ref_point = np.array([[5010306], [2336344], [3170376.2]], dtype=np.float16)
     NED = np.array(
         [[3906.67536618], [2732.16708], [1519.47079847], [1]], dtype=np.float16
     )
     with pytest.raises(ValueError):
-        ECEF2NED(ref_point, NED, WGS84.a, WGS84.b)  # type: ignore
+        ECEF2NED(ref_point, NED, WGS84.a, WGS84.b)
 
 
 def test_ECEF2NED_raise_wrong_size():
@@ -548,6 +502,157 @@ def test_ECEF2NED_points_unrolled_list(dtype):
     assert np.all(np.isclose(m_x, 1334.3, rtol=0.001))
     assert np.all(np.isclose(m_y, -2544.4, rtol=0.001))
     assert np.all(np.isclose(m_z, 360.0, rtol=0.001))
+
+
+@pytest.mark.parametrize("dtype_num", [int, np.int32, np.int64])
+def test_ECEF2NED_points_unrolled_numbers_loop_int(dtype_num):
+    XYZ = np.array(
+        [
+            [[1345660], [-4350891], [4452314]],
+            [[1345660], [-4350891], [4452314]],
+        ],
+        dtype=np.float64,
+    )
+    ref_point = DDM2RRM(
+        np.array(
+            [[[44.532], [-72.782], [1699.0]], [[44.532], [-72.782], [1699.0]]],
+            dtype=np.float64,
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "ref_x": ref_point[:, 0, 0],
+            "ref_y": ref_point[:, 1, 0],
+            "ref_z": ref_point[:, 2, 0],
+            "x": XYZ[:, 0, 0],
+            "y": XYZ[:, 1, 0],
+            "z": XYZ[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        m_x, m_y, m_z = ECEF2NED(
+            dtype_num(df.loc[i_row, "ref_x"]),
+            dtype_num(df.loc[i_row, "ref_y"]),
+            dtype_num(df.loc[i_row, "ref_z"]),
+            dtype_num(df.loc[i_row, "x"]),
+            dtype_num(df.loc[i_row, "y"]),
+            dtype_num(df.loc[i_row, "z"]),
+            WGS84.a,
+            WGS84.b,
+        )
+        m_x64, m_y64, m_z64 = ECEF2NED(
+            np.float64(dtype_num(df.loc[i_row, "ref_x"])),
+            np.float64(dtype_num(df.loc[i_row, "ref_y"])),
+            np.float64(dtype_num(df.loc[i_row, "ref_z"])),
+            np.float64(dtype_num(df.loc[i_row, "x"])),
+            np.float64(dtype_num(df.loc[i_row, "y"])),
+            np.float64(dtype_num(df.loc[i_row, "z"])),
+            WGS84.a,
+            WGS84.b,
+        )
+        assert np.isclose(m_x, m_x64)
+        assert np.isclose(m_y, m_y64)
+        assert np.isclose(m_z, m_z64)
+        assert m_x.dtype == np.float64
+        assert m_y.dtype == np.float64
+        assert m_z.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_ECEF2NED_points_unrolled_numbers_int(dtype_num):
+    XYZ = np.array(
+        [
+            [[1345660], [-4350891], [4452314]],
+            [[1345660], [-4350891], [4452314]],
+        ],
+        dtype=np.float64,
+    )
+    ref_point = DDM2RRM(
+        np.array(
+            [[[44.532], [-72.782], [1699.0]], [[44.532], [-72.782], [1699.0]]],
+            dtype=np.float64,
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "ref_x": ref_point[:, 0, 0],
+            "ref_y": ref_point[:, 1, 0],
+            "ref_z": ref_point[:, 2, 0],
+            "x": XYZ[:, 0, 0],
+            "y": XYZ[:, 1, 0],
+            "z": XYZ[:, 2, 0],
+        }
+    )
+    m_x, m_y, m_z = ECEF2NED(
+        dtype_num(df["ref_x"]),
+        dtype_num(df["ref_y"]),
+        dtype_num(df["ref_z"]),
+        dtype_num(df["x"]),
+        dtype_num(df["y"]),
+        dtype_num(df["z"]),
+        WGS84.a,
+        WGS84.b,
+    )
+    m_x64, m_y64, m_z64 = ECEF2NED(
+        np.float64(dtype_num(df["ref_x"])),
+        np.float64(dtype_num(df["ref_y"])),
+        np.float64(dtype_num(df["ref_z"])),
+        np.float64(dtype_num(df["x"])),
+        np.float64(dtype_num(df["y"])),
+        np.float64(dtype_num(df["z"])),
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.all(np.isclose(m_x, m_x64))
+    assert np.all(np.isclose(m_y, m_y64))
+    assert np.all(np.isclose(m_z, m_z64))
+    assert m_x.dtype == np.float64
+    assert m_y.dtype == np.float64
+    assert m_z.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_arr,dtype_num", float_type_pairs)
+def test_ECEF2NED_points_unrolled_numbers_loop(dtype_arr, dtype_num):
+    XYZ = np.array(
+        [
+            [[1345660], [-4350891], [4452314]],
+            [[1345660], [-4350891], [4452314]],
+        ],
+        dtype=dtype_arr,
+    )
+    ref_point = DDM2RRM(
+        np.array(
+            [[[44.532], [-72.782], [1699.0]], [[44.532], [-72.782], [1699.0]]],
+            dtype=dtype_arr,
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "ref_x": ref_point[:, 0, 0],
+            "ref_y": ref_point[:, 1, 0],
+            "ref_z": ref_point[:, 2, 0],
+            "x": XYZ[:, 0, 0],
+            "y": XYZ[:, 1, 0],
+            "z": XYZ[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        m_x, m_y, m_z = ECEF2NED(
+            dtype_num(df.loc[i_row, "ref_x"]),
+            dtype_num(df.loc[i_row, "ref_y"]),
+            dtype_num(df.loc[i_row, "ref_z"]),
+            dtype_num(df.loc[i_row, "x"]),
+            dtype_num(df.loc[i_row, "y"]),
+            dtype_num(df.loc[i_row, "z"]),
+            WGS84.a,
+            WGS84.b,
+        )
+        assert np.all(np.isclose(m_x, 1334.3, rtol=0.001))
+        assert np.all(np.isclose(m_y, -2544.4, rtol=0.001))
+        assert np.all(np.isclose(m_z, 360.0, rtol=0.001))
+        assert m_x.dtype == dtype_num or m_x.dtype == np.float64
+        assert m_y.dtype == dtype_num or m_y.dtype == np.float64
+        assert m_z.dtype == dtype_num or m_z.dtype == np.float64
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])

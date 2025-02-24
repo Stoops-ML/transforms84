@@ -146,6 +146,99 @@ def test_ENU2ECEFv_parallel_unrolled_list(dtype, tol):
     assert np.all(np.isclose(z, -15.7724, atol=tol))
 
 
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_ENU2ECEFv_parallel_unrolled_numbers_int(dtype_num):
+    rrm_local = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[17.41], [78.27], [0]], dtype=np.float64)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    uvw = np.ascontiguousarray(
+        np.tile(
+            np.array([[-27.6190], [-16.4298], [-0.3186]], dtype=np.float64), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "x": rrm_local[:, 0, 0],
+            "y": rrm_local[:, 1, 0],
+            "z": rrm_local[:, 2, 0],
+            "u": uvw[:, 0, 0],
+            "v": uvw[:, 1, 0],
+            "w": uvw[:, 2, 0],
+        }
+    )
+    x, y, z = ENU2ECEFv(
+        dtype_num(df["x"]),
+        dtype_num(df["y"]),
+        dtype_num(df["z"]),
+        dtype_num(df["u"]),
+        dtype_num(df["v"]),
+        dtype_num(df["w"]),
+    )
+    x64, y64, z64 = ENU2ECEFv(
+        np.float64(dtype_num(df["x"])),
+        np.float64(dtype_num(df["y"])),
+        np.float64(dtype_num(df["z"])),
+        np.float64(dtype_num(df["u"])),
+        np.float64(dtype_num(df["v"])),
+        np.float64(dtype_num(df["w"])),
+    )
+    assert np.all(np.isclose(x, x64))
+    assert np.all(np.isclose(y, y64))
+    assert np.all(np.isclose(z, z64))
+    assert x.dtype == np.float64
+    assert y.dtype == np.float64
+    assert z.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_ENU2ECEFv_parallel_unrolled_numbers_loop_int(dtype_num):
+    rrm_local = np.ascontiguousarray(
+        np.tile(
+            DDM2RRM(np.array([[17.41], [78.27], [0]], dtype=np.float64)), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    uvw = np.ascontiguousarray(
+        np.tile(
+            np.array([[-27.6190], [-16.4298], [-0.3186]], dtype=np.float64), 1000
+        ).T.reshape((-1, 3, 1))
+    )
+    df = pd.DataFrame(
+        {
+            "x": rrm_local[:, 0, 0],
+            "y": rrm_local[:, 1, 0],
+            "z": rrm_local[:, 2, 0],
+            "u": uvw[:, 0, 0],
+            "v": uvw[:, 1, 0],
+            "w": uvw[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        x, y, z = ENU2ECEFv(
+            dtype_num(df.loc[i_row, "x"]),
+            dtype_num(df.loc[i_row, "y"]),
+            dtype_num(df.loc[i_row, "z"]),
+            dtype_num(df.loc[i_row, "u"]),
+            dtype_num(df.loc[i_row, "v"]),
+            dtype_num(df.loc[i_row, "w"]),
+        )
+        x64, y64, z64 = ENU2ECEFv(
+            np.float64(dtype_num(df.loc[i_row, "x"])),
+            np.float64(dtype_num(df.loc[i_row, "y"])),
+            np.float64(dtype_num(df.loc[i_row, "z"])),
+            np.float64(dtype_num(df.loc[i_row, "u"])),
+            np.float64(dtype_num(df.loc[i_row, "v"])),
+            np.float64(dtype_num(df.loc[i_row, "w"])),
+        )
+        assert np.all(np.isclose(x, x64))
+        assert np.all(np.isclose(y, y64))
+        assert np.all(np.isclose(z, z64))
+        assert x.dtype == np.float64
+        assert y.dtype == np.float64
+        assert z.dtype == np.float64
+
+
 @pytest.mark.parametrize(
     "dtype,tol", [(np.float64, tol_double_atol), (np.float32, tol_float_atol)]
 )

@@ -5,19 +5,7 @@ import pytest
 from transforms84.helpers import DDM2RRM
 from transforms84.transforms import AER2NED
 
-from .conftest import tol_double_atol, tol_float_atol
-
-
-def test_AER2NED_raise_wrong_dtype():
-    AER = np.array([[155.427], [-23.161], [10.885]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        AER2NED(AER)  # type: ignore
-
-
-def test_AER2NED_raise_wrong_dtype_unrolled():
-    AER = np.array([[155.427], [-23.161], [10.885]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        AER2NED(AER[0], AER[1], AER[2])
+from .conftest import float_type_pairs, tol_double_atol, tol_float_atol
 
 
 @pytest.mark.parametrize(
@@ -93,6 +81,108 @@ def test_AER2NED_point_int(dtype):
             np.array([[8.4504], [12.4737], [1.1046]], dtype=dtype),
         ),
     )
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_AER2NED_points_unrolled_numbers_int(dtype_num):
+    AER = DDM2RRM(
+        np.array(
+            [
+                [[155.427], [-23.161], [10.885]],
+                [[155.427], [-23.161], [10.885]],
+            ],
+            dtype=np.float64,
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "azimuth": AER[:, 0, 0],
+            "elevation": AER[:, 1, 0],
+            "range": AER[:, 2, 0],
+        }
+    )
+    n, e, d = AER2NED(
+        dtype_num(df["azimuth"]),
+        dtype_num(df["elevation"]),
+        dtype_num(df["range"]),
+    )
+    n64, e64, d64 = AER2NED(
+        np.float64(dtype_num(df["azimuth"])),
+        np.float64(dtype_num(df["elevation"])),
+        np.float64(dtype_num(df["range"])),
+    )
+    assert np.all(np.isclose(n, n64))
+    assert np.all(np.isclose(e, e64))
+    assert np.all(np.isclose(d, d64))
+
+
+@pytest.mark.parametrize("dtype_num", [int, np.int32, np.int64])
+def test_AER2NED_points_unrolled_numbers_loop_int(dtype_num):
+    AER = DDM2RRM(
+        np.array(
+            [
+                [[155.427], [-23.161], [10.885]],
+                [[155.427], [-23.161], [10.885]],
+            ],
+            dtype=np.float64,
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "azimuth": AER[:, 0, 0],
+            "elevation": AER[:, 1, 0],
+            "range": AER[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        n, e, d = AER2NED(
+            dtype_num(df.loc[i_row, "azimuth"]),
+            dtype_num(df.loc[i_row, "elevation"]),
+            dtype_num(df.loc[i_row, "range"]),
+        )
+        n64, e64, d64 = AER2NED(
+            np.float64(dtype_num(df.loc[i_row, "azimuth"])),
+            np.float64(dtype_num(df.loc[i_row, "elevation"])),
+            np.float64(dtype_num(df.loc[i_row, "range"])),
+        )
+        assert np.isclose(n, n64)
+        assert np.isclose(e, e64)
+        assert np.isclose(d, d64)
+        assert n.dtype == np.float64
+        assert e.dtype == np.float64
+        assert d.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_arr,dtype_num", float_type_pairs)
+def test_AER2NED_points_unrolled_numbers_loop(dtype_arr, dtype_num):
+    AER = DDM2RRM(
+        np.array(
+            [
+                [[155.427], [-23.161], [10.885]],
+                [[155.427], [-23.161], [10.885]],
+            ],
+            dtype=dtype_arr,
+        )
+    )
+    df = pd.DataFrame(
+        {
+            "azimuth": AER[:, 0, 0],
+            "elevation": AER[:, 1, 0],
+            "range": AER[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        n, e, d = AER2NED(
+            dtype_num(df.loc[i_row, "azimuth"]),
+            dtype_num(df.loc[i_row, "elevation"]),
+            dtype_num(df.loc[i_row, "range"]),
+        )
+        assert np.all(np.isclose(n, -9.1013, atol=tol_double_atol))
+        assert np.all(np.isclose(e, 4.1617, atol=tol_double_atol))
+        assert np.all(np.isclose(d, 4.2812, atol=tol_double_atol))
+        assert isinstance(n, dtype_num) or n.dtype == np.float64
+        assert isinstance(e, dtype_num) or e.dtype == np.float64
+        assert isinstance(d, dtype_num) or d.dtype == np.float64
 
 
 @pytest.mark.parametrize(

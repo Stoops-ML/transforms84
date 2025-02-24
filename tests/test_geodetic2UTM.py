@@ -6,19 +6,9 @@ from transforms84.helpers import DDM2RRM
 from transforms84.systems import WGS84
 from transforms84.transforms import geodetic2UTM
 
+from .conftest import float_type_pairs
+
 # https://www.latlong.net/lat-long-utm.html
-
-
-def test_raise_wrong_dtype():
-    in_arr = np.array([[np.deg2rad(30)], [np.deg2rad(25)], [5]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        geodetic2UTM(in_arr, WGS84.a, WGS84.b)  # type: ignore
-
-
-def test_raise_wrong_dtype_unrolled():
-    in_arr = np.array([[np.deg2rad(30)], [np.deg2rad(25)], [5]], dtype=np.float16)
-    with pytest.raises(ValueError):
-        geodetic2UTM(in_arr[0], in_arr[1], in_arr[2], WGS84.a, WGS84.b)
 
 
 def test_raise_wrong_size():
@@ -142,6 +132,107 @@ def test_points_unrolled_list(dtype):
     )
     assert np.all(np.isclose(out_x, 741548.22))
     assert np.all(np.isclose(out_y, 3515555.26))
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_points_unrolled_numbers_loop_int(dtype_num):
+    in_arr = np.array(
+        [
+            [[np.deg2rad(31.750000)], [np.deg2rad(35.550000)], [5]],
+            [[np.deg2rad(31.750000)], [np.deg2rad(35.550000)], [5]],
+        ],
+        dtype=np.float64,
+    )
+    df = pd.DataFrame(
+        {
+            "lat": in_arr[:, 0, 0],
+            "lon": in_arr[:, 1, 0],
+            "alt": in_arr[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        out_x, out_y = geodetic2UTM(
+            dtype_num(df.loc[i_row, "lat"]),
+            dtype_num(df.loc[i_row, "lon"]),
+            dtype_num(df.loc[i_row, "alt"]),
+            WGS84.a,
+            WGS84.b,
+        )
+        out_x64, out_y64 = geodetic2UTM(
+            np.float64(dtype_num(df.loc[i_row, "lat"])),
+            np.float64(dtype_num(df.loc[i_row, "lon"])),
+            dtype_num(df.loc[i_row, "alt"]),
+            WGS84.a,
+            WGS84.b,
+        )
+        assert np.all(np.isclose(out_x, out_x64))
+        assert np.all(np.isclose(out_y, out_y64))
+        assert out_x.dtype == np.float64
+        assert out_y.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_num", [np.int32, np.int64])
+def test_points_unrolled_numbers_int(dtype_num):
+    in_arr = np.array(
+        [
+            [[np.deg2rad(31.750000)], [np.deg2rad(35.550000)], [5]],
+            [[np.deg2rad(31.750000)], [np.deg2rad(35.550000)], [5]],
+        ],
+        dtype=np.float64,
+    )
+    df = pd.DataFrame(
+        {
+            "lat": in_arr[:, 0, 0],
+            "lon": in_arr[:, 1, 0],
+            "alt": in_arr[:, 2, 0],
+        }
+    )
+    out_x, out_y = geodetic2UTM(
+        dtype_num(df["lat"]),
+        dtype_num(df["lon"]),
+        dtype_num(df["alt"]),
+        WGS84.a,
+        WGS84.b,
+    )
+    out_x64, out_y64 = geodetic2UTM(
+        np.float64(dtype_num(df["lat"])),
+        np.float64(dtype_num(df["lon"])),
+        dtype_num(df["alt"]),
+        WGS84.a,
+        WGS84.b,
+    )
+    assert np.all(np.isclose(out_x, out_x64))
+    assert np.all(np.isclose(out_y, out_y64))
+    assert out_x.dtype == np.float64
+    assert out_y.dtype == np.float64
+
+
+@pytest.mark.parametrize("dtype_arr,dtype_num", float_type_pairs)
+def test_points_unrolled_numbers_loop(dtype_arr, dtype_num):
+    in_arr = np.array(
+        [
+            [[np.deg2rad(31.750000)], [np.deg2rad(35.550000)], [5]],
+            [[np.deg2rad(31.750000)], [np.deg2rad(35.550000)], [5]],
+        ],
+        dtype=dtype_arr,
+    )
+    df = pd.DataFrame(
+        {
+            "lat": in_arr[:, 0, 0],
+            "lon": in_arr[:, 1, 0],
+            "alt": in_arr[:, 2, 0],
+        }
+    )
+    for i_row in df.index:
+        out_x, out_y = geodetic2UTM(
+            dtype_num(df.loc[i_row, "lat"]),
+            dtype_num(df.loc[i_row, "lon"]),
+            dtype_num(df.loc[i_row, "alt"]),
+            WGS84.a,
+            WGS84.b,
+        )
+        assert np.all(np.isclose(out_x, 741548.22))
+        assert np.all(np.isclose(out_y, 3515555.26))
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
