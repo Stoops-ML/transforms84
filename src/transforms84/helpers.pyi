@@ -1,6 +1,5 @@
 from typing import Union
 
-import numpy as np
 import numpy.typing as npt
 
 from .definitions import ArrayLike, NumberLike, NumberLikeNpy
@@ -66,19 +65,19 @@ def DDM2RRM(ddm_position: npt.NDArray[NumberLikeNpy]) -> npt.NDArray[NumberLikeN
     ...
 
 def wrap(
-    num: Union[float, int, npt.NDArray[Union[np.float32, np.float64]]],
-    bound_lower: Union[float, int, npt.NDArray[Union[np.float32, np.float64]]],
-    bound_upper: Union[float, int, npt.NDArray[Union[np.float32, np.float64]]],
+    num: Union[NumberLike, ArrayLike],
+    bound_lower: Union[NumberLike, ArrayLike],
+    bound_upper: Union[NumberLike, ArrayLike],
 ) -> Union[float, npt.NDArray[NumberLikeNpy]]:
     """
     Wrap a number or array of numbers within a specified range.
 
     :param num: Number or array of numbers to be wrapped.
-    :type num: Union[float, int, npt.NDArray[Union[np.float32, np.float64]]]
+    :type num: Union[NumberLike, ArrayLike]
     :param bound_lower: Lower bound of the range.
-    :type bound_lower: Union[float, int, npt.NDArray[Union[np.float32, np.float64]]]
+    :type bound_lower: Union[NumberLike, ArrayLike]
     :param bound_upper: Upper bound of the range.
-    :type bound_upper: Union[float, int, npt.NDArray[Union[np.float32, np.float64]]]
+    :type bound_upper: Union[NumberLike, ArrayLike]
 
     :returns: Wrapped number or array of numbers within the specified range.
     :rtype: Union[float, npt.NDArray[SUPPORTED_TYPES]]

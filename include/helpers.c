@@ -158,89 +158,49 @@ void XXM2YYMFloat(const float* rrmPoint,
     }
 }
 
-/*
-Wrap a point between two numbers
-*/
-void WrapsFloat3(const float* val,
-    const float* maxVal,
-    const float* minVal,
-    long nPoints,
-    float* boundedVal)
-{
-    long iPoint;
-#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
-    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        boundedVal[iPoint] = fmodf(val[iPoint] - minVal[iPoint], maxVal[iPoint] - minVal[iPoint]) + minVal[iPoint];
-        if (boundedVal[iPoint] < minVal[iPoint])
-            boundedVal[iPoint] += maxVal[iPoint] - minVal[iPoint];
-    }
-}
 
 /*
 Wrap a point between two numbers
 */
-void WrapsDouble3(const double* val,
+void WrapsDouble(const double* val,
     const double* maxVal,
     const double* minVal,
     long nPoints,
+    int isMinValSizeOfVal,
+    int isMaxValSizeOfVal,
     double* boundedVal)
 {
     long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        boundedVal[iPoint] = fmod(val[iPoint] - minVal[iPoint], maxVal[iPoint] - minVal[iPoint]) + minVal[iPoint];
-        if (boundedVal[iPoint] < minVal[iPoint])
-            boundedVal[iPoint] += maxVal[iPoint] - minVal[iPoint];
+        long iMin = iPoint * isMinValSizeOfVal;
+        long iMax = iPoint * isMaxValSizeOfVal;
+        boundedVal[iPoint] = fmod(val[iPoint] - minVal[iMin], maxVal[iMax] - minVal[iMin]) + minVal[iMin];
+        if (boundedVal[iPoint] < minVal[iMin])
+            boundedVal[iPoint] += maxVal[iMax] - minVal[iMin];
     }
 }
 
 /*
 Wrap a point between two numbers
 */
-void WrapsFloat1(const float* val,
-    const float maxVal,
-    const float minVal,
+void WrapsFloat(const float* val,
+    const float* maxVal,
+    const float* minVal,
     long nPoints,
+    int isMinValSizeOfVal,
+    int isMaxValSizeOfVal,
     float* boundedVal)
 {
     long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        boundedVal[iPoint] = fmodf(val[iPoint] - minVal, maxVal - minVal) + minVal;
-        if (boundedVal[iPoint] < minVal)
-            boundedVal[iPoint] += maxVal - minVal;
+        long iMin = iPoint * isMinValSizeOfVal;
+        long iMax = iPoint * isMaxValSizeOfVal;
+        boundedVal[iPoint] = fmodf(val[iPoint] - minVal[iMin], maxVal[iMax] - minVal[iMin]) + minVal[iMin];
+        if (boundedVal[iPoint] < minVal[iMin])
+            boundedVal[iPoint] += maxVal[iMax] - minVal[iMin];
     }
-}
-
-/*
-Wrap a point between two numbers
-*/
-void WrapsDouble1(const double* val,
-    const double maxVal,
-    const double minVal,
-    long nPoints,
-    double* boundedVal)
-{
-    long iPoint;
-#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
-    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        boundedVal[iPoint] = fmod(val[iPoint] - minVal, maxVal - minVal) + minVal;
-        if (boundedVal[iPoint] < minVal)
-            boundedVal[iPoint] += maxVal - minVal;
-    }
-}
-
-/*
-Wrap a point between two numbers
-*/
-double Wrap(const double val,
-    const double maxVal,
-    const double minVal)
-{
-    double boundedVal = fmod(val - minVal, maxVal - minVal) + minVal;
-    if (boundedVal < minVal)
-        boundedVal += maxVal - minVal;
-    return boundedVal;
 }
 
 static PyObject*
@@ -252,151 +212,76 @@ WrapWrapper(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "OOO", &arg1, &arg2, &arg3))
         return NULL;
 
-    if (!PyArray_Check(arg1)) {
-        double val, minVal, maxVal;
-        if (PyLong_Check(arg1))
-            val = PyLong_AsDouble(arg1);
-        else if (PyFloat_Check(arg1))
-            val = PyFloat_AsDouble(arg1);
-        else {
-            PyErr_SetString(PyExc_ValueError, "Value must be a float or an integer.");
-            return NULL;
-        }
-        if (PyLong_Check(arg2))
-            minVal = PyLong_AsDouble(arg2);
-        else if (PyFloat_Check(arg2))
-            minVal = PyFloat_AsDouble(arg2);
-        else {
-            PyErr_SetString(PyExc_ValueError, "Minimum value must be a float or an integer.");
-            return NULL;
-        }
-        if (PyLong_Check(arg3))
-            maxVal = PyLong_AsDouble(arg3);
-        else if (PyFloat_Check(arg3))
-            maxVal = PyFloat_AsDouble(arg3);
-        else {
-            PyErr_SetString(PyExc_ValueError, "Maximum value must be a float or an integer.");
-            return NULL;
-        }
-        if (maxVal <= minVal) {
-            PyErr_SetString(PyExc_ValueError, "The maximum value must be a greater than the minimum value.");
-            return NULL;
-        }
-        return Py_BuildValue("d", Wrap(val, maxVal, +minVal));
-    } else if (PyArray_Check(arg1) && (!PyArray_Check(arg2) && !PyArray_Check(arg3))) {
-        PyArrayObject* val = (PyArrayObject*)arg1;
+    // convert inputs to numpy arrays
+    PyArrayObject *val = get_numpy_array(arg1);
+    PyArrayObject *minVal = get_numpy_array(arg2);
+    PyArrayObject *maxVal = get_numpy_array(arg3);
+    if (val == NULL || minVal == NULL || maxVal == NULL)
+        return NULL;
+    PyArrayObject *arrays[] = {val, minVal, maxVal};
+    if (check_arrays_same_float_dtype(3, arrays) == 0) {
+        val = (PyArrayObject *)PyArray_CastToType(val, PyArray_DescrFromType(NPY_FLOAT64), 0);
+        minVal = (PyArrayObject *)PyArray_CastToType(minVal, PyArray_DescrFromType(NPY_FLOAT64), 0);
+        maxVal = (PyArrayObject *)PyArray_CastToType(maxVal, PyArray_DescrFromType(NPY_FLOAT64), 0);
+    }
 
-        if (!PyArray_ISCONTIGUOUS(val)) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
-            return NULL;
-        }
-        if (PyArray_NDIM(val) != 1) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays have one dimensoin.");
-            return NULL;
-        }
-
-        // Create result array
-        PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(val),
-            PyArray_SHAPE(val),
-            PyArray_TYPE(val));
-        if (result_array == NULL) {
-            PyErr_SetString(PyExc_ValueError, "Could not create output array.");
-            return NULL;
-        }
-
-        long nPoints = (int)PyArray_SIZE(val);
-        double minVal, maxVal;
-        if (PyLong_Check(arg2))
-            minVal = PyLong_AsDouble(arg2);
-        else if (PyFloat_Check(arg2))
-            minVal = PyFloat_AsDouble(arg2);
-        else {
-            PyErr_SetString(PyExc_ValueError, "Minimum value must be a float or an integer.");
-            return NULL;
-        }
-        if (PyLong_Check(arg3))
-            maxVal = PyLong_AsDouble(arg3);
-        else if (PyFloat_Check(arg3))
-            maxVal = PyFloat_AsDouble(arg3);
-        else {
-            PyErr_SetString(PyExc_ValueError, "Maximum value must be a float or an integer.");
-            return NULL;
-        }
-        if (maxVal <= minVal) {
-            PyErr_SetString(PyExc_ValueError, "The maximum value must be a greater than the minimum value.");
-            return NULL;
-        }
-
-        if (PyArray_TYPE(val) == NPY_DOUBLE)
-            WrapsDouble1((double*)PyArray_DATA(val), maxVal, minVal, nPoints, (double*)PyArray_DATA(result_array));
-        else if (PyArray_TYPE(val) == NPY_FLOAT)
-            WrapsFloat1((float*)PyArray_DATA(val), (float)(maxVal), (float)(minVal), nPoints, (float*)PyArray_DATA(result_array));
-        else {
-            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
-            return NULL;
-        }
-        return (PyObject*)result_array;
-    } else if (PyArray_Check(arg1) && PyArray_Check(arg2) && PyArray_Check(arg3)) {
-        PyArrayObject* val = (PyArrayObject*)arg1;
-        PyArrayObject* minVal = (PyArrayObject*)arg2;
-        PyArrayObject* maxVal = (PyArrayObject*)arg3;
-
-        if (!(PyArray_ISCONTIGUOUS(minVal)) || !(PyArray_ISCONTIGUOUS(maxVal)) || !(PyArray_ISCONTIGUOUS(val))) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
-            return NULL;
-        }
-        if ((PyArray_NDIM(minVal) != 1) || (PyArray_NDIM(maxVal) != 1) || (PyArray_NDIM(val) != 1)) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays have one dimensoin.");
-            return NULL;
-        }
-        if ((PyArray_SIZE(minVal) != PyArray_SIZE(maxVal)) || (PyArray_SIZE(maxVal) != PyArray_SIZE(val))) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays are of unequal size.");
-            return NULL;
-        }
-        if ((PyArray_TYPE(minVal) != PyArray_TYPE(maxVal)) || (PyArray_TYPE(maxVal) != PyArray_TYPE(val))) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
-            return NULL;
-        }
-
-        // Create result array
-        PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(val),
-            PyArray_SHAPE(val),
-            PyArray_TYPE(val));
-        if (result_array == NULL) {
-            PyErr_SetString(PyExc_ValueError, "Could not create output array.");
-            return NULL;
-        }
-
-        long nPoints = (int)PyArray_SIZE(val);
-        if (PyArray_TYPE(val) == NPY_DOUBLE) {
-            double* maxVals = (double*)PyArray_DATA(maxVal);
-            double* minVals = (double*)PyArray_DATA(minVal);
-            for (long i = 0; i < nPoints; i++) {
-                if (minVals[i] > maxVals[i]) {
-                    PyErr_SetString(PyExc_ValueError, "All maximum values must be larger than all minimum values.");
-                    return NULL;
-                }
-            }
-            WrapsDouble3((double*)PyArray_DATA(val), maxVals, minVals, nPoints, (double*)PyArray_DATA(result_array));
-        } else if (PyArray_TYPE(val) == NPY_FLOAT) {
-            float* maxVals = (float*)PyArray_DATA(maxVal);
-            float* minVals = (float*)PyArray_DATA(minVal);
-            for (long i = 0; i < nPoints; i++) {
-                if (minVals[i] > maxVals[i]) {
-                    PyErr_SetString(PyExc_ValueError, "All maximum values must be larger than all minimum values.");
-                    return NULL;
-                }
-            }
-            WrapsFloat3((float*)PyArray_DATA(val), maxVals, minVals, nPoints, (float*)PyArray_DATA(result_array));
-        } else {
-            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
-            return NULL;
-        }
-        return (PyObject*)result_array;
-    } else {
-        PyErr_SetString(PyExc_TypeError, "Bounds must be either two arrays or two floats and value must be a float or an array.");
+    // checks
+    long nPoints = (int)PyArray_SIZE(val);
+    int isMinValSizeOfVal = (nPoints == PyArray_Size((PyObject*)minVal));
+    int isMaxValSizeOfVal = (nPoints == PyArray_Size((PyObject*)maxVal));
+    if (!(isMinValSizeOfVal || (PyArray_SIZE(minVal) == 1))) {
+        PyErr_SetString(PyExc_ValueError, "Value and minimum value arrays must be the same size or the minimum value array must have a size of 1.");
         return NULL;
     }
+    if (!(isMaxValSizeOfVal || (PyArray_SIZE(maxVal) == 1))) {
+        PyErr_SetString(PyExc_ValueError, "Value and maximum value arrays must be the same size or the maximum value array must have a size of 1.");
+        return NULL;
+    }
+    for (long i = 0; i < nPoints; ++i) {
+        long iMin = i * isMinValSizeOfVal;
+        long iMax = i * isMaxValSizeOfVal;
+        if (PyArray_TYPE(maxVal) == NPY_DOUBLE && PyArray_TYPE(minVal) == NPY_DOUBLE) {
+            if (((double*)PyArray_DATA(maxVal))[iMax] <= ((double*)PyArray_DATA(minVal))[iMin]) {
+                PyErr_SetString(PyExc_ValueError, "All elements in maxVal must be greater than corresponding elements in minVal.");
+                return NULL;
+            }
+        } else if (PyArray_TYPE(maxVal) == NPY_FLOAT && PyArray_TYPE(minVal) == NPY_FLOAT) {
+            if (((float*)PyArray_DATA(maxVal))[iMax] <= ((float*)PyArray_DATA(minVal))[iMin]) {
+                PyErr_SetString(PyExc_ValueError, "All elements in maxVal must be greater than corresponding elements in minVal.");
+                return NULL;
+            }
+        } else {
+            PyErr_SetString(PyExc_ValueError, "maxVal and minVal must be of the same type.");
+            return NULL;
+        }
+    }
+
+    // Create result array
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(val),
+        PyArray_SHAPE(val),
+        PyArray_TYPE(val));
+    if (result_array == NULL) {
+        PyErr_SetString(PyExc_ValueError, "Could not create output array.");
+        return NULL;
+    }
+
+    // run function
+    if (PyArray_TYPE(val) == NPY_DOUBLE) {
+        WrapsDouble((double*)PyArray_DATA(val), (double*)PyArray_DATA(maxVal), (double*)PyArray_DATA(minVal), nPoints, isMinValSizeOfVal, isMaxValSizeOfVal, (double*)PyArray_DATA(result_array));
+    } else if (PyArray_TYPE(val) == NPY_FLOAT) {
+        WrapsFloat((float*)PyArray_DATA(val), (float*)PyArray_DATA(maxVal), (float*)PyArray_DATA(minVal), nPoints, isMinValSizeOfVal, isMaxValSizeOfVal, (float*)PyArray_DATA(result_array));
+    } else {
+        PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
+        return NULL;
+    }
+
+    // output
+    if ((nPoints == 1) && (PyArray_TYPE(result_array) == NPY_DOUBLE))
+        return Py_BuildValue("d", *(double*)PyArray_DATA(result_array));
+    else if ((nPoints == 1) && (PyArray_TYPE(result_array) == NPY_FLOAT))
+        return Py_BuildValue("f", *(float*)PyArray_DATA(result_array));
+    else
+        return (PyObject*)result_array;
 }
 
 static PyObject*
