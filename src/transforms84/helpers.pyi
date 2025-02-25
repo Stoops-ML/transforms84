@@ -3,20 +3,20 @@ from typing import Union
 import numpy as np
 import numpy.typing as npt
 
-from .definitions import NumberLikeNpy
+from .definitions import ArrayLike, NumberLike, NumberLikeNpy
 
 def deg_angular_difference(
-    angle1: Union[float, npt.NDArray[NumberLikeNpy]],
-    angle2: Union[float, npt.NDArray[NumberLikeNpy]],
+    angle1: Union[NumberLike, ArrayLike],
+    angle2: Union[NumberLike, ArrayLike],
     smallest_angle: bool,
 ) -> Union[float, npt.NDArray[NumberLikeNpy]]:
     """
     Calculate the angular difference between two angles in degrees.
 
     :param angle1: First angle in degrees.
-    :type angle1: Union[float, npt.NDArray[SUPPORTED_TYPES]]
+    :type angle1: Union[NumberLike, ArrayLike]
     :param angle2: Second angle in degrees.
-    :type angle2: Union[float, npt.NDArray[SUPPORTED_TYPES]]
+    :type angle2: Union[NumberLike, ArrayLike]
     :param smallest_angle: If True, return the smallest angular difference.
     :type smallest_angle: bool
 
@@ -26,17 +26,17 @@ def deg_angular_difference(
     ...
 
 def rad_angular_difference(
-    angle1: Union[float, npt.NDArray[NumberLikeNpy]],
-    angle2: Union[float, npt.NDArray[NumberLikeNpy]],
+    angle1: Union[NumberLike, ArrayLike],
+    angle2: Union[NumberLike, ArrayLike],
     smallest_angle: bool,
 ) -> Union[float, npt.NDArray[NumberLikeNpy]]:
     """
     Calculate the angular difference between two angles in radians.
 
     :param angle1: First angle in radians.
-    :type angle1: Union[float, npt.NDArray[SUPPORTED_TYPES]]
+    :type angle1: Union[NumberLike, ArrayLike]
     :param angle2: Second angle in radians.
-    :type angle2: Union[float, npt.NDArray[SUPPORTED_TYPES]]
+    :type angle2: Union[NumberLike, ArrayLike]
     :param smallest_angle: If True, return the smallest angular difference.
     :type smallest_angle: bool
 
