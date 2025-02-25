@@ -409,46 +409,25 @@ RRM2DDMWrapper(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &rrmPoint))
         return NULL;
 
-    // Checks
-    if (!(PyArray_ISCONTIGUOUS(rrmPoint))) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
-        return NULL;
-    }
-
-    PyArrayObject* in_array;
-    if (PyArray_ISINTEGER(rrmPoint) == 0)
-        in_array = rrmPoint;
-    else {
-        in_array = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(rrmPoint), PyArray_SHAPE(rrmPoint), NPY_DOUBLE);
-        if (in_array == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
-            return NULL;
-        }
-        if (PyArray_CopyInto(in_array, rrmPoint) < 0) {
-            Py_DECREF(in_array);
-            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
-            return NULL;
-        }
-        if (!(PyArray_ISCONTIGUOUS(in_array))) {
-            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
-            return NULL;
-        }
-    }
-    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
-        PyArray_NDIM(in_array), PyArray_SHAPE(in_array), PyArray_TYPE(in_array));
+    rrmPoint = get_numpy_array(rrmPoint);
+    if (check_arrays_same_float_dtype(1, (PyArrayObject *[]){rrmPoint}) == 0)
+        rrmPoint = (PyArrayObject *)PyArray_CastToType(rrmPoint, PyArray_DescrFromType(NPY_FLOAT64), 0);
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(rrmPoint),
+        PyArray_SHAPE(rrmPoint),
+        PyArray_TYPE(rrmPoint));
     if (result_array == NULL) {
         PyErr_SetString(PyExc_ValueError, "Could not create output array.");
         return NULL;
     }
 
-    long nPoints = (int)PyArray_SIZE(in_array) / NCOORDSIN3D;
+    // run function
+    long nPoints = (int)PyArray_SIZE(rrmPoint) / NCOORDSIN3D;
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
         XXM2YYMDouble(
-            (double*)PyArray_DATA(in_array), nPoints, 180.0 / PI, (double*)PyArray_DATA(result_array));
+            (double*)PyArray_DATA(rrmPoint), nPoints, 180.0 / PI, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
         XXM2YYMFloat(
-            (float*)PyArray_DATA(in_array), nPoints, (float)(180.0 / PI), (float*)PyArray_DATA(result_array));
+            (float*)PyArray_DATA(rrmPoint), nPoints, (float)(180.0 / PI), (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float or int types accepted.");
@@ -466,45 +445,25 @@ DDM2RRMWrapper(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &ddmPoint))
         return NULL;
 
-    // Checks
-    if (!(PyArray_ISCONTIGUOUS(ddmPoint))) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
-        return NULL;
-    }
-
-    PyArrayObject* in_array;
-    if (PyArray_ISINTEGER(ddmPoint) == 0)
-        in_array = ddmPoint;
-    else {
-        in_array = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(ddmPoint), PyArray_SHAPE(ddmPoint), NPY_DOUBLE);
-        if (in_array == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
-            return NULL;
-        }
-        if (PyArray_CopyInto(in_array, ddmPoint) < 0) {
-            Py_DECREF(in_array);
-            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
-            return NULL;
-        }
-        if (!(PyArray_ISCONTIGUOUS(in_array))) {
-            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
-            return NULL;
-        }
-    }
-    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
-        PyArray_NDIM(in_array), PyArray_SHAPE(in_array), PyArray_TYPE(in_array));
+    ddmPoint = get_numpy_array(ddmPoint);
+    if (check_arrays_same_float_dtype(1, (PyArrayObject *[]){ddmPoint}) == 0)
+        ddmPoint = (PyArrayObject *)PyArray_CastToType(ddmPoint, PyArray_DescrFromType(NPY_FLOAT64), 0);
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(ddmPoint),
+        PyArray_SHAPE(ddmPoint),
+        PyArray_TYPE(ddmPoint));
     if (result_array == NULL) {
         PyErr_SetString(PyExc_ValueError, "Could not create output array.");
         return NULL;
     }
-    long nPoints = (int)PyArray_SIZE(in_array) / NCOORDSIN3D;
+
+    // run function
+    long nPoints = (int)PyArray_SIZE(ddmPoint) / NCOORDSIN3D;
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
         XXM2YYMDouble(
-            (double*)PyArray_DATA(in_array), nPoints, PI / 180.0, (double*)PyArray_DATA(result_array));
+            (double*)PyArray_DATA(ddmPoint), nPoints, PI / 180.0, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
         XXM2YYMFloat(
-            (float*)PyArray_DATA(in_array), nPoints, (float)(PI / 180.0), (float*)PyArray_DATA(result_array));
+            (float*)PyArray_DATA(ddmPoint), nPoints, (float)(PI / 180.0), (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float or int types accepted.");

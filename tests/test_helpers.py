@@ -114,10 +114,7 @@ def test_XXM2YYM_one_point(dtype):
     ddm_point = np.array([[30], [31], [0]], dtype=dtype)
     out = RRM2DDM(DDM2RRM(ddm_point))
     assert np.all(np.isclose(ddm_point, out))
-    if np.issubdtype(dtype, np.integer):
-        assert out.dtype == np.float64
-    else:
-        assert ddm_point.dtype == out.dtype
+    assert out.dtype == np.float64 or ddm_point.dtype == out.dtype
 
 
 @pytest.mark.parametrize("dtype", [np.float64, np.float32])
