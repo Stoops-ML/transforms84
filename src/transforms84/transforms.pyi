@@ -1,4 +1,4 @@
-from typing import Tuple, Union, overload
+from typing import Union, overload
 
 import numpy.typing as npt
 
@@ -32,7 +32,7 @@ def geodetic2UTM(
     m_alt: Union[NumberLike, ArrayLike],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy],
     npt.NDArray[NumberLikeNpy],
 ]:
@@ -51,7 +51,7 @@ def geodetic2UTM(
     :type m_semi_minor_axis: float
 
     :return: The UTM coordinates as a tuple of NumPy arrays.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -90,7 +90,7 @@ def UTM2geodetic(
     zone_letter: str,
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -110,7 +110,7 @@ def UTM2geodetic(
     :type m_semi_minor_axis: float
 
     :return: The geodetic coordinates (latitude, longitude, altitude) as a tuple of NumPy arrays.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -142,7 +142,7 @@ def geodetic2ECEF(
     m_alt: Union[NumberLike, ArrayLike],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -160,7 +160,7 @@ def geodetic2ECEF(
     :type m_semi_minor_axis: float
 
     :return: The ECEF coordinates (X, Y, Z) as a tuple of NumPy arrays.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -192,7 +192,7 @@ def ECEF2geodetic(
     m_Z: Union[NumberLike, ArrayLike],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -210,7 +210,7 @@ def ECEF2geodetic(
     :type m_semi_minor_axis: float
 
     :return: The geodetic coordinates (latitude, longitude, altitude) as a tuple of NumPy arrays.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -248,7 +248,7 @@ def ECEF2ENU(
     m_Z_target: Union[NumberLike, ArrayLike],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -272,7 +272,7 @@ def ECEF2ENU(
     :type m_semi_minor_axis: float
 
     :return: The ENU coordinates (East, North, Up) as a tuple of NumPy arrays.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -310,7 +310,7 @@ def ECEF2NED(
     m_Z_target: Union[NumberLike, ArrayLike],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -334,7 +334,7 @@ def ECEF2NED(
     :type m_semi_minor_axis: float
 
     :return: The NED coordinates (North, East, Down) as a tuple of NumPy arrays.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -346,7 +346,7 @@ def ECEF2ENUv(
     m_X_target: Union[NumberLike, ArrayLike],
     m_Y_target: Union[NumberLike, ArrayLike],
     m_Z_target: Union[NumberLike, ArrayLike],
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -366,7 +366,7 @@ def ECEF2ENUv(
     :type m_Z_target: Union[NumberLike, ArrayLike]
 
     :return: The ENU velocity coordinates (East, North, Up) as a tuple of NumPy arrays.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -414,7 +414,7 @@ def ECEF2NEDv(
     m_X_target: Union[NumberLike, ArrayLike],
     m_Y_target: Union[NumberLike, ArrayLike],
     m_Z_target: Union[NumberLike, ArrayLike],
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -434,7 +434,7 @@ def ECEF2NEDv(
     :type m_Z_target: Union[NumberLike, ArrayLike]
 
     :return: The NED velocity coordinates (North, East, Down) as a tuple of NumPy arrays.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -448,7 +448,7 @@ def ENU2ECEF(
     m_up: Union[NumberLike, ArrayLike],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -472,7 +472,7 @@ def ENU2ECEF(
     :type m_semi_minor_axis: float
 
     :return: The ECEF coordinates (X, Y, Z) as a tuple of NumPy arrays.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -510,7 +510,7 @@ def NED2ECEF(
     m_down: Union[NumberLike, ArrayLike],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -534,7 +534,7 @@ def NED2ECEF(
     :type m_semi_minor_axis: float
 
     :return: The ECEF coordinates (X, Y, Z) as a tuple of NumPy arrays.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -570,7 +570,7 @@ def ENU2ECEFv(
     m_east: Union[NumberLike, ArrayLike],
     m_north: Union[NumberLike, ArrayLike],
     m_up: Union[NumberLike, ArrayLike],
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -590,7 +590,7 @@ def ENU2ECEFv(
     :type m_up: Union[NumberLike, ArrayLike]
 
     :return: The ECEF velocity coordinates (X, Y, Z) as a tuple of NumPy arrays.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -620,7 +620,7 @@ def NED2ECEFv(
     m_north: Union[NumberLike, ArrayLike],
     m_east: Union[NumberLike, ArrayLike],
     m_down: Union[NumberLike, ArrayLike],
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -640,7 +640,7 @@ def NED2ECEFv(
     :type m_down: Union[NumberLike, ArrayLike]
 
     :return: The ECEF velocity coordinates (X, Y, Z) as a tuple of NumPy arrays.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -667,7 +667,7 @@ def ENU2AER(
     m_east: Union[NumberLike, ArrayLike],
     m_north: Union[NumberLike, ArrayLike],
     m_up: Union[NumberLike, ArrayLike],
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -681,7 +681,7 @@ def ENU2AER(
     :type m_up: Union[NumberLike, ArrayLike]
 
     :returns: Tuple containing arrays of Azimuth, Elevation, and Range coordinates.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy],
+    :rtype: tuple[npt.NDArray[NumberLikeNpy],
                 npt.NDArray[NumberLikeNpy],
                 npt.NDArray[NumberLikeNpy]]
     """
@@ -705,7 +705,7 @@ def AER2ENU(
     rad_az: Union[NumberLike, ArrayLike],
     rad_el: Union[NumberLike, ArrayLike],
     m_range: Union[NumberLike, ArrayLike],
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -719,7 +719,7 @@ def AER2ENU(
     :type m_range: Union[NumberLike, ArrayLike]
 
     :returns: Tuple containing arrays of East, North, and Up coordinates.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -754,7 +754,7 @@ def NED2AER(
     m_north: Union[NumberLike, ArrayLike],
     m_east: Union[NumberLike, ArrayLike],
     m_down: Union[NumberLike, ArrayLike],
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -768,7 +768,7 @@ def NED2AER(
     :type m_down: Union[NumberLike, ArrayLike]
 
     :returns: Tuple containing arrays of Azimuth, Elevation, and Range coordinates.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy],
+    :rtype: tuple[npt.NDArray[NumberLikeNpy],
                 npt.NDArray[NumberLikeNpy],
                 npt.NDArray[NumberLikeNpy]]
     """
@@ -792,7 +792,7 @@ def AER2NED(
     rad_az: Union[NumberLike, ArrayLike],
     rad_el: Union[NumberLike, ArrayLike],
     m_range: Union[NumberLike, ArrayLike],
-) -> Tuple[
+) -> tuple[
     npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]
 ]:
     """
@@ -806,7 +806,7 @@ def AER2NED(
     :type m_range: Union[NumberLike, ArrayLike]
 
     :returns: Tuple containing arrays of North, East, and Down coordinates.
-    :rtype: Tuple[npt.NDArray[NumberLikeNpy],
+    :rtype: tuple[npt.NDArray[NumberLikeNpy],
                 npt.NDArray[NumberLikeNpy],
                 npt.NDArray[NumberLikeNpy]]
     """
