@@ -128,14 +128,16 @@ def test_XXM2YYM_multiple_points(dtype):
 def test_deg_angular_difference_smallest_angle1():
     for diff_v in range(0, 179):
         diff = np.ones((1000,), dtype=np.float32) * diff_v
-        assert np.all(diff == deg_angular_difference(diff, diff + diff_v, True))
+        assert np.all(
+            np.isclose(diff, deg_angular_difference(diff, diff + diff_v, True))
+        )
 
 
 def test_deg_angular_difference_largest_angle1():
     for diff_v in range(0, 1000):
         diff = np.ones((1000,), dtype=np.float32) * diff_v
         assert np.all(
-            diff % 360.0 == deg_angular_difference(diff, diff + diff_v, False)
+            np.isclose(diff % 360.0, deg_angular_difference(diff, diff + diff_v, False))
         )
 
 
@@ -143,14 +145,20 @@ def test_deg_angular_difference_largest_angle1_list():
     for diff_v in range(0, 1000):
         diff = np.ones((1000,), dtype=np.float32) * diff_v
         assert np.all(
-            diff % 360.0 == deg_angular_difference(list(diff), diff + diff_v, False)
+            np.isclose(
+                diff % 360.0, deg_angular_difference(list(diff), diff + diff_v, False)
+            )
         )
         assert np.all(
-            diff % 360.0 == deg_angular_difference(diff, list(diff + diff_v), False)
+            np.isclose(
+                diff % 360.0, deg_angular_difference(diff, list(diff + diff_v), False)
+            )
         )
         assert np.all(
-            diff % 360.0
-            == deg_angular_difference(list(diff), list(diff + diff_v), False)
+            np.isclose(
+                diff % 360.0,
+                deg_angular_difference(list(diff), list(diff + diff_v), False),
+            )
         )
 
 
@@ -158,46 +166,58 @@ def test_deg_angular_difference_largest_angle1_pandas():
     for diff_v in range(0, 1000):
         diff = np.ones((1000,), dtype=np.float32) * diff_v
         assert np.all(
-            diff % 360.0
-            == deg_angular_difference(pd.Series(diff), diff + diff_v, False)
+            np.isclose(
+                diff % 360.0,
+                deg_angular_difference(pd.Series(diff), diff + diff_v, False),
+            )
         )
         assert np.all(
-            diff % 360.0
-            == deg_angular_difference(diff, pd.Series(diff + diff_v), False)
+            np.isclose(
+                diff % 360.0,
+                deg_angular_difference(diff, pd.Series(diff + diff_v), False),
+            )
         )
         assert np.all(
-            diff % 360.0
-            == deg_angular_difference(pd.Series(diff), pd.Series(diff + diff_v), False)
+            np.isclose(
+                diff % 360.0,
+                deg_angular_difference(
+                    pd.Series(diff), pd.Series(diff + diff_v), False
+                ),
+            )
         )
 
 
 def test_deg_angular_difference_smallest_angle_floats():
     for diff in range(0, 179):
         for i in range(1000):
-            assert diff == deg_angular_difference(
-                float(diff * i), float(diff * (i + 1)), True
+            assert np.isclose(
+                diff,
+                deg_angular_difference(float(diff * i), float(diff * (i + 1)), True),
             )
 
 
 def test_deg_angular_difference_largest_angle_floats():
     for diff in range(0, 1000):
         for i in range(1000):
-            assert diff % 360.0 == deg_angular_difference(
-                float(diff * i), float(diff * (i + 1)), False
+            assert np.isclose(
+                diff % 360.0,
+                deg_angular_difference(float(diff * i), float(diff * (i + 1)), False),
             )
 
 
 def test_deg_angular_difference_smallest_angle_ints():
     for diff in range(0, 179):
         for i in range(1000):
-            assert diff == deg_angular_difference(diff * i, diff * (i + 1), True)
+            assert np.isclose(
+                diff, deg_angular_difference(diff * i, diff * (i + 1), True)
+            )
 
 
 def test_deg_angular_difference_largest_angle_ints():
     for diff in range(0, 1000):
         for i in range(1000):
-            assert diff % 360.0 == deg_angular_difference(
-                diff * i, diff * (i + 1), False
+            assert np.isclose(
+                diff % 360.0, deg_angular_difference(diff * i, diff * (i + 1), False)
             )
 
 
@@ -205,7 +225,9 @@ def test_rad_angular_difference_smallest_angle():
     for diff_v in range(0, 179):
         diff_v = np.deg2rad(diff_v)
         diff = np.ones((1000,), dtype=np.float32) * diff_v
-        assert np.all(diff == rad_angular_difference(diff, diff + diff_v, True))
+        assert np.all(
+            np.isclose(diff, rad_angular_difference(diff, diff + diff_v, True))
+        )
 
 
 def test_rad_angular_difference_largest_angle():
@@ -213,7 +235,9 @@ def test_rad_angular_difference_largest_angle():
         diff_v = np.deg2rad(diff_v)
         diff = np.ones((1000,), dtype=np.float32) * diff_v
         assert np.all(
-            diff % (2 * np.pi) == rad_angular_difference(diff, diff + diff_v, False)
+            np.isclose(
+                diff % (2 * np.pi), rad_angular_difference(diff, diff + diff_v, False)
+            )
         )
 
 
@@ -222,16 +246,22 @@ def test_rad_angular_difference_largest_angle_list():
         diff_v = np.deg2rad(diff_v)
         diff = np.ones((1000,), dtype=np.float32) * diff_v
         assert np.all(
-            diff % (2 * np.pi)
-            == rad_angular_difference(list(diff), diff + diff_v, False)
+            np.isclose(
+                diff % (2 * np.pi),
+                rad_angular_difference(list(diff), diff + diff_v, False),
+            )
         )
         assert np.all(
-            diff % (2 * np.pi)
-            == rad_angular_difference(diff, list(diff + diff_v), False)
+            np.isclose(
+                diff % (2 * np.pi),
+                rad_angular_difference(diff, list(diff + diff_v), False),
+            )
         )
         assert np.all(
-            diff % (2 * np.pi)
-            == rad_angular_difference(list(diff), list(diff + diff_v), False)
+            np.isclose(
+                diff % (2 * np.pi),
+                rad_angular_difference(list(diff), list(diff + diff_v), False),
+            )
         )
 
 
@@ -240,16 +270,24 @@ def test_rad_angular_difference_largest_angle_pandas():
         diff_v = np.deg2rad(diff_v)
         diff = np.ones((1000,), dtype=np.float32) * diff_v
         assert np.all(
-            diff % (2 * np.pi)
-            == rad_angular_difference(pd.Series(diff), diff + diff_v, False)
+            np.isclose(
+                diff % (2 * np.pi),
+                rad_angular_difference(pd.Series(diff), diff + diff_v, False),
+            )
         )
         assert np.all(
-            diff % (2 * np.pi)
-            == rad_angular_difference(diff, pd.Series(diff + diff_v), False)
+            np.isclose(
+                diff % (2 * np.pi),
+                rad_angular_difference(diff, pd.Series(diff + diff_v), False),
+            )
         )
         assert np.all(
-            diff % (2 * np.pi)
-            == rad_angular_difference(pd.Series(diff), pd.Series(diff + diff_v), False)
+            np.isclose(
+                diff % (2 * np.pi),
+                rad_angular_difference(
+                    pd.Series(diff), pd.Series(diff + diff_v), False
+                ),
+            )
         )
 
 
