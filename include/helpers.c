@@ -158,89 +158,49 @@ void XXM2YYMFloat(const float* rrmPoint,
     }
 }
 
-/*
-Wrap a point between two numbers
-*/
-void WrapsFloat3(const float* val,
-    const float* maxVal,
-    const float* minVal,
-    long nPoints,
-    float* boundedVal)
-{
-    long iPoint;
-#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
-    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        boundedVal[iPoint] = fmodf(val[iPoint] - minVal[iPoint], maxVal[iPoint] - minVal[iPoint]) + minVal[iPoint];
-        if (boundedVal[iPoint] < minVal[iPoint])
-            boundedVal[iPoint] += maxVal[iPoint] - minVal[iPoint];
-    }
-}
 
 /*
 Wrap a point between two numbers
 */
-void WrapsDouble3(const double* val,
+void WrapsDouble(const double* val,
     const double* maxVal,
     const double* minVal,
     long nPoints,
+    int isMinValSizeOfVal,
+    int isMaxValSizeOfVal,
     double* boundedVal)
 {
     long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        boundedVal[iPoint] = fmod(val[iPoint] - minVal[iPoint], maxVal[iPoint] - minVal[iPoint]) + minVal[iPoint];
-        if (boundedVal[iPoint] < minVal[iPoint])
-            boundedVal[iPoint] += maxVal[iPoint] - minVal[iPoint];
+        long iMin = iPoint * isMinValSizeOfVal;
+        long iMax = iPoint * isMaxValSizeOfVal;
+        boundedVal[iPoint] = fmod(val[iPoint] - minVal[iMin], maxVal[iMax] - minVal[iMin]) + minVal[iMin];
+        if (boundedVal[iPoint] < minVal[iMin])
+            boundedVal[iPoint] += maxVal[iMax] - minVal[iMin];
     }
 }
 
 /*
 Wrap a point between two numbers
 */
-void WrapsFloat1(const float* val,
-    const float maxVal,
-    const float minVal,
+void WrapsFloat(const float* val,
+    const float* maxVal,
+    const float* minVal,
     long nPoints,
+    int isMinValSizeOfVal,
+    int isMaxValSizeOfVal,
     float* boundedVal)
 {
     long iPoint;
 #pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
     for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        boundedVal[iPoint] = fmodf(val[iPoint] - minVal, maxVal - minVal) + minVal;
-        if (boundedVal[iPoint] < minVal)
-            boundedVal[iPoint] += maxVal - minVal;
+        long iMin = iPoint * isMinValSizeOfVal;
+        long iMax = iPoint * isMaxValSizeOfVal;
+        boundedVal[iPoint] = fmodf(val[iPoint] - minVal[iMin], maxVal[iMax] - minVal[iMin]) + minVal[iMin];
+        if (boundedVal[iPoint] < minVal[iMin])
+            boundedVal[iPoint] += maxVal[iMax] - minVal[iMin];
     }
-}
-
-/*
-Wrap a point between two numbers
-*/
-void WrapsDouble1(const double* val,
-    const double maxVal,
-    const double minVal,
-    long nPoints,
-    double* boundedVal)
-{
-    long iPoint;
-#pragma omp parallel for if (nPoints > omp_get_num_procs() * THREADING_CORES_MULTIPLIER)
-    for (iPoint = 0; iPoint < nPoints; ++iPoint) {
-        boundedVal[iPoint] = fmod(val[iPoint] - minVal, maxVal - minVal) + minVal;
-        if (boundedVal[iPoint] < minVal)
-            boundedVal[iPoint] += maxVal - minVal;
-    }
-}
-
-/*
-Wrap a point between two numbers
-*/
-double Wrap(const double val,
-    const double maxVal,
-    const double minVal)
-{
-    double boundedVal = fmod(val - minVal, maxVal - minVal) + minVal;
-    if (boundedVal < minVal)
-        boundedVal += maxVal - minVal;
-    return boundedVal;
 }
 
 static PyObject*
@@ -252,151 +212,76 @@ WrapWrapper(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "OOO", &arg1, &arg2, &arg3))
         return NULL;
 
-    if (!PyArray_Check(arg1)) {
-        double val, minVal, maxVal;
-        if (PyLong_Check(arg1))
-            val = PyLong_AsDouble(arg1);
-        else if (PyFloat_Check(arg1))
-            val = PyFloat_AsDouble(arg1);
-        else {
-            PyErr_SetString(PyExc_ValueError, "Value must be a float or an integer.");
-            return NULL;
-        }
-        if (PyLong_Check(arg2))
-            minVal = PyLong_AsDouble(arg2);
-        else if (PyFloat_Check(arg2))
-            minVal = PyFloat_AsDouble(arg2);
-        else {
-            PyErr_SetString(PyExc_ValueError, "Minimum value must be a float or an integer.");
-            return NULL;
-        }
-        if (PyLong_Check(arg3))
-            maxVal = PyLong_AsDouble(arg3);
-        else if (PyFloat_Check(arg3))
-            maxVal = PyFloat_AsDouble(arg3);
-        else {
-            PyErr_SetString(PyExc_ValueError, "Maximum value must be a float or an integer.");
-            return NULL;
-        }
-        if (maxVal <= minVal) {
-            PyErr_SetString(PyExc_ValueError, "The maximum value must be a greater than the minimum value.");
-            return NULL;
-        }
-        return Py_BuildValue("d", Wrap(val, maxVal, +minVal));
-    } else if (PyArray_Check(arg1) && (!PyArray_Check(arg2) && !PyArray_Check(arg3))) {
-        PyArrayObject* val = (PyArrayObject*)arg1;
+    // convert inputs to numpy arrays
+    PyArrayObject *val = get_numpy_array(arg1);
+    PyArrayObject *minVal = get_numpy_array(arg2);
+    PyArrayObject *maxVal = get_numpy_array(arg3);
+    if (val == NULL || minVal == NULL || maxVal == NULL)
+        return NULL;
+    PyArrayObject *arrays[] = {val, minVal, maxVal};
+    if (check_arrays_same_float_dtype(3, arrays) == 0) {
+        val = (PyArrayObject *)PyArray_CastToType(val, PyArray_DescrFromType(NPY_FLOAT64), 0);
+        minVal = (PyArrayObject *)PyArray_CastToType(minVal, PyArray_DescrFromType(NPY_FLOAT64), 0);
+        maxVal = (PyArrayObject *)PyArray_CastToType(maxVal, PyArray_DescrFromType(NPY_FLOAT64), 0);
+    }
 
-        if (!PyArray_ISCONTIGUOUS(val)) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
-            return NULL;
-        }
-        if (PyArray_NDIM(val) != 1) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays have one dimensoin.");
-            return NULL;
-        }
-
-        // Create result array
-        PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(val),
-            PyArray_SHAPE(val),
-            PyArray_TYPE(val));
-        if (result_array == NULL) {
-            PyErr_SetString(PyExc_ValueError, "Could not create output array.");
-            return NULL;
-        }
-
-        long nPoints = (int)PyArray_SIZE(val);
-        double minVal, maxVal;
-        if (PyLong_Check(arg2))
-            minVal = PyLong_AsDouble(arg2);
-        else if (PyFloat_Check(arg2))
-            minVal = PyFloat_AsDouble(arg2);
-        else {
-            PyErr_SetString(PyExc_ValueError, "Minimum value must be a float or an integer.");
-            return NULL;
-        }
-        if (PyLong_Check(arg3))
-            maxVal = PyLong_AsDouble(arg3);
-        else if (PyFloat_Check(arg3))
-            maxVal = PyFloat_AsDouble(arg3);
-        else {
-            PyErr_SetString(PyExc_ValueError, "Maximum value must be a float or an integer.");
-            return NULL;
-        }
-        if (maxVal <= minVal) {
-            PyErr_SetString(PyExc_ValueError, "The maximum value must be a greater than the minimum value.");
-            return NULL;
-        }
-
-        if (PyArray_TYPE(val) == NPY_DOUBLE)
-            WrapsDouble1((double*)PyArray_DATA(val), maxVal, minVal, nPoints, (double*)PyArray_DATA(result_array));
-        else if (PyArray_TYPE(val) == NPY_FLOAT)
-            WrapsFloat1((float*)PyArray_DATA(val), (float)(maxVal), (float)(minVal), nPoints, (float*)PyArray_DATA(result_array));
-        else {
-            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
-            return NULL;
-        }
-        return (PyObject*)result_array;
-    } else if (PyArray_Check(arg1) && PyArray_Check(arg2) && PyArray_Check(arg3)) {
-        PyArrayObject* val = (PyArrayObject*)arg1;
-        PyArrayObject* minVal = (PyArrayObject*)arg2;
-        PyArrayObject* maxVal = (PyArrayObject*)arg3;
-
-        if (!(PyArray_ISCONTIGUOUS(minVal)) || !(PyArray_ISCONTIGUOUS(maxVal)) || !(PyArray_ISCONTIGUOUS(val))) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
-            return NULL;
-        }
-        if ((PyArray_NDIM(minVal) != 1) || (PyArray_NDIM(maxVal) != 1) || (PyArray_NDIM(val) != 1)) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays have one dimensoin.");
-            return NULL;
-        }
-        if ((PyArray_SIZE(minVal) != PyArray_SIZE(maxVal)) || (PyArray_SIZE(maxVal) != PyArray_SIZE(val))) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays are of unequal size.");
-            return NULL;
-        }
-        if ((PyArray_TYPE(minVal) != PyArray_TYPE(maxVal)) || (PyArray_TYPE(maxVal) != PyArray_TYPE(val))) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
-            return NULL;
-        }
-
-        // Create result array
-        PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(val),
-            PyArray_SHAPE(val),
-            PyArray_TYPE(val));
-        if (result_array == NULL) {
-            PyErr_SetString(PyExc_ValueError, "Could not create output array.");
-            return NULL;
-        }
-
-        long nPoints = (int)PyArray_SIZE(val);
-        if (PyArray_TYPE(val) == NPY_DOUBLE) {
-            double* maxVals = (double*)PyArray_DATA(maxVal);
-            double* minVals = (double*)PyArray_DATA(minVal);
-            for (long i = 0; i < nPoints; i++) {
-                if (minVals[i] > maxVals[i]) {
-                    PyErr_SetString(PyExc_ValueError, "All maximum values must be larger than all minimum values.");
-                    return NULL;
-                }
-            }
-            WrapsDouble3((double*)PyArray_DATA(val), maxVals, minVals, nPoints, (double*)PyArray_DATA(result_array));
-        } else if (PyArray_TYPE(val) == NPY_FLOAT) {
-            float* maxVals = (float*)PyArray_DATA(maxVal);
-            float* minVals = (float*)PyArray_DATA(minVal);
-            for (long i = 0; i < nPoints; i++) {
-                if (minVals[i] > maxVals[i]) {
-                    PyErr_SetString(PyExc_ValueError, "All maximum values must be larger than all minimum values.");
-                    return NULL;
-                }
-            }
-            WrapsFloat3((float*)PyArray_DATA(val), maxVals, minVals, nPoints, (float*)PyArray_DATA(result_array));
-        } else {
-            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
-            return NULL;
-        }
-        return (PyObject*)result_array;
-    } else {
-        PyErr_SetString(PyExc_TypeError, "Bounds must be either two arrays or two floats and value must be a float or an array.");
+    // checks
+    long nPoints = (int)PyArray_SIZE(val);
+    int isMinValSizeOfVal = (nPoints == PyArray_Size((PyObject*)minVal));
+    int isMaxValSizeOfVal = (nPoints == PyArray_Size((PyObject*)maxVal));
+    if (!(isMinValSizeOfVal || (PyArray_SIZE(minVal) == 1))) {
+        PyErr_SetString(PyExc_ValueError, "Value and minimum value arrays must be the same size or the minimum value array must have a size of 1.");
         return NULL;
     }
+    if (!(isMaxValSizeOfVal || (PyArray_SIZE(maxVal) == 1))) {
+        PyErr_SetString(PyExc_ValueError, "Value and maximum value arrays must be the same size or the maximum value array must have a size of 1.");
+        return NULL;
+    }
+    for (long i = 0; i < nPoints; ++i) {
+        long iMin = i * isMinValSizeOfVal;
+        long iMax = i * isMaxValSizeOfVal;
+        if (PyArray_TYPE(maxVal) == NPY_DOUBLE && PyArray_TYPE(minVal) == NPY_DOUBLE) {
+            if (((double*)PyArray_DATA(maxVal))[iMax] <= ((double*)PyArray_DATA(minVal))[iMin]) {
+                PyErr_SetString(PyExc_ValueError, "All elements in maxVal must be greater than corresponding elements in minVal.");
+                return NULL;
+            }
+        } else if (PyArray_TYPE(maxVal) == NPY_FLOAT && PyArray_TYPE(minVal) == NPY_FLOAT) {
+            if (((float*)PyArray_DATA(maxVal))[iMax] <= ((float*)PyArray_DATA(minVal))[iMin]) {
+                PyErr_SetString(PyExc_ValueError, "All elements in maxVal must be greater than corresponding elements in minVal.");
+                return NULL;
+            }
+        } else {
+            PyErr_SetString(PyExc_ValueError, "maxVal and minVal must be of the same type.");
+            return NULL;
+        }
+    }
+
+    // Create result array
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(val),
+        PyArray_SHAPE(val),
+        PyArray_TYPE(val));
+    if (result_array == NULL) {
+        PyErr_SetString(PyExc_ValueError, "Could not create output array.");
+        return NULL;
+    }
+
+    // run function
+    if (PyArray_TYPE(val) == NPY_DOUBLE) {
+        WrapsDouble((double*)PyArray_DATA(val), (double*)PyArray_DATA(maxVal), (double*)PyArray_DATA(minVal), nPoints, isMinValSizeOfVal, isMaxValSizeOfVal, (double*)PyArray_DATA(result_array));
+    } else if (PyArray_TYPE(val) == NPY_FLOAT) {
+        WrapsFloat((float*)PyArray_DATA(val), (float*)PyArray_DATA(maxVal), (float*)PyArray_DATA(minVal), nPoints, isMinValSizeOfVal, isMaxValSizeOfVal, (float*)PyArray_DATA(result_array));
+    } else {
+        PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
+        return NULL;
+    }
+
+    // output
+    if ((nPoints == 1) && (PyArray_TYPE(result_array) == NPY_DOUBLE))
+        return Py_BuildValue("d", *(double*)PyArray_DATA(result_array));
+    else if ((nPoints == 1) && (PyArray_TYPE(result_array) == NPY_FLOAT))
+        return Py_BuildValue("f", *(float*)PyArray_DATA(result_array));
+    else
+        return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -415,89 +300,46 @@ RadAngularDifferenceWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    // Check if inputs are arrays
-    if (PyArray_Check(arg1) && PyArray_Check(arg2)) {
-        PyArrayObject* radAngleStart = (PyArrayObject*)arg1;
-        PyArrayObject* radAngleEnd = (PyArrayObject*)arg2;
-
-        // Validate arrays
-        if (!(PyArray_ISCONTIGUOUS(radAngleStart)) || !(PyArray_ISCONTIGUOUS(radAngleEnd))) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
-            return NULL;
-        }
-        if (PyArray_NDIM(radAngleStart) != PyArray_NDIM(radAngleEnd)) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays have non-matching dimensions.");
-            return NULL;
-        }
-        if (PyArray_SIZE(radAngleStart) != PyArray_SIZE(radAngleEnd)) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays are of unequal size.");
-            return NULL;
-        }
-        if (PyArray_TYPE(radAngleStart) != PyArray_TYPE(radAngleEnd)) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
-            return NULL;
-        }
-
-        // Create result array
-        PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(radAngleEnd),
-            PyArray_SHAPE(radAngleEnd),
-            PyArray_TYPE(radAngleEnd));
-        if (result_array == NULL) {
-            PyErr_SetString(PyExc_ValueError, "Could not create output array.");
-            return NULL;
-        }
-
-        long nPoints = (int)PyArray_SIZE(radAngleStart);
-        if (PyArray_TYPE(radAngleEnd) == NPY_DOUBLE) {
-            AngularDifferencesDouble((double*)PyArray_DATA(radAngleStart), (double*)PyArray_DATA(radAngleEnd), 2.0 * PI, nPoints, smallestAngle, (double*)PyArray_DATA(result_array));
-        } else if (PyArray_TYPE(radAngleEnd) == NPY_FLOAT) {
-            AngularDifferencesFloat((float*)PyArray_DATA(radAngleStart), (float*)PyArray_DATA(radAngleEnd), (float)(2.0 * PI), nPoints, smallestAngle, (float*)PyArray_DATA(result_array));
-        } else {
-            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
-            return NULL;
-        }
-        return (PyObject*)result_array;
+    // convert to numpy array
+    PyArrayObject* radAngleStart = get_numpy_array(arg1);
+    PyArrayObject* radAngleEnd = get_numpy_array(arg2);
+    PyArrayObject *arrays[] = {radAngleStart, radAngleEnd};
+    if (radAngleStart == NULL || radAngleEnd == NULL)
+        return NULL;
+    if (check_arrays_same_size(2, arrays) == 0)
+        return NULL;
+    if (check_arrays_same_float_dtype(2, arrays) == 0) {
+        radAngleStart = (PyArrayObject *)PyArray_CastToType(radAngleStart, PyArray_DescrFromType(NPY_FLOAT64), 0);
+        radAngleEnd = (PyArrayObject *)PyArray_CastToType(radAngleEnd, PyArray_DescrFromType(NPY_FLOAT64), 0);
     }
-    // Check if inputs are float scalars
-    else if (PyFloat_Check(arg1) && PyFloat_Check(arg2)) {
-        double radAngleStart = PyFloat_AsDouble(arg1);
-        double radAngleEnd = PyFloat_AsDouble(arg2);
 
-        double result_data;
-        if (sizeof(radAngleEnd) == sizeof(double)) {
-            double maxValue = 2.0 * PI;
-            result_data = AngularDifferenceDouble(radAngleStart, radAngleEnd, maxValue, smallestAngle);
-            return Py_BuildValue("d", result_data);
-        } else if (sizeof(radAngleEnd) == sizeof(float)) {
-            float maxValue = (float)(2.0 * PI);
-            result_data = AngularDifferenceFloat((float)radAngleStart, (float)radAngleEnd, maxValue, smallestAngle);
-            return Py_BuildValue("f", result_data);
-        } else {
-            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
-            return NULL;
-        }
-    } // Check if inputs are int scalars
-    else if (PyLong_Check(arg1) && PyLong_Check(arg2)) {
-        double radAngleStart = PyLong_AsDouble(arg1);
-        double radAngleEnd = PyLong_AsDouble(arg2);
-
-        double result_data;
-        if (sizeof(radAngleEnd) == sizeof(double)) {
-            double maxValue = 2.0 * PI;
-            result_data = AngularDifferenceDouble(radAngleStart, radAngleEnd, maxValue, smallestAngle);
-            return Py_BuildValue("d", result_data);
-        } else if (sizeof(radAngleEnd) == sizeof(float)) {
-            float maxValue = (float)(2.0 * PI);
-            result_data = AngularDifferenceFloat((float)radAngleStart, (float)radAngleEnd, maxValue, smallestAngle);
-            return Py_BuildValue("f", result_data);
-        } else {
-            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
-            return NULL;
-        }
-    } else {
-        PyErr_SetString(PyExc_TypeError, "Inputs must be either two arrays or two floats.");
+    // Create result array
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(radAngleEnd),
+        PyArray_SHAPE(radAngleEnd),
+        PyArray_TYPE(radAngleEnd));
+    if (result_array == NULL) {
+        PyErr_SetString(PyExc_ValueError, "Could not create output array.");
         return NULL;
     }
+
+    // run function
+    long nPoints = (int)PyArray_SIZE(radAngleStart);
+    if (PyArray_TYPE(radAngleEnd) == NPY_DOUBLE) {
+        AngularDifferencesDouble((double*)PyArray_DATA(radAngleStart), (double*)PyArray_DATA(radAngleEnd), 2.0 * PI, nPoints, smallestAngle, (double*)PyArray_DATA(result_array));
+    } else if (PyArray_TYPE(radAngleEnd) == NPY_FLOAT) {
+        AngularDifferencesFloat((float*)PyArray_DATA(radAngleStart), (float*)PyArray_DATA(radAngleEnd), (float)(2.0 * PI), nPoints, smallestAngle, (float*)PyArray_DATA(result_array));
+    } else {
+        PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
+        return NULL;
+    }
+
+    // output
+    if ((nPoints == 1) && (PyArray_TYPE(result_array) == NPY_DOUBLE))
+        return Py_BuildValue("d", *(double*)PyArray_DATA(result_array));
+    else if ((nPoints == 1) && (PyArray_TYPE(result_array) == NPY_FLOAT))
+        return Py_BuildValue("f", *(float*)PyArray_DATA(result_array));
+    else
+        return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -516,89 +358,46 @@ DegAngularDifferenceWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
 
-    // Check if inputs are arrays
-    if (PyArray_Check(arg1) && PyArray_Check(arg2)) {
-        PyArrayObject* degAngleStart = (PyArrayObject*)arg1;
-        PyArrayObject* degAngleEnd = (PyArrayObject*)arg2;
-
-        // Validate arrays
-        if (!(PyArray_ISCONTIGUOUS(degAngleStart)) || !(PyArray_ISCONTIGUOUS(degAngleEnd))) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays must be C contiguous.");
-            return NULL;
-        }
-        if (PyArray_NDIM(degAngleStart) != PyArray_NDIM(degAngleEnd)) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays have non-matching dimensions.");
-            return NULL;
-        }
-        if (PyArray_SIZE(degAngleStart) != PyArray_SIZE(degAngleEnd)) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays are of unequal size.");
-            return NULL;
-        }
-        if (PyArray_TYPE(degAngleStart) != PyArray_TYPE(degAngleEnd)) {
-            PyErr_SetString(PyExc_ValueError, "Input arrays must have the same type.");
-            return NULL;
-        }
-
-        // Create result array
-        PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(degAngleEnd),
-            PyArray_SHAPE(degAngleEnd),
-            PyArray_TYPE(degAngleEnd));
-        if (result_array == NULL) {
-            PyErr_SetString(PyExc_ValueError, "Could not create output array.");
-            return NULL;
-        }
-
-        long nPoints = (int)PyArray_SIZE(degAngleStart);
-        if (PyArray_TYPE(degAngleEnd) == NPY_DOUBLE) {
-            AngularDifferencesDouble((double*)PyArray_DATA(degAngleStart), (double*)PyArray_DATA(degAngleEnd), DEGCIRCLE, nPoints, smallestAngle, (double*)PyArray_DATA(result_array));
-        } else if (PyArray_TYPE(degAngleEnd) == NPY_FLOAT) {
-            AngularDifferencesFloat((float*)PyArray_DATA(degAngleStart), (float*)PyArray_DATA(degAngleEnd), DEGCIRCLE, nPoints, smallestAngle, (float*)PyArray_DATA(result_array));
-        } else {
-            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
-            return NULL;
-        }
-        return (PyObject*)result_array;
+    // convert to numpy array
+    PyArrayObject* degAngleStart = get_numpy_array(arg1);
+    PyArrayObject* degAngleEnd = get_numpy_array(arg2);
+    if (degAngleStart == NULL || degAngleEnd == NULL)
+        return NULL;
+    PyArrayObject *arrays[] = {degAngleStart, degAngleEnd};
+    if (check_arrays_same_size(2, arrays) == 0)
+        return NULL;
+    if (check_arrays_same_float_dtype(2, arrays) == 0) {
+        degAngleStart = (PyArrayObject *)PyArray_CastToType(degAngleStart, PyArray_DescrFromType(NPY_FLOAT64), 0);
+        degAngleEnd = (PyArrayObject *)PyArray_CastToType(degAngleEnd, PyArray_DescrFromType(NPY_FLOAT64), 0);
     }
-    // Check if inputs are float scalars
-    else if (PyFloat_Check(arg1) && PyFloat_Check(arg2)) {
-        double degAngleStart = PyFloat_AsDouble(arg1);
-        double degAngleEnd = PyFloat_AsDouble(arg2);
 
-        double result_data;
-        if (sizeof(degAngleEnd) == sizeof(double)) {
-            double maxValue = DEGCIRCLE;
-            result_data = AngularDifferenceDouble(degAngleStart, degAngleEnd, maxValue, smallestAngle);
-            return Py_BuildValue("d", result_data);
-        } else if (sizeof(degAngleEnd) == sizeof(float)) {
-            float maxValue = DEGCIRCLE;
-            result_data = AngularDifferenceFloat((float)degAngleStart, (float)degAngleEnd, maxValue, smallestAngle);
-            return Py_BuildValue("f", result_data);
-        } else {
-            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
-            return NULL;
-        }
-    } // Check if inputs are int scalars
-    else if (PyLong_Check(arg1) && PyLong_Check(arg2)) {
-        double degAngleStart = PyLong_AsDouble(arg1);
-        double degAngleEnd = PyLong_AsDouble(arg2);
-
-        double result_data;
-        if (sizeof(degAngleEnd) == sizeof(double)) {
-            double maxValue = DEGCIRCLE;
-            result_data = AngularDifferenceDouble(degAngleStart, degAngleEnd, maxValue, smallestAngle);
-            return Py_BuildValue("d", result_data);
-        } else if (sizeof(degAngleEnd) == sizeof(float)) {
-            float maxValue = DEGCIRCLE;
-            result_data = AngularDifferenceFloat((float)degAngleStart, (float)degAngleEnd, maxValue, smallestAngle);
-            return Py_BuildValue("f", result_data);
-        } else {
-            PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
-            return NULL;
-        }
-    } else {
-        PyErr_SetString(PyExc_TypeError, "Inputs must be either two arrays or two floats.");
+    // Create result array
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(degAngleEnd),
+        PyArray_SHAPE(degAngleEnd),
+        PyArray_TYPE(degAngleEnd));
+    if (result_array == NULL) {
+        PyErr_SetString(PyExc_ValueError, "Could not create output array.");
         return NULL;
     }
+
+    // run function
+    long nPoints = (int)PyArray_SIZE(degAngleStart);
+    if (PyArray_TYPE(degAngleEnd) == NPY_DOUBLE) {
+        AngularDifferencesDouble((double*)PyArray_DATA(degAngleStart), (double*)PyArray_DATA(degAngleEnd), DEGCIRCLE, nPoints, smallestAngle, (double*)PyArray_DATA(result_array));
+    } else if (PyArray_TYPE(degAngleEnd) == NPY_FLOAT) {
+        AngularDifferencesFloat((float*)PyArray_DATA(degAngleStart), (float*)PyArray_DATA(degAngleEnd), DEGCIRCLE, nPoints, smallestAngle, (float*)PyArray_DATA(result_array));
+    } else {
+        PyErr_SetString(PyExc_ValueError, "Only 32 and 64 bit float types accepted.");
+        return NULL;
+    }
+
+    // output
+    if ((nPoints == 1) && (PyArray_TYPE(result_array) == NPY_DOUBLE))
+        return Py_BuildValue("d", *(double*)PyArray_DATA(result_array));
+    else if ((nPoints == 1) && (PyArray_TYPE(result_array) == NPY_FLOAT))
+        return Py_BuildValue("f", *(float*)PyArray_DATA(result_array));
+    else
+        return (PyObject*)result_array;
 }
 
 static PyObject*
@@ -610,46 +409,25 @@ RRM2DDMWrapper(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &rrmPoint))
         return NULL;
 
-    // Checks
-    if (!(PyArray_ISCONTIGUOUS(rrmPoint))) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
-        return NULL;
-    }
-
-    PyArrayObject* in_array;
-    if (PyArray_ISINTEGER(rrmPoint) == 0)
-        in_array = rrmPoint;
-    else {
-        in_array = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(rrmPoint), PyArray_SHAPE(rrmPoint), NPY_DOUBLE);
-        if (in_array == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
-            return NULL;
-        }
-        if (PyArray_CopyInto(in_array, rrmPoint) < 0) {
-            Py_DECREF(in_array);
-            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
-            return NULL;
-        }
-        if (!(PyArray_ISCONTIGUOUS(in_array))) {
-            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
-            return NULL;
-        }
-    }
-    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
-        PyArray_NDIM(in_array), PyArray_SHAPE(in_array), PyArray_TYPE(in_array));
+    rrmPoint = get_numpy_array(rrmPoint);
+    if (check_arrays_same_float_dtype(1, (PyArrayObject *[]){rrmPoint}) == 0)
+        rrmPoint = (PyArrayObject *)PyArray_CastToType(rrmPoint, PyArray_DescrFromType(NPY_FLOAT64), 0);
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(rrmPoint),
+        PyArray_SHAPE(rrmPoint),
+        PyArray_TYPE(rrmPoint));
     if (result_array == NULL) {
         PyErr_SetString(PyExc_ValueError, "Could not create output array.");
         return NULL;
     }
 
-    long nPoints = (int)PyArray_SIZE(in_array) / NCOORDSIN3D;
+    // run function
+    long nPoints = (int)PyArray_SIZE(rrmPoint) / NCOORDSIN3D;
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
         XXM2YYMDouble(
-            (double*)PyArray_DATA(in_array), nPoints, 180.0 / PI, (double*)PyArray_DATA(result_array));
+            (double*)PyArray_DATA(rrmPoint), nPoints, 180.0 / PI, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
         XXM2YYMFloat(
-            (float*)PyArray_DATA(in_array), nPoints, (float)(180.0 / PI), (float*)PyArray_DATA(result_array));
+            (float*)PyArray_DATA(rrmPoint), nPoints, (float)(180.0 / PI), (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float or int types accepted.");
@@ -667,45 +445,25 @@ DDM2RRMWrapper(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &ddmPoint))
         return NULL;
 
-    // Checks
-    if (!(PyArray_ISCONTIGUOUS(ddmPoint))) {
-        PyErr_SetString(PyExc_ValueError, "Input arrays must be a C contiguous.");
-        return NULL;
-    }
-
-    PyArrayObject* in_array;
-    if (PyArray_ISINTEGER(ddmPoint) == 0)
-        in_array = ddmPoint;
-    else {
-        in_array = (PyArrayObject*)PyArray_SimpleNew(
-            PyArray_NDIM(ddmPoint), PyArray_SHAPE(ddmPoint), NPY_DOUBLE);
-        if (in_array == NULL) {
-            PyErr_SetString(PyExc_RuntimeError, "Failed to create new array.");
-            return NULL;
-        }
-        if (PyArray_CopyInto(in_array, ddmPoint) < 0) {
-            Py_DECREF(in_array);
-            PyErr_SetString(PyExc_RuntimeError, "Failed to copy data to new array.");
-            return NULL;
-        }
-        if (!(PyArray_ISCONTIGUOUS(in_array))) {
-            PyErr_SetString(PyExc_ValueError, "Created array is not C contiguous.");
-            return NULL;
-        }
-    }
-    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(
-        PyArray_NDIM(in_array), PyArray_SHAPE(in_array), PyArray_TYPE(in_array));
+    ddmPoint = get_numpy_array(ddmPoint);
+    if (check_arrays_same_float_dtype(1, (PyArrayObject *[]){ddmPoint}) == 0)
+        ddmPoint = (PyArrayObject *)PyArray_CastToType(ddmPoint, PyArray_DescrFromType(NPY_FLOAT64), 0);
+    PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(ddmPoint),
+        PyArray_SHAPE(ddmPoint),
+        PyArray_TYPE(ddmPoint));
     if (result_array == NULL) {
         PyErr_SetString(PyExc_ValueError, "Could not create output array.");
         return NULL;
     }
-    long nPoints = (int)PyArray_SIZE(in_array) / NCOORDSIN3D;
+
+    // run function
+    long nPoints = (int)PyArray_SIZE(ddmPoint) / NCOORDSIN3D;
     if (PyArray_TYPE(result_array) == NPY_DOUBLE) {
         XXM2YYMDouble(
-            (double*)PyArray_DATA(in_array), nPoints, PI / 180.0, (double*)PyArray_DATA(result_array));
+            (double*)PyArray_DATA(ddmPoint), nPoints, PI / 180.0, (double*)PyArray_DATA(result_array));
     } else if (PyArray_TYPE(result_array) == NPY_FLOAT) {
         XXM2YYMFloat(
-            (float*)PyArray_DATA(in_array), nPoints, (float)(PI / 180.0), (float*)PyArray_DATA(result_array));
+            (float*)PyArray_DATA(ddmPoint), nPoints, (float)(PI / 180.0), (float*)PyArray_DATA(result_array));
     } else {
         PyErr_SetString(PyExc_ValueError,
             "Only 32 and 64 bit float or int types accepted.");

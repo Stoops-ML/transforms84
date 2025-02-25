@@ -8,9 +8,9 @@ Python library for geographic system transformations with additional helper func
 
 This package focuses on:
 1. Performance
-2. Support for different matrix shapes:
-   * Ideal point shape of `(3,1)`, `(nPoints,3,1)` (as well as `(3,)` and `(nPoints,3)`)
-   * Separate input array for each axis in the coordinate system of size `(nPoints,)`
+2. Support for different number of inputs and types:
+   * Ideal array shape of `(3,1)`, `(nPoints,3,1)` (as well as `(3,)` and `(nPoints,3)`)
+   * Separate input array or number for each axis in the coordinate system of size `(nPoints,)`
 3. Functions that adapt to differing input matrices shapes: one-to-one, many-to-many and one-to-many points. See [below](#many-to-many--one-to-many) for an example.
 
 ## Installation
@@ -99,26 +99,26 @@ Again, we can achieve the same result by splitting the arrays over each coordian
 ```
 >> import pandas as pd
 >> df = pd.DataFrame(
-      {
-          "radLatTarget": rrm_target[:, 0, 0],
-          "radLonTarget": rrm_target[:, 1, 0],
-          "mAltTarget": rrm_target[:, 2, 0],
-      }
-  )
+>>    {
+>>        "radLatTarget": rrm_target[:, 0, 0],
+>>        "radLonTarget": rrm_target[:, 1, 0],
+>>        "mAltTarget": rrm_target[:, 2, 0],
+>>    }
+>> )
 >> df["e"], df["n"], df["u"] = ECEF2ENU(
-    np.deg2rad(30),
-    np.deg2rad(31),
-    0,
-    *geodetic2ECEF(
-        df["radLatTarget"],
-        df["radLonTarget"],
-        df["mAltTarget"],
-        WGS84.a,
-        WGS84.b,
-    ),
-    WGS84.a,
-    WGS84.b,
-)
+>>    np.deg2rad(30),
+>>    np.deg2rad(31),
+>>    0,
+>>    *geodetic2ECEF(
+>>        df["radLatTarget"],
+>>        df["radLonTarget"],
+>>        df["mAltTarget"],
+>>        WGS84.a,
+>>        WGS84.b,
+>>    ),
+>>    WGS84.a,
+>>    WGS84.b,
+>> )
 >> df[["e", "n", "u"]]
               e              n            u
 0  95499.413736  111272.002453 -1689.199168
