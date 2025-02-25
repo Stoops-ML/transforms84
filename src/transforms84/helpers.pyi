@@ -45,9 +45,7 @@ def rad_angular_difference(
     """
     ...
 
-def RRM2DDM(
-    rrm_position: npt.NDArray[NumberLikeNpy],
-) -> npt.NDArray[NumberLikeNpy]:
+def RRM2DDM(rrm_position: npt.NDArray[NumberLikeNpy]) -> npt.NDArray[NumberLikeNpy]:
     """Convert array with units radians, radians, X to array with units degrees, degrees, X
 
     :param rrm_position: Array with units radians, radians, X
@@ -57,9 +55,7 @@ def RRM2DDM(
     """
     ...
 
-def DDM2RRM(
-    ddm_position: npt.NDArray[NumberLikeNpy],
-) -> npt.NDArray[NumberLikeNpy]:
+def DDM2RRM(ddm_position: npt.NDArray[NumberLikeNpy]) -> npt.NDArray[NumberLikeNpy]:
     """Convert array with units degrees, degrees, X to array with units radians, radians, X
 
     :param rrm_position: Array with units degrees, degrees, X
@@ -70,21 +66,9 @@ def DDM2RRM(
     ...
 
 def wrap(
-    num: Union[
-        float,
-        int,
-        npt.NDArray[Union[np.float32, np.float64]],
-    ],
-    bound_lower: Union[
-        float,
-        int,
-        npt.NDArray[Union[np.float32, np.float64]],
-    ],
-    bound_upper: Union[
-        float,
-        int,
-        npt.NDArray[Union[np.float32, np.float64]],
-    ],
+    num: Union[float, int, npt.NDArray[Union[np.float32, np.float64]]],
+    bound_lower: Union[float, int, npt.NDArray[Union[np.float32, np.float64]]],
+    bound_upper: Union[float, int, npt.NDArray[Union[np.float32, np.float64]]],
 ) -> Union[float, npt.NDArray[NumberLikeNpy]]:
     """
     Wrap a number or array of numbers within a specified range.
