@@ -35,14 +35,14 @@ def test_wrap_arrays(dtype):
 def test_wrap_lists(dtype):
     for i in range(-180, 180):
         out = wrap(
-            (float(i) + np.arange(10, dtype=dtype)).tolist(),
-            (-90.0 * np.ones((10,), dtype=dtype)).tolist(),
-            (90.0 * np.ones((10,), dtype=dtype)).tolist(),
+            list(float(i) + np.arange(10, dtype=dtype)),
+            list(-90.0 * np.ones((10,), dtype=dtype)),
+            list(90.0 * np.ones((10,), dtype=dtype)),
         )
         assert np.all(out >= -90)
         assert np.all(out <= 90)
         out = wrap(
-            (float(i) + np.arange(10, dtype=dtype)).tolist(),
+            list(float(i) + np.arange(10, dtype=dtype)),
             -90.0 * np.ones((10,), dtype=dtype),
             90.0 * np.ones((10,), dtype=dtype),
         )
@@ -50,14 +50,14 @@ def test_wrap_lists(dtype):
         assert np.all(out <= 90)
         out = wrap(
             (float(i) + np.arange(10, dtype=dtype)),
-            (-90.0 * np.ones((10,), dtype=dtype)).tolist(),
-            (90.0 * np.ones((10,), dtype=dtype)).tolist(),
+            list(-90.0 * np.ones((10,), dtype=dtype)),
+            list(90.0 * np.ones((10,), dtype=dtype)),
         )
         assert np.all(out >= -90)
         assert np.all(out <= 90)
         out = wrap(
             (float(i) + np.arange(10, dtype=dtype)),
-            (-90.0 * np.ones((10,), dtype=dtype)).tolist(),
+            list(-90.0 * np.ones((10,), dtype=dtype)),
             90.0 * np.ones((10,), dtype=dtype),
         )
         assert np.all(out >= -90)
@@ -65,7 +65,7 @@ def test_wrap_lists(dtype):
         out = wrap(
             (float(i) + np.arange(10, dtype=dtype)),
             -90.0 * np.ones((10,), dtype=dtype),
-            (90.0 * np.ones((10,), dtype=dtype)).tolist(),
+            list(90.0 * np.ones((10,), dtype=dtype)),
         )
         assert np.all(out >= -90)
         assert np.all(out <= 90)
@@ -143,15 +143,14 @@ def test_deg_angular_difference_largest_angle1_list():
     for diff_v in range(0, 1000):
         diff = np.ones((1000,), dtype=np.float32) * diff_v
         assert np.all(
-            diff % 360.0 == deg_angular_difference(diff.tolist(), diff + diff_v, False)
+            diff % 360.0 == deg_angular_difference(list(diff), diff + diff_v, False)
+        )
+        assert np.all(
+            diff % 360.0 == deg_angular_difference(diff, list(diff + diff_v), False)
         )
         assert np.all(
             diff % 360.0
-            == deg_angular_difference(diff, (diff + diff_v).tolist(), False)
-        )
-        assert np.all(
-            diff % 360.0
-            == deg_angular_difference(diff.tolist(), (diff + diff_v).tolist(), False)
+            == deg_angular_difference(list(diff), list(diff + diff_v), False)
         )
 
 
@@ -224,15 +223,15 @@ def test_rad_angular_difference_largest_angle_list():
         diff = np.ones((1000,), dtype=np.float32) * diff_v
         assert np.all(
             diff % (2 * np.pi)
-            == rad_angular_difference(diff.tolist(), diff + diff_v, False)
+            == rad_angular_difference(list(diff), diff + diff_v, False)
         )
         assert np.all(
             diff % (2 * np.pi)
-            == rad_angular_difference(diff, (diff + diff_v).tolist(), False)
+            == rad_angular_difference(diff, list(diff + diff_v), False)
         )
         assert np.all(
             diff % (2 * np.pi)
-            == rad_angular_difference(diff.tolist(), (diff + diff_v).tolist(), False)
+            == rad_angular_difference(list(diff), list(diff + diff_v), False)
         )
 
 
