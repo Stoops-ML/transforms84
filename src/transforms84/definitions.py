@@ -8,5 +8,5 @@ NumberLikePy = Union[float, int]
 NumberLikeNpy = Union[np.integer[Any], np.floating[Any]]
 NumberLike = Union[NumberLikePy, NumberLikeNpy]
 ArrayLike = Union[
-    npt.NDArray[NumberLikeNpy], "pd.Series[Union[float | int]]", list[NumberLike]
+    npt.NDArray[NumberLikeNpy], "pd.Series[Union[float, int]]", list[NumberLike]
 ]
