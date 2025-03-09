@@ -8,10 +8,14 @@ Python library for geographic system transformations with additional helper func
 
 This package focuses on:
 1. Performance
-2. Support for different number of inputs and types:
-   * Ideal array shape of `(3,1)`, `(nPoints,3,1)` (as well as `(3,)` and `(nPoints,3)`)
-   * Separate input array or number for each axis in the coordinate system of size `(nPoints,)`
-3. Functions that adapt to differing input matrices shapes: one-to-one, many-to-many and one-to-many points. See [below](#many-to-many--one-to-many) for an example.
+2. Support for different number of inputs:
+   * Ideal array shape of `(3,1)` and `(nPoints,3,1)` (as well as `(3,)` and `(nPoints,3)`)
+   * Separate input for each axis in the coordinate system of size `(nPoints,)`
+3. Support for different inputs types:
+   * NumPy `ndarray`
+   * Pandas `Series`
+   * Float/int
+4. Functions that adapt to differing input matrices shapes: one-to-one, many-to-many and one-to-many points. See [below](#many-to-many--one-to-many) for an example.
 
 ## Installation
 `pip install transforms84`
