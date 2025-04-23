@@ -46,7 +46,7 @@ dev = [
 examples = [
     "jupyterlab>=4.2.4",
     "shapely>=2.0.5",
-    "czml3>=1.0.2",
+    "czml3<3",
     "pandas>=2.0.0",
 ]
 
