@@ -48,11 +48,11 @@ jobs:
           name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: ./wheelhouse/*.whl
 
-  upload_pypi:
+  upload_test_pypi:
     needs: [build_sdist, build_wheels]
     runs-on: ubuntu-latest
     environment:
-      name: pypi
+      name: testpypi
       url: https://test.pypi.org/p/transforms84
     permissions:
       id-token: write
