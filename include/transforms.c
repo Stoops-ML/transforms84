@@ -2,7 +2,11 @@
 #include <float.h>
 #include <math.h>
 #include <numpy/arrayobject.h>
+#ifdef _OPENMP
 #include <omp.h>
+#else
+#define omp_get_num_procs() 1
+#endif
 
 #include "definitions.h"
 
