@@ -72,7 +72,7 @@ We can print the shape using Shapely::
         ]
     )
 
-or using czml3::
+or using ``czml3``::
 
     rrm_points = (
         np.hstack([rrm_top_left, rrm_top_right, rrm_bottom_right, rrm_bottom_left])
@@ -179,7 +179,7 @@ We can achieve the same result by splitting the arrays over each coordiante syst
 World geodetic systems standards
 --------------------------------
 
-transforms84.systems includes the WGS84 class, which is the `[WGS 84] <https://en.wikipedia.org/wiki/World_Geodetic_System#WGS_84>`_ version of the standard. Other standards can be created::
+``transforms84.systems`` includes the ``WGS84`` class, which is the `WGS 84 <https://en.wikipedia.org/wiki/World_Geodetic_System#WGS_84>`_ version of the standard. Other standards can be created::
 
     from transforms84.systems import WGS, WGS72
     WGS72 == WGS(6378135.0, 6356750.520016094)
