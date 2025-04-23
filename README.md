@@ -21,6 +21,8 @@ This package focuses on:
 ## Installation
 `pip install transforms84`
 
+`transforms84` is supported on Windows, Linux and MacOS.
+
 ## Operations
 ### Coordinate Transformations
 The following coordinate transformations have been implemented:
