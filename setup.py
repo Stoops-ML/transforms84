@@ -19,16 +19,17 @@ if sys.platform.startswith("win"):
         ompcompileflags = ["-fopenmp"]
         omplinkflags = ["-fopenmp"]
 elif sys.platform.startswith("darwin"):
-    # This is a bit unusual but necessary...
-    # llvm (clang) OpenMP is used for headers etc at compile time
-    # Intel OpenMP (libiomp5) provides the link library.
-    # They are binary compatible and may not safely coexist in a process, as
-    # libiomp5 is more prevalent and often linked in for NumPy it is used
-    # here!
-    ompcompileflags = ["-fopenmp"]
-    omplinkflags = ["-fopenmp=libiomp5"]
-    omppath = ["lib", "clang", "*", "include", "omp.h"]
-    include_dirs.append("/".join(omppath))  # Add omppath to include_dirs
+    if "clang" in os.popen("cc --version").read():
+        # Disable OpenMP for macOS with clang
+        ompcompileflags = []
+        omplinkflags = []
+    else:
+        # llvm (clang) OpenMP is used for headers etc at compile time
+        # Intel OpenMP (libiomp5) provides the link library.
+        ompcompileflags = ["-fopenmp"]
+        omplinkflags = ["-fopenmp=libiomp5"]
+        omppath = ["lib", "clang", "*", "include", "omp.h"]
+        include_dirs.append("/".join(omppath))  # Add omppath to include_dirs
 else:
     ompcompileflags = ["-fopenmp"]
     if platform.machine() == "ppc64le":  # from Numba # noqa: SIM108
