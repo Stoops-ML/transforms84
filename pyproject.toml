@@ -15,7 +15,6 @@ license = {file = "LICENSE.txt"}
 classifiers = [
     "Intended Audience :: Education",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: BSD License :: BSD-3-Clause",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
