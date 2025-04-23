@@ -9,15 +9,20 @@ transforms84 documentation
 Python library for geographic system transformations with additional helper functions.
 
 This package focuses on:
+
 * Performance
 * Support for different number of inputs:
+
    * Ideal array shape of ``(3,1)`` and ``(nPoints,3,1)`` (as well as ``(3,)`` and ``(nPoints,3)``)
    * Separate input for each axis in the coordinate system of size ``(nPoints,)``
+
 * Support for different inputs types:
+
    * NumPy ``ndarray``
    * Pandas ``Series``
    * List
    * Float/int
+
 * Functions that adapt to differing input matrices shapes: one-to-one, many-to-many and one-to-many points.
 
 
