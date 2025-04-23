@@ -63,24 +63,24 @@ See the Jupyter notebooks in [examples](examples) to see how to use the transfor
 ### Many-to-many & one-to-many
 The `transforms.ECEF2ENU` transformation accepts same and differing matrix shape sizes. Below showcases the many-to-many method where three target points, `rrm_target`, in the geodetic coordinate system are transformed to the local ENU coordinate system about the point `rrm_local`, where both matrices are of shape (3, 3, 1):
 ```
->> import numpy as np
->> from transforms84.systems import WGS84
->> from transforms84.helpers import DDM2RRM
->> from transforms84.transforms import ECEF2ENU, geodetic2ECEF
+>>> import numpy as np
+>>> from transforms84.systems import WGS84
+>>> from transforms84.helpers import DDM2RRM
+>>> from transforms84.transforms import ECEF2ENU, geodetic2ECEF
 >>
->> rrm_local = DDM2RRM(
->>     np.array(
->>         [[[30], [31], [0]], [[30], [31], [0]], [[30], [31], [0]]], dtype=np.float64
->>     )
->> )  # convert each point from [deg, deg, X] to [rad, rad, X]
->> rrm_target = DDM2RRM(
->>     np.array(
->>         [[[31], [32], [0]], [[31], [32], [0]], [[31], [32], [0]]], dtype=np.float64
->>     )
->> )
->> ECEF2ENU(
->>     rrm_local, geodetic2ECEF(rrm_target, WGS84.a, WGS84.b), WGS84.a, WGS84.b
->> )  # geodetic2ECEF -> ECEF2ENU
+>>> rrm_local = DDM2RRM(
+>>>     np.array(
+>>>         [[[30], [31], [0]], [[30], [31], [0]], [[30], [31], [0]]], dtype=np.float64
+>>>     )
+>>> )  # convert each point from [deg, deg, X] to [rad, rad, X]
+>>> rrm_target = DDM2RRM(
+>>>     np.array(
+>>>         [[[31], [32], [0]], [[31], [32], [0]], [[31], [32], [0]]], dtype=np.float64
+>>>     )
+>>> )
+>>> ECEF2ENU(
+>>>     rrm_local, geodetic2ECEF(rrm_target, WGS84.a, WGS84.b), WGS84.a, WGS84.b
+>>> )  # geodetic2ECEF -> ECEF2ENU
 array(
     [
         [[95499.41373564], [111272.00245298], [-1689.19916788]],
@@ -92,8 +92,8 @@ array(
 
 We can achieve the same result using the one-to-many method with a single local point of shape (3, 1):
 ```
->> rrm_local_one_point = DDM2RRM(np.array([[30], [31], [0]], dtype=np.float64))
->> ECEF2ENU(rrm_local_one_point, geodetic2ECEF(rrm_target, WGS84.a, WGS84.b), WGS84.a, WGS84.b)
+>>> rrm_local_one_point = DDM2RRM(np.array([[30], [31], [0]], dtype=np.float64))
+>>> ECEF2ENU(rrm_local_one_point, geodetic2ECEF(rrm_target, WGS84.a, WGS84.b), WGS84.a, WGS84.b)
 array(
     [
         [[95499.41373564], [111272.00245298], [-1689.19916788]],
@@ -105,29 +105,29 @@ array(
 
 Again, we can achieve the same result by splitting the arrays over each coordiante system axis:
 ```
->> import pandas as pd
->> df = pd.DataFrame(
->>    {
->>        "radLatTarget": rrm_target[:, 0, 0],
->>        "radLonTarget": rrm_target[:, 1, 0],
->>        "mAltTarget": rrm_target[:, 2, 0],
->>    }
->> )
->> df["e"], df["n"], df["u"] = ECEF2ENU(
->>    np.deg2rad(30),
->>    np.deg2rad(31),
->>    0,
->>    *geodetic2ECEF(
->>        df["radLatTarget"],
->>        df["radLonTarget"],
->>        df["mAltTarget"],
->>        WGS84.a,
->>        WGS84.b,
->>    ),
->>    WGS84.a,
->>    WGS84.b,
->> )
->> df[["e", "n", "u"]]
+>>> import pandas as pd
+>>> df = pd.DataFrame(
+>>>    {
+>>>        "radLatTarget": rrm_target[:, 0, 0],
+>>>        "radLonTarget": rrm_target[:, 1, 0],
+>>>        "mAltTarget": rrm_target[:, 2, 0],
+>>>    }
+>>> )
+>>> df["e"], df["n"], df["u"] = ECEF2ENU(
+>>>    np.deg2rad(30),
+>>>    np.deg2rad(31),
+>>>    0,
+>>>    *geodetic2ECEF(
+>>>        df["radLatTarget"],
+>>>        df["radLonTarget"],
+>>>        df["mAltTarget"],
+>>>        WGS84.a,
+>>>        WGS84.b,
+>>>    ),
+>>>    WGS84.a,
+>>>    WGS84.b,
+>>> )
+>>> df[["e", "n", "u"]]
               e              n            u
 0  95499.413736  111272.002453 -1689.199168
 1  95499.413736  111272.002453 -1689.199168
@@ -137,8 +137,8 @@ Again, we can achieve the same result by splitting the arrays over each coordian
 ### World Geodetic Systems Standards
 `transforms84.systems` includes the `WGS84` class, which is the [WGS 84](https://en.wikipedia.org/wiki/World_Geodetic_System#WGS_84) version of the standard. Other standards can be created:
 ```
->> from transforms84.systems import WGS, WGS72
->> WGS72 == WGS(6378135.0, 6356750.520016094)
+>>> from transforms84.systems import WGS, WGS72
+>>> WGS72 == WGS(6378135.0, 6356750.520016094)
 True
 ```
 
