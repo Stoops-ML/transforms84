@@ -20,7 +20,7 @@ def deg_angular_difference(
     :type smallest_angle: bool
 
     :returns: Angular difference in degrees.
-    :rtype: Union[float, npt.NDArray[SUPPORTED_TYPES]]
+    :rtype: Union[float, npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -40,7 +40,7 @@ def rad_angular_difference(
     :type smallest_angle: bool
 
     :returns: Angular difference in radians.
-    :rtype: Union[float, npt.NDArray[SUPPORTED_TYPES]]
+    :rtype: Union[float, npt.NDArray[NumberLikeNpy]]
     """
     ...
 
@@ -48,9 +48,9 @@ def RRM2DDM(rrm_position: npt.NDArray[NumberLikeNpy]) -> npt.NDArray[NumberLikeN
     """Convert array with units radians, radians, X to array with units degrees, degrees, X
 
     :param rrm_position: Array with units radians, radians, X
-    :type rrm_position: npt.NDArray[SUPPORTED_TYPES]
+    :type rrm_position: npt.NDArray[NumberLikeNpy]
     :return: Array with units degrees, degrees, X
-    :rtype: npt.NDArray[SUPPORTED_TYPES]
+    :rtype: npt.NDArray[NumberLikeNpy]
     """
     ...
 
@@ -58,9 +58,9 @@ def DDM2RRM(ddm_position: npt.NDArray[NumberLikeNpy]) -> npt.NDArray[NumberLikeN
     """Convert array with units degrees, degrees, X to array with units radians, radians, X
 
     :param rrm_position: Array with units degrees, degrees, X
-    :type rrm_position: npt.NDArray[SUPPORTED_TYPES]
+    :type rrm_position: npt.NDArray[NumberLikeNpy]
     :return: Array with units radians, radians, X
-    :rtype: npt.NDArray[SUPPORTED_TYPES]
+    :rtype: npt.NDArray[NumberLikeNpy]
     """
     ...
 
@@ -80,6 +80,6 @@ def wrap(
     :type bound_upper: Union[NumberLike, ArrayLike]
 
     :returns: Wrapped number or array of numbers within the specified range.
-    :rtype: Union[float, npt.NDArray[SUPPORTED_TYPES]]
+    :rtype: Union[float, npt.NDArray[NumberLikeNpy]]
     """
     ...
