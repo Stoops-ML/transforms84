@@ -6,9 +6,7 @@ from .definitions import ArrayLike, NumberLike, NumberLikeNpy
 
 @overload
 def Haversine(
-    rrmStart: npt.NDArray[NumberLikeNpy],
-    rrmEnd: npt.NDArray[NumberLikeNpy],
-    m_radius_sphere: float,
+    rrmStart: ArrayLike, rrmEnd: ArrayLike, m_radius_sphere: float
 ) -> Union[float, npt.NDArray[NumberLikeNpy]]:
     """Calculate the Haversine distance between two points on a sphere.
 
