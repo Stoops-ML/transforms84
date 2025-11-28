@@ -6,21 +6,19 @@ from .definitions import ArrayLike, NumberLike, NumberLikeNpy
 
 @overload
 def Haversine(
-    rrmStart: npt.NDArray[NumberLikeNpy],
-    rrmEnd: npt.NDArray[NumberLikeNpy],
-    m_radius_sphere: float,
+    rrmStart: ArrayLike, rrmEnd: ArrayLike, m_radius_sphere: float
 ) -> Union[float, npt.NDArray[NumberLikeNpy]]:
     """Calculate the Haversine distance between two points on a sphere.
 
     :param rrmStart: The starting point coordinates as a NumPy array.
-    :type rrmStart: npt.NDArray[SUPPORTED_TYPES]
+    :type rrmStart: ArrayLike
     :param rrmEnd: The ending point coordinates as a NumPy array.
-    :type rrmEnd: npt.NDArray[SUPPORTED_TYPES]
+    :type rrmEnd: ArrayLike
     :param m_radius_sphere: The radius of the sphere.
     :type m_radius_sphere: float
 
     :return: The Haversine distance between the two points. The return type matches the type of the input coordinates.
-    :rtype: npt.NDArray[SUPPORTED_TYPES]
+    :rtype: npt.NDArray[NumberLikeNpy]
     """
     ...
 
@@ -53,6 +51,6 @@ def Haversine(
     :type m_radius_sphere: float
 
     :return: The Haversine distance between the two points. The return type matches the type of the input coordinates.
-    :rtype: npt.NDArray[SUPPORTED_TYPES]
+    :rtype: npt.NDArray[NumberLikeNpy]
     """
     ...

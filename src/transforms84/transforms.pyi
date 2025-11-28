@@ -6,15 +6,13 @@ from .definitions import ArrayLike, NumberLike, NumberLikeNpy
 
 @overload
 def geodetic2UTM(
-    rrm_LLA: npt.NDArray[NumberLikeNpy],
-    m_semi_major_axis: float,
-    m_semi_minor_axis: float,
+    rrm_LLA: ArrayLike, m_semi_major_axis: float, m_semi_minor_axis: float
 ) -> npt.NDArray[NumberLikeNpy]:
     """
     Convert geodetic coordinates (latitude, longitude, altitude) to UTM coordinates.
 
     :param rrm_LLA: The geodetic coordinates as a NumPy array.
-    :type rrm_LLA: npt.NDArray[NumberLikeNpy]
+    :type rrm_LLA: ArrayLike
     :param m_semi_major_axis: The semi-major axis of the ellipsoid.
     :type m_semi_major_axis: float
     :param m_semi_minor_axis: The semi-minor axis of the ellipsoid.
@@ -32,10 +30,7 @@ def geodetic2UTM(
     m_alt: Union[NumberLike, ArrayLike],
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
-) -> tuple[
-    npt.NDArray[NumberLikeNpy],
-    npt.NDArray[NumberLikeNpy],
-]:
+) -> tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]:
     """
     Convert geodetic coordinates (latitude, longitude, altitude) to UTM coordinates.
 
@@ -57,7 +52,7 @@ def geodetic2UTM(
 
 @overload
 def UTM2geodetic(
-    mmUTM: npt.NDArray[NumberLikeNpy],
+    mmUTM: ArrayLike,
     zone_number: int,
     zone_letter: str,
     m_semi_major_axis: float,
@@ -67,7 +62,7 @@ def UTM2geodetic(
     Convert UTM coordinates to geodetic coordinates (latitude, longitude, altitude).
 
     :param mmUTM: The UTM coordinates as a NumPy array.
-    :type mmUTM: npt.NDArray[NumberLikeNpy]
+    :type mmUTM: ArrayLike
     :param zone_number: The UTM zone number.
     :type zone_number: int
     :param zone_letter: The UTM zone letter.
@@ -116,15 +111,13 @@ def UTM2geodetic(
 
 @overload
 def geodetic2ECEF(
-    rrm_LLA: npt.NDArray[NumberLikeNpy],
-    m_semi_major_axis: float,
-    m_semi_minor_axis: float,
+    rrm_LLA: ArrayLike, m_semi_major_axis: float, m_semi_minor_axis: float
 ) -> npt.NDArray[NumberLikeNpy]:
     """
     Convert geodetic coordinates (latitude, longitude, altitude) to ECEF (Earth-Centered, Earth-Fixed) coordinates.
 
     :param rrm_LLA: The geodetic coordinates as a NumPy array.
-    :type rrm_LLA: npt.NDArray[NumberLikeNpy]
+    :type rrm_LLA: ArrayLike
     :param m_semi_major_axis: The semi-major axis of the ellipsoid.
     :type m_semi_major_axis: float
     :param m_semi_minor_axis: The semi-minor axis of the ellipsoid.
@@ -166,15 +159,13 @@ def geodetic2ECEF(
 
 @overload
 def ECEF2geodetic(
-    mmm_XYZ: npt.NDArray[NumberLikeNpy],
-    m_semi_major_axis: float,
-    m_semi_minor_axis: float,
+    mmm_XYZ: ArrayLike, m_semi_major_axis: float, m_semi_minor_axis: float
 ) -> npt.NDArray[NumberLikeNpy]:
     """
     Convert ECEF (Earth-Centered, Earth-Fixed) coordinates to geodetic coordinates (latitude, longitude, altitude).
 
     :param mmm_XYZ: The ECEF coordinates as a NumPy array.
-    :type mmm_XYZ: npt.NDArray[NumberLikeNpy]
+    :type mmm_XYZ: ArrayLike
     :param m_semi_major_axis: The semi-major axis of the ellipsoid.
     :type m_semi_major_axis: float
     :param m_semi_minor_axis: The semi-minor axis of the ellipsoid.
@@ -216,8 +207,8 @@ def ECEF2geodetic(
 
 @overload
 def ECEF2ENU(
-    rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy],
-    mmm_XYZ_target: npt.NDArray[NumberLikeNpy],
+    rrm_LLA_local_origin: ArrayLike,
+    mmm_XYZ_target: ArrayLike,
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
 ) -> npt.NDArray[NumberLikeNpy]:
@@ -225,9 +216,9 @@ def ECEF2ENU(
     Convert ECEF (Earth-Centered, Earth-Fixed) coordinates to ENU (East-North-Up) coordinates.
 
     :param rrm_LLA_local_origin: The local origin geodetic coordinates (latitude, longitude, altitude) as a NumPy array.
-    :type rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy]
+    :type rrm_LLA_local_origin: ArrayLike
     :param mmm_XYZ_target: The target ECEF coordinates as a NumPy array.
-    :type mmm_XYZ_target: npt.NDArray[NumberLikeNpy]
+    :type mmm_XYZ_target: ArrayLike
     :param m_semi_major_axis: The semi-major axis of the ellipsoid.
     :type m_semi_major_axis: float
     :param m_semi_minor_axis: The semi-minor axis of the ellipsoid.
@@ -278,8 +269,8 @@ def ECEF2ENU(
 
 @overload
 def ECEF2NED(
-    rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy],
-    mmm_XYZ_target: npt.NDArray[NumberLikeNpy],
+    rrm_LLA_local_origin: ArrayLike,
+    mmm_XYZ_target: ArrayLike,
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
 ) -> npt.NDArray[NumberLikeNpy]:
@@ -287,9 +278,9 @@ def ECEF2NED(
     Convert ECEF (Earth-Centered, Earth-Fixed) coordinates to NED (North-East-Down) coordinates.
 
     :param rrm_LLA_local_origin: The local origin geodetic coordinates (latitude, longitude, altitude) as a NumPy array.
-    :type rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy]
+    :type rrm_LLA_local_origin: ArrayLike
     :param mmm_XYZ_target: The target ECEF coordinates as a NumPy array.
-    :type mmm_XYZ_target: npt.NDArray[NumberLikeNpy]
+    :type mmm_XYZ_target: ArrayLike
     :param m_semi_major_axis: The semi-major axis of the ellipsoid.
     :type m_semi_major_axis: float
     :param m_semi_minor_axis: The semi-minor axis of the ellipsoid.
@@ -372,16 +363,15 @@ def ECEF2ENUv(
 
 @overload
 def ECEF2ENUv(
-    rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy],
-    mmm_XYZ_target: npt.NDArray[NumberLikeNpy],
+    rrm_LLA_local_origin: ArrayLike, mmm_XYZ_target: ArrayLike
 ) -> npt.NDArray[NumberLikeNpy]:
     """
     Convert ECEF (Earth-Centered, Earth-Fixed) velocity coordinates to ENU (East-North-Up) velocity coordinates.
 
     :param rrm_LLA_local_origin: The local origin geodetic velocity coordinates (latitude, longitude, altitude) as a NumPy array.
-    :type rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy]
+    :type rrm_LLA_local_origin: ArrayLike
     :param mmm_XYZ_target: The target ECEF velocity coordinates as a NumPy array.
-    :type mmm_XYZ_target: npt.NDArray[NumberLikeNpy]
+    :type mmm_XYZ_target: ArrayLike
 
     :return: The ENU velocity coordinates as a NumPy array.
     :rtype: npt.NDArray[NumberLikeNpy]
@@ -390,16 +380,15 @@ def ECEF2ENUv(
 
 @overload
 def ECEF2NEDv(
-    rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy],
-    mmm_XYZ_target: npt.NDArray[NumberLikeNpy],
+    rrm_LLA_local_origin: ArrayLike, mmm_XYZ_target: ArrayLike
 ) -> npt.NDArray[NumberLikeNpy]:
     """
     Convert ECEF (Earth-Centered, Earth-Fixed) velocity coordinates to NED (North-East-Down) velocity coordinates.
 
     :param rrm_LLA_local_origin: The local origin geodetic velocity coordinates (latitude, longitude, altitude) as a NumPy array.
-    :type rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy]
+    :type rrm_LLA_local_origin: ArrayLike
     :param mmm_XYZ_target: The target ECEF velocity coordinates as a NumPy array.
-    :type mmm_XYZ_target: npt.NDArray[NumberLikeNpy]
+    :type mmm_XYZ_target: ArrayLike
 
     :return: The NED velocity coordinates as a NumPy array.
     :rtype: npt.NDArray[NumberLikeNpy]
@@ -478,8 +467,8 @@ def ENU2ECEF(
 
 @overload
 def ENU2ECEF(
-    rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy],
-    mmm_XYZ_local: npt.NDArray[NumberLikeNpy],
+    rrm_LLA_local_origin: ArrayLike,
+    mmm_XYZ_local: ArrayLike,
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
 ) -> npt.NDArray[NumberLikeNpy]:
@@ -487,9 +476,9 @@ def ENU2ECEF(
     Convert ENU (East-North-Up) coordinates to ECEF (Earth-Centered, Earth-Fixed) coordinates.
 
     :param rrm_LLA_local_origin: The local origin geodetic coordinates (latitude, longitude, altitude) as a NumPy array.
-    :type rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy]
+    :type rrm_LLA_local_origin: ArrayLike
     :param mmm_XYZ_local: The local ENU coordinates as a NumPy array.
-    :type mmm_XYZ_local: npt.NDArray[NumberLikeNpy]
+    :type mmm_XYZ_local: ArrayLike
     :param m_semi_major_axis: The semi-major axis of the ellipsoid.
     :type m_semi_major_axis: float
     :param m_semi_minor_axis: The semi-minor axis of the ellipsoid.
@@ -540,8 +529,8 @@ def NED2ECEF(
 
 @overload
 def NED2ECEF(
-    rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy],
-    mmm_XYZ_local: npt.NDArray[NumberLikeNpy],
+    rrm_LLA_local_origin: ArrayLike,
+    mmm_XYZ_local: ArrayLike,
     m_semi_major_axis: float,
     m_semi_minor_axis: float,
 ) -> npt.NDArray[NumberLikeNpy]:
@@ -549,9 +538,9 @@ def NED2ECEF(
     Convert NED (North-East-Down) coordinates to ECEF (Earth-Centered, Earth-Fixed) coordinates.
 
     :param rrm_LLA_local_origin: The local origin geodetic coordinates (latitude, longitude, altitude) as a NumPy array.
-    :type rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy]
+    :type rrm_LLA_local_origin: ArrayLike
     :param mmm_XYZ_local: The local NED coordinates as a NumPy array.
-    :type mmm_XYZ_local: npt.NDArray[NumberLikeNpy]
+    :type mmm_XYZ_local: ArrayLike
     :param m_semi_major_axis: The semi-major axis of the ellipsoid.
     :type m_semi_major_axis: float
     :param m_semi_minor_axis: The semi-minor axis of the ellipsoid.
@@ -596,16 +585,15 @@ def ENU2ECEFv(
 
 @overload
 def ENU2ECEFv(
-    rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy],
-    mmm_XYZ_local: npt.NDArray[NumberLikeNpy],
+    rrm_LLA_local_origin: ArrayLike, mmm_XYZ_local: ArrayLike
 ) -> npt.NDArray[NumberLikeNpy]:
     """
     Convert ENU (East-North-Up) velocity coordinates to ECEF (Earth-Centered, Earth-Fixed) velocity coordinates.
 
     :param rrm_LLA_local_origin: The local origin geodetic velocity coordinates (latitude, longitude, altitude) as a NumPy array.
-    :type rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy]
+    :type rrm_LLA_local_origin: ArrayLike
     :param mmm_XYZ_local: The local ENU velocity coordinates as a NumPy array.
-    :type mmm_XYZ_local: npt.NDArray[NumberLikeNpy]
+    :type mmm_XYZ_local: ArrayLike
 
     :return: The ECEF velocity coordinates as a NumPy array.
     :rtype: npt.NDArray[NumberLikeNpy]
@@ -646,16 +634,15 @@ def NED2ECEFv(
 
 @overload
 def NED2ECEFv(
-    rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy],
-    mmm_XYZ_local: npt.NDArray[NumberLikeNpy],
+    rrm_LLA_local_origin: ArrayLike, mmm_XYZ_local: ArrayLike
 ) -> npt.NDArray[NumberLikeNpy]:
     """
     Convert NED (North-East-Down) velocity coordinates to ECEF (Earth-Centered, Earth-Fixed) velocity coordinates.
 
     :param rrm_LLA_local_origin: The local origin geodetic velocity coordinates (latitude, longitude, altitude) as a NumPy array.
-    :type rrm_LLA_local_origin: npt.NDArray[NumberLikeNpy]
+    :type rrm_LLA_local_origin: ArrayLike
     :param mmm_XYZ_local: The local NED velocity coordinates as a NumPy array.
-    :type mmm_XYZ_local: npt.NDArray[NumberLikeNpy]
+    :type mmm_XYZ_local: ArrayLike
 
     :return: The ECEF velocity coordinates as a NumPy array.
     :rtype: npt.NDArray[NumberLikeNpy]
@@ -681,19 +668,17 @@ def ENU2AER(
     :type m_up: Union[NumberLike, ArrayLike]
 
     :returns: Tuple containing arrays of Azimuth, Elevation, and Range coordinates.
-    :rtype: tuple[npt.NDArray[NumberLikeNpy],
-                npt.NDArray[NumberLikeNpy],
-                npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
 @overload
-def ENU2AER(mmm_ENU: npt.NDArray[NumberLikeNpy]) -> npt.NDArray[NumberLikeNpy]:
+def ENU2AER(mmm_ENU: ArrayLike) -> npt.NDArray[NumberLikeNpy]:
     """
     Convert ENU (East-North-Up) coordinates to AER (Azimuth-Elevation-Range) coordinates.
 
     :param mmm_ENU: Array of ENU coordinates.
-    :type mmm_ENU: npt.NDArray[NumberLikeNpy]
+    :type mmm_ENU: ArrayLike
 
     :returns: Array of AER coordinates.
     :rtype: npt.NDArray[NumberLikeNpy]
@@ -724,12 +709,12 @@ def AER2ENU(
     ...
 
 @overload
-def AER2ENU(rrm_AER: npt.NDArray[NumberLikeNpy]) -> npt.NDArray[NumberLikeNpy]:
+def AER2ENU(rrm_AER: ArrayLike) -> npt.NDArray[NumberLikeNpy]:
     """
     Convert AER (Azimuth-Elevation-Range) coordinates to ENU (East-North-Up) coordinates.
 
     :param rrm_AER: Array of AER coordinates.
-    :type rrm_AER: npt.NDArray[NumberLikeNpy]
+    :type rrm_AER: ArrayLike
 
     :returns: Array of ENU coordinates.
     :rtype: npt.NDArray[NumberLikeNpy]
@@ -737,12 +722,12 @@ def AER2ENU(rrm_AER: npt.NDArray[NumberLikeNpy]) -> npt.NDArray[NumberLikeNpy]:
     ...
 
 @overload
-def NED2AER(mmm_NED: npt.NDArray[NumberLikeNpy]) -> npt.NDArray[NumberLikeNpy]:
+def NED2AER(mmm_NED: ArrayLike) -> npt.NDArray[NumberLikeNpy]:
     """
     Convert NED (North-East-Down) coordinates to AER (Azimuth-Elevation-Range) coordinates.
 
     :param mmm_NED: Array of NED coordinates.
-    :type mmm_NED: npt.NDArray[NumberLikeNpy]
+    :type mmm_NED: ArrayLike
 
     :returns: Array of AER coordinates.
     :rtype: npt.NDArray[NumberLikeNpy]
@@ -768,19 +753,17 @@ def NED2AER(
     :type m_down: Union[NumberLike, ArrayLike]
 
     :returns: Tuple containing arrays of Azimuth, Elevation, and Range coordinates.
-    :rtype: tuple[npt.NDArray[NumberLikeNpy],
-                npt.NDArray[NumberLikeNpy],
-                npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
 
 @overload
-def AER2NED(rrm_AER: npt.NDArray[NumberLikeNpy]) -> npt.NDArray[NumberLikeNpy]:
+def AER2NED(rrm_AER: ArrayLike) -> npt.NDArray[NumberLikeNpy]:
     """
     Convert AER (Azimuth-Elevation-Range) coordinates to NED (North-East-Down) coordinates.
 
     :param rrm_AER: Array of AER coordinates.
-    :type rrm_AER: npt.NDArray[NumberLikeNpy]
+    :type rrm_AER: ArrayLike
 
     :returns: Array of NED coordinates.
     :rtype: npt.NDArray[NumberLikeNpy]
@@ -806,8 +789,6 @@ def AER2NED(
     :type m_range: Union[NumberLike, ArrayLike]
 
     :returns: Tuple containing arrays of North, East, and Down coordinates.
-    :rtype: tuple[npt.NDArray[NumberLikeNpy],
-                npt.NDArray[NumberLikeNpy],
-                npt.NDArray[NumberLikeNpy]]
+    :rtype: tuple[npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy], npt.NDArray[NumberLikeNpy]]
     """
     ...
