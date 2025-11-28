@@ -53,7 +53,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: pypi
-      url: https://test.pypi.org/p/transforms84
+      url: https://pypi.org/p/transforms84
     permissions:
       id-token: write
     # upload to pypi only on release, not on manual dispatch
