@@ -1,7 +1,7 @@
 # transforms84
 ![PyPI - Version](https://img.shields.io/pypi/v/transforms84)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/transforms84)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/transforms84)
+![Pepy Total Downloads](https://img.shields.io/pepy/dt/transforms84)
 ![workflow-status](https://img.shields.io/github/actions/workflow/status/Stoops-ML/transforms84/workflow.yml)
 [![Documentation Status](https://readthedocs.org/projects/transforms84/badge)](https://transforms84.readthedocs.io/en)
 
