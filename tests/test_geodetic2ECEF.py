@@ -204,16 +204,16 @@ def test_geodetic2ECEF_point_unrolled_numbers_int(dtype_num):
         }
     )
     out_x, out_y, out_z = geodetic2ECEF(
-        dtype_num(df["radLat"]),
-        dtype_num(df["radLon"]),
-        dtype_num(df["mAlt"]),
+        df["radLat"].astype(dtype_num),
+        df["radLon"].astype(dtype_num),
+        df["mAlt"].astype(dtype_num),
         WGS84.a,
         WGS84.b,
     )
     out_x64, out_y64, out_z64 = geodetic2ECEF(
-        np.float64(dtype_num(df["radLat"])),
-        np.float64(dtype_num(df["radLon"])),
-        np.float64(dtype_num(df["mAlt"])),
+        df["radLat"].astype(dtype_num).astype(np.float64),
+        df["radLon"].astype(dtype_num).astype(np.float64),
+        df["mAlt"].astype(dtype_num).astype(np.float64),
         WGS84.a,
         WGS84.b,
     )

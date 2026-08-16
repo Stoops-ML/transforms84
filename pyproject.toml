@@ -151,7 +151,6 @@ legacy_tox_ini = """
         PYTHONUNBUFFERED = yes
     deps =
         .[dev]
-    extras = tests
     commands =
         python -m pytest --cov transforms84 --cov-report=term-missing
         python -m mypy
