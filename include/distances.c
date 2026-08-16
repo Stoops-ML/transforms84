@@ -148,7 +148,7 @@ HaversineUnrolledWrapper(PyObject* self, PyObject* args)
             &mAltEnd,
             &mRadiusSphere))
         return NULL;
-    if (((radLatStart = get_numpy_array(radLatStart)) == NULL) || ((radLonStart = get_numpy_array(radLonStart)) == NULL) || ((mAltStart = get_numpy_array(mAltStart)) == NULL) || ((radLatEnd = get_numpy_array(radLatEnd)) == NULL) || ((radLonEnd = get_numpy_array(radLonEnd)) == NULL) || ((mAltEnd = get_numpy_array(mAltEnd)) == NULL))
+    if (((radLatStart = get_numpy_array((PyObject*)radLatStart)) == NULL) || ((radLonStart = get_numpy_array((PyObject*)radLonStart)) == NULL) || ((mAltStart = get_numpy_array((PyObject*)mAltStart)) == NULL) || ((radLatEnd = get_numpy_array((PyObject*)radLatEnd)) == NULL) || ((radLonEnd = get_numpy_array((PyObject*)radLonEnd)) == NULL) || ((mAltEnd = get_numpy_array((PyObject*)mAltEnd)) == NULL))
         return NULL;
     PyArrayObject *arrays[] = {radLatStart, radLonStart, mAltStart, radLatEnd, radLonEnd, mAltEnd};
     if (check_arrays_same_float_dtype(6, arrays) == 0) {
@@ -199,8 +199,8 @@ HaversineRolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "OOd", &rrmStart, &rrmEnd, &mRadiusSphere))
         return NULL;
-    rrmStart = get_numpy_array(rrmStart);
-    rrmEnd = get_numpy_array(rrmEnd);
+    rrmStart = get_numpy_array((PyObject*)rrmStart);
+    rrmEnd = get_numpy_array((PyObject*)rrmEnd);
     if (PyErr_Occurred())
         return NULL;
     if (check_arrays_same_float_dtype(2, (PyArrayObject *[]){rrmStart, rrmEnd}) == 0) {

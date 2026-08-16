@@ -217,9 +217,9 @@ WrapWrapper(PyObject* self, PyObject* args)
         return NULL;
 
     // convert inputs to numpy arrays
-    PyArrayObject *val = get_numpy_array(arg1);
-    PyArrayObject *minVal = get_numpy_array(arg2);
-    PyArrayObject *maxVal = get_numpy_array(arg3);
+    PyArrayObject *val = get_numpy_array((PyObject*)arg1);
+    PyArrayObject *minVal = get_numpy_array((PyObject*)arg2);
+    PyArrayObject *maxVal = get_numpy_array((PyObject*)arg3);
     if (val == NULL || minVal == NULL || maxVal == NULL)
         return NULL;
     PyArrayObject *arrays[] = {val, minVal, maxVal};
@@ -305,8 +305,8 @@ RadAngularDifferenceWrapper(PyObject* self, PyObject* args)
     }
 
     // convert to numpy array
-    PyArrayObject* radAngleStart = get_numpy_array(arg1);
-    PyArrayObject* radAngleEnd = get_numpy_array(arg2);
+    PyArrayObject* radAngleStart = get_numpy_array((PyObject*)arg1);
+    PyArrayObject* radAngleEnd = get_numpy_array((PyObject*)arg2);
     PyArrayObject *arrays[] = {radAngleStart, radAngleEnd};
     if (radAngleStart == NULL || radAngleEnd == NULL)
         return NULL;
@@ -363,8 +363,8 @@ DegAngularDifferenceWrapper(PyObject* self, PyObject* args)
     }
 
     // convert to numpy array
-    PyArrayObject* degAngleStart = get_numpy_array(arg1);
-    PyArrayObject* degAngleEnd = get_numpy_array(arg2);
+    PyArrayObject* degAngleStart = get_numpy_array((PyObject*)arg1);
+    PyArrayObject* degAngleEnd = get_numpy_array((PyObject*)arg2);
     if (degAngleStart == NULL || degAngleEnd == NULL)
         return NULL;
     PyArrayObject *arrays[] = {degAngleStart, degAngleEnd};
@@ -413,7 +413,7 @@ RRM2DDMWrapper(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &rrmPoint))
         return NULL;
 
-    rrmPoint = get_numpy_array(rrmPoint);
+    rrmPoint = get_numpy_array((PyObject*)rrmPoint);
     if (check_arrays_same_float_dtype(1, (PyArrayObject *[]){rrmPoint}) == 0)
         rrmPoint = (PyArrayObject *)PyArray_CastToType(rrmPoint, PyArray_DescrFromType(NPY_FLOAT64), 0);
     PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(rrmPoint),
@@ -449,7 +449,7 @@ DDM2RRMWrapper(PyObject* self, PyObject* args)
     if (!PyArg_ParseTuple(args, "O!", &PyArray_Type, &ddmPoint))
         return NULL;
 
-    ddmPoint = get_numpy_array(ddmPoint);
+    ddmPoint = get_numpy_array((PyObject*)ddmPoint);
     if (check_arrays_same_float_dtype(1, (PyArrayObject *[]){ddmPoint}) == 0)
         ddmPoint = (PyArrayObject *)PyArray_CastToType(ddmPoint, PyArray_DescrFromType(NPY_FLOAT64), 0);
     PyArrayObject* result_array = (PyArrayObject*)PyArray_SimpleNew(PyArray_NDIM(ddmPoint),
