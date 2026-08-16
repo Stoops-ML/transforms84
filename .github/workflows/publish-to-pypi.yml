@@ -68,7 +68,7 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          pattern: sdist/*.tar.gz
+          name: sdist
           path: dist
 
       - uses: pypa/gh-action-pypi-publish@release/v1
