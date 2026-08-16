@@ -96,22 +96,22 @@ def test_ECEF2ENU_point_int_unrolled_numbers_int(dtype_num):
         }
     )
     m_x, m_y, m_z = ECEF2ENU(
-        dtype_num(df["radLatOrigin"]),
-        dtype_num(df["radLonOrigin"]),
-        dtype_num(df["mAltOrigin"]),
-        dtype_num(df["mETarget"]),
-        dtype_num(df["mYTarget"]),
-        dtype_num(df["mZTarget"]),
+        df["radLatOrigin"].astype(dtype_num),
+        df["radLonOrigin"].astype(dtype_num),
+        df["mAltOrigin"].astype(dtype_num),
+        df["mETarget"].astype(dtype_num),
+        df["mYTarget"].astype(dtype_num),
+        df["mZTarget"].astype(dtype_num),
         WGS84.a,
         WGS84.b,
     )
     m_x64, m_y64, m_z64 = ECEF2ENU(
-        np.float64(dtype_num(df["radLatOrigin"])),
-        np.float64(dtype_num(df["radLonOrigin"])),
-        np.float64(dtype_num(df["mAltOrigin"])),
-        np.float64(dtype_num(df["mETarget"])),
-        np.float64(dtype_num(df["mYTarget"])),
-        np.float64(dtype_num(df["mZTarget"])),
+        df["radLatOrigin"].astype(dtype_num).astype(np.float64),
+        df["radLonOrigin"].astype(dtype_num).astype(np.float64),
+        df["mAltOrigin"].astype(dtype_num).astype(np.float64),
+        df["mETarget"].astype(dtype_num).astype(np.float64),
+        df["mYTarget"].astype(dtype_num).astype(np.float64),
+        df["mZTarget"].astype(dtype_num).astype(np.float64),
         WGS84.a,
         WGS84.b,
     )
