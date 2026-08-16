@@ -1998,7 +1998,7 @@ geodetic2UTMRolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "Odd", &rrmLLA, &a, &b))
         return NULL;
-    rrmLLA = get_numpy_array(rrmLLA);
+    rrmLLA = get_numpy_array((PyObject*)rrmLLA);
     if (PyErr_Occurred())
         return NULL;
     if (check_arrays_same_float_dtype(1, (PyArrayObject *[]){rrmLLA}) == 0) {
@@ -2055,7 +2055,7 @@ geodetic2UTMUnrolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "OOOdd", &radLat, &radLon, &mAlt, &a, &b))
         return NULL;
-    if (((radLat = get_numpy_array(radLat)) == NULL) || ((radLon = get_numpy_array(radLon)) == NULL) || ((mAlt = get_numpy_array(mAlt)) == NULL))
+    if (((radLat = get_numpy_array((PyObject*)radLat)) == NULL) || ((radLon = get_numpy_array((PyObject*)radLon)) == NULL) || ((mAlt = get_numpy_array((PyObject*)mAlt)) == NULL))
         return NULL;
     PyArrayObject *arrays[] = {radLat, radLon, mAlt};
     if (check_arrays_same_size(3, arrays) == 0)
@@ -2132,7 +2132,7 @@ UTM2geodeticRolledWrapper(PyObject* self, PyObject* args)
         return NULL;
     }
     long ZoneNumber = PyLong_AsLong(ZoneNumberPy);
-    mmUTM = get_numpy_array(mmUTM);
+    mmUTM = get_numpy_array((PyObject*)mmUTM);
     if (PyErr_Occurred())
         return NULL;
     if (check_arrays_same_float_dtype(1, (PyArrayObject *[]){mmUTM}) == 0)
@@ -2190,7 +2190,7 @@ UTM2geodeticUnrolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "OOOsdd", &mX, &mY, &ZoneNumberPy, &ZoneLetter, &a, &b))
         return NULL;
-    if (((mX = get_numpy_array(mX)) == NULL) || ((mY = get_numpy_array(mY)) == NULL))
+    if (((mX = get_numpy_array((PyObject*)mX)) == NULL) || ((mY = get_numpy_array((PyObject*)mY)) == NULL))
         return NULL;
     if (!PyLong_Check(ZoneNumberPy)) {
         PyErr_SetString(PyExc_TypeError, "Zone number must be an integer");
@@ -2270,7 +2270,7 @@ geodetic2ECEFRolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "Odd", &rrmLLA, &a, &b))
         return NULL;
-    rrmLLA = get_numpy_array(rrmLLA);
+    rrmLLA = get_numpy_array((PyObject*)rrmLLA);
     if (PyErr_Occurred())
         return NULL;
     if (check_arrays_same_float_dtype(1, (PyArrayObject *[]){rrmLLA}) == 0) {
@@ -2313,7 +2313,7 @@ geodetic2ECEFUnrolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "OOOdd", &radLat, &radLon, &mAlt, &a, &b))
         return NULL;
-    if (((radLat = get_numpy_array(radLat)) == NULL) || ((radLon = get_numpy_array(radLon)) == NULL) || ((mAlt = get_numpy_array(mAlt)) == NULL))
+    if (((radLat = get_numpy_array((PyObject*)radLat)) == NULL) || ((radLon = get_numpy_array((PyObject*)radLon)) == NULL) || ((mAlt = get_numpy_array((PyObject*)mAlt)) == NULL))
         return NULL;
     PyArrayObject *arrays[] = {radLat, radLon, mAlt};
     if (check_arrays_same_size(3, arrays) == 0)
@@ -2388,7 +2388,7 @@ ECEF2geodeticUnrolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "OOOdd", &mX, &mY, &mZ, &a, &b))
         return NULL;
-    if (((mX = get_numpy_array(mX)) == NULL) || ((mY = get_numpy_array(mY)) == NULL) || ((mZ = get_numpy_array(mZ)) == NULL))
+    if (((mX = get_numpy_array((PyObject*)mX)) == NULL) || ((mY = get_numpy_array((PyObject*)mY)) == NULL) || ((mZ = get_numpy_array((PyObject*)mZ)) == NULL))
         return NULL;
     PyArrayObject *arrays[] = {mX, mY, mZ};
     if (check_arrays_same_size(3, arrays) == 0)
@@ -2450,7 +2450,7 @@ ECEF2geodeticRolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "Odd", &mmmXYZ, &a, &b))
         return NULL;
-    mmmXYZ = get_numpy_array(mmmXYZ);
+    mmmXYZ = get_numpy_array((PyObject*)mmmXYZ);
     if (check_arrays_same_float_dtype(1, (PyArrayObject *[]){mmmXYZ}) == 0)
         mmmXYZ = (PyArrayObject *)PyArray_CastToType(mmmXYZ, PyArray_DescrFromType(NPY_FLOAT64), 0);
     if (PyErr_Occurred())
@@ -2514,7 +2514,7 @@ ECEF2ENUUnrolledWrapper(PyObject* self, PyObject* args)
             &a,
             &b))
         return NULL;
-    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mXTarget = get_numpy_array(mXTarget)) == NULL) || ((mYTarget = get_numpy_array(mYTarget)) == NULL) || ((mZTarget = get_numpy_array(mZTarget)) == NULL))
+    if (((radLatOrigin = get_numpy_array((PyObject*)radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array((PyObject*)radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array((PyObject*)mAltOrigin)) == NULL) || ((mXTarget = get_numpy_array((PyObject*)mXTarget)) == NULL) || ((mYTarget = get_numpy_array((PyObject*)mYTarget)) == NULL) || ((mZTarget = get_numpy_array((PyObject*)mZTarget)) == NULL))
         return NULL;
     if (check_arrays_same_float_dtype(6, (PyArrayObject *[]){radLatOrigin, radLonOrigin, mAltOrigin, mXTarget, mYTarget, mZTarget}) == 0) {
         radLatOrigin = (PyArrayObject *)PyArray_CastToType(radLatOrigin, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -2588,8 +2588,8 @@ ECEF2ENURolledWrapper(PyObject* self, PyObject* args)
             &a,
             &b))
         return NULL;
-    mmmXYZTarget = get_numpy_array(mmmXYZTarget);
-    rrmLLALocalOrigin = get_numpy_array(rrmLLALocalOrigin);
+    mmmXYZTarget = get_numpy_array((PyObject*)mmmXYZTarget);
+    rrmLLALocalOrigin = get_numpy_array((PyObject*)rrmLLALocalOrigin);
     PyArrayObject *arrays[] = {rrmLLALocalOrigin, mmmXYZTarget};
     if (check_arrays_same_float_dtype(2, arrays) == 0) {
         mmmXYZTarget = (PyArrayObject *)PyArray_CastToType(mmmXYZTarget, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -2664,7 +2664,7 @@ ECEF2NEDUnrolledWrapper(PyObject* self, PyObject* args)
             &a,
             &b))
         return NULL;
-    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mXTarget = get_numpy_array(mXTarget)) == NULL) || ((mYTarget = get_numpy_array(mYTarget)) == NULL) || ((mZTarget = get_numpy_array(mZTarget)) == NULL))
+    if (((radLatOrigin = get_numpy_array((PyObject*)radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array((PyObject*)radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array((PyObject*)mAltOrigin)) == NULL) || ((mXTarget = get_numpy_array((PyObject*)mXTarget)) == NULL) || ((mYTarget = get_numpy_array((PyObject*)mYTarget)) == NULL) || ((mZTarget = get_numpy_array((PyObject*)mZTarget)) == NULL))
         return NULL;
     PyArrayObject *arrays[] = {radLatOrigin, radLonOrigin, mAltOrigin, mXTarget, mYTarget, mZTarget};
     if (check_arrays_same_float_dtype(6, arrays) == 0) {
@@ -2739,8 +2739,8 @@ ECEF2NEDRolledWrapper(PyObject* self, PyObject* args)
             &a,
             &b))
         return NULL;
-    rrmLLALocalOrigin = get_numpy_array(rrmLLALocalOrigin);
-    mmmXYZTarget = get_numpy_array(mmmXYZTarget);
+    rrmLLALocalOrigin = get_numpy_array((PyObject*)rrmLLALocalOrigin);
+    mmmXYZTarget = get_numpy_array((PyObject*)mmmXYZTarget);
     PyArrayObject *arrays[] = {rrmLLALocalOrigin, mmmXYZTarget};
     if (check_arrays_same_float_dtype(2, arrays) == 0) {
         mmmXYZTarget = (PyArrayObject *)PyArray_CastToType(mmmXYZTarget, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -2805,8 +2805,8 @@ ECEF2NEDvRolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "OO", &rrmLLALocalOrigin, &mmmXYZTarget))
         return NULL;
-    rrmLLALocalOrigin = get_numpy_array(rrmLLALocalOrigin);
-    mmmXYZTarget = get_numpy_array(mmmXYZTarget);
+    rrmLLALocalOrigin = get_numpy_array((PyObject*)rrmLLALocalOrigin);
+    mmmXYZTarget = get_numpy_array((PyObject*)mmmXYZTarget);
     PyArrayObject *arrays[] = {rrmLLALocalOrigin, mmmXYZTarget};
     if (check_arrays_same_float_dtype(2, arrays) == 0) {
         mmmXYZTarget = (PyArrayObject *)PyArray_CastToType(mmmXYZTarget, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -2865,7 +2865,7 @@ ECEF2NEDvUnrolledWrapper(PyObject* self, PyObject* args)
         &mYTarget,
         &mZTarget))
         return NULL;
-    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mXTarget = get_numpy_array(mXTarget)) == NULL) || ((mYTarget = get_numpy_array(mYTarget)) == NULL) || ((mZTarget = get_numpy_array(mZTarget)) == NULL))
+    if (((radLatOrigin = get_numpy_array((PyObject*)radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array((PyObject*)radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array((PyObject*)mAltOrigin)) == NULL) || ((mXTarget = get_numpy_array((PyObject*)mXTarget)) == NULL) || ((mYTarget = get_numpy_array((PyObject*)mYTarget)) == NULL) || ((mZTarget = get_numpy_array((PyObject*)mZTarget)) == NULL))
         return NULL;
     if (check_arrays_same_float_dtype(6, (PyArrayObject *[]){radLatOrigin, radLonOrigin, mAltOrigin, mXTarget, mYTarget, mZTarget}) == 0) {
         radLatOrigin = (PyArrayObject *)PyArray_CastToType(radLatOrigin, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -2946,8 +2946,8 @@ ECEF2ENUvRolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "OO", &rrmLLALocalOrigin, &mmmXYZTarget))
         return NULL;
-    rrmLLALocalOrigin = get_numpy_array(rrmLLALocalOrigin);
-    mmmXYZTarget = get_numpy_array(mmmXYZTarget);
+    rrmLLALocalOrigin = get_numpy_array((PyObject*)rrmLLALocalOrigin);
+    mmmXYZTarget = get_numpy_array((PyObject*)mmmXYZTarget);
     PyArrayObject *arrays[] = {rrmLLALocalOrigin, mmmXYZTarget};
     if (check_arrays_same_float_dtype(2, arrays) == 0) {
         mmmXYZTarget = (PyArrayObject *)PyArray_CastToType(mmmXYZTarget, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -3006,7 +3006,7 @@ ECEF2ENUvUnrolledWrapper(PyObject* self, PyObject* args)
         &mYTarget,
         &mZTarget))
         return NULL;
-    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mXTarget = get_numpy_array(mXTarget)) == NULL) || ((mYTarget = get_numpy_array(mYTarget)) == NULL) || ((mZTarget = get_numpy_array(mZTarget)) == NULL))
+    if (((radLatOrigin = get_numpy_array((PyObject*)radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array((PyObject*)radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array((PyObject*)mAltOrigin)) == NULL) || ((mXTarget = get_numpy_array((PyObject*)mXTarget)) == NULL) || ((mYTarget = get_numpy_array((PyObject*)mYTarget)) == NULL) || ((mZTarget = get_numpy_array((PyObject*)mZTarget)) == NULL))
         return NULL;
     if (check_arrays_same_float_dtype(6, (PyArrayObject *[]){radLatOrigin, radLonOrigin, mAltOrigin, mXTarget, mYTarget, mZTarget}) == 0) {
         radLatOrigin = (PyArrayObject *)PyArray_CastToType(radLatOrigin, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -3095,7 +3095,7 @@ NED2ECEFUnrolledWrapper(PyObject* self, PyObject* args)
         &mELocal,
         &mDLocal, &a, &b))
         return NULL;
-    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mNLocal = get_numpy_array(mNLocal)) == NULL) || ((mELocal = get_numpy_array(mELocal)) == NULL) || ((mDLocal = get_numpy_array(mDLocal)) == NULL))
+    if (((radLatOrigin = get_numpy_array((PyObject*)radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array((PyObject*)radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array((PyObject*)mAltOrigin)) == NULL) || ((mNLocal = get_numpy_array((PyObject*)mNLocal)) == NULL) || ((mELocal = get_numpy_array((PyObject*)mELocal)) == NULL) || ((mDLocal = get_numpy_array((PyObject*)mDLocal)) == NULL))
         return NULL;
     if (check_arrays_same_float_dtype(6, (PyArrayObject *[]){radLatOrigin, radLonOrigin, mAltOrigin, mNLocal, mELocal, mDLocal}) == 0) {
         radLatOrigin = (PyArrayObject *)PyArray_CastToType(radLatOrigin, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -3169,8 +3169,8 @@ NED2ECEFRolledWrapper(PyObject* self, PyObject* args)
             &a,
             &b))
         return NULL;
-    rrmLLALocalOrigin = get_numpy_array(rrmLLALocalOrigin);
-    mmmLocal = get_numpy_array(mmmLocal);
+    rrmLLALocalOrigin = get_numpy_array((PyObject*)rrmLLALocalOrigin);
+    mmmLocal = get_numpy_array((PyObject*)mmmLocal);
     PyArrayObject *arrays[] = {rrmLLALocalOrigin, mmmLocal};
     if (check_arrays_same_float_dtype(2, arrays) == 0) {
         mmmLocal = (PyArrayObject *)PyArray_CastToType(mmmLocal, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -3244,7 +3244,7 @@ ENU2ECEFUnrolledWrapper(PyObject* self, PyObject* args)
             &a,
             &b))
         return NULL;
-    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mNLocal = get_numpy_array(mNLocal)) == NULL) || ((mELocal = get_numpy_array(mELocal)) == NULL) || ((mDLocal = get_numpy_array(mDLocal)) == NULL))
+    if (((radLatOrigin = get_numpy_array((PyObject*)radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array((PyObject*)radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array((PyObject*)mAltOrigin)) == NULL) || ((mNLocal = get_numpy_array((PyObject*)mNLocal)) == NULL) || ((mELocal = get_numpy_array((PyObject*)mELocal)) == NULL) || ((mDLocal = get_numpy_array((PyObject*)mDLocal)) == NULL))
         return NULL;
     if (check_arrays_same_float_dtype(6, (PyArrayObject *[]){radLatOrigin, radLonOrigin, mAltOrigin, mNLocal, mELocal, mDLocal}) == 0) {
         radLatOrigin = (PyArrayObject *)PyArray_CastToType(radLatOrigin, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -3318,8 +3318,8 @@ ENU2ECEFRolledWrapper(PyObject* self, PyObject* args)
             &a,
             &b))
         return NULL;
-    rrmLLALocalOrigin = get_numpy_array(rrmLLALocalOrigin);
-    mmmLocal = get_numpy_array(mmmLocal);
+    rrmLLALocalOrigin = get_numpy_array((PyObject*)rrmLLALocalOrigin);
+    mmmLocal = get_numpy_array((PyObject*)mmmLocal);
     PyArrayObject *arrays[] = {rrmLLALocalOrigin, mmmLocal};
     if (check_arrays_same_float_dtype(2, arrays) == 0) {
         mmmLocal = (PyArrayObject *)PyArray_CastToType(mmmLocal, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -3386,8 +3386,8 @@ ENU2ECEFvRolledWrapper(PyObject* self, PyObject* args)
             &rrmLLALocalOrigin,
             &mmmLocal))
         return NULL;
-    rrmLLALocalOrigin = get_numpy_array(rrmLLALocalOrigin);
-    mmmLocal = get_numpy_array(mmmLocal);
+    rrmLLALocalOrigin = get_numpy_array((PyObject*)rrmLLALocalOrigin);
+    mmmLocal = get_numpy_array((PyObject*)mmmLocal);
     PyArrayObject *arrays[] = {rrmLLALocalOrigin, mmmLocal};
     if (check_arrays_same_float_dtype(2, arrays) == 0) {
         mmmLocal = (PyArrayObject *)PyArray_CastToType(mmmLocal, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -3445,7 +3445,7 @@ ENU2ECEFvUnrolledWrapper(PyObject* self, PyObject* args)
         &mNLocal,
         &mULocal))
         return NULL;
-    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mNLocal = get_numpy_array(mNLocal)) == NULL) || ((mELocal = get_numpy_array(mELocal)) == NULL) || ((mULocal = get_numpy_array(mULocal)) == NULL))
+    if (((radLatOrigin = get_numpy_array((PyObject*)radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array((PyObject*)radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array((PyObject*)mAltOrigin)) == NULL) || ((mNLocal = get_numpy_array((PyObject*)mNLocal)) == NULL) || ((mELocal = get_numpy_array((PyObject*)mELocal)) == NULL) || ((mULocal = get_numpy_array((PyObject*)mULocal)) == NULL))
         return NULL;
     if (check_arrays_same_float_dtype(6, (PyArrayObject *[]){radLatOrigin, radLonOrigin, mAltOrigin, mNLocal, mELocal, mULocal}) == 0) {
         radLatOrigin = (PyArrayObject *)PyArray_CastToType(radLatOrigin, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -3534,7 +3534,7 @@ NED2ECEFvUnrolledWrapper(PyObject* self, PyObject* args)
         &mELocal,
         &mDLocal))
         return NULL;
-    if (((radLatOrigin = get_numpy_array(radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array(radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array(mAltOrigin)) == NULL) || ((mNLocal = get_numpy_array(mNLocal)) == NULL) || ((mELocal = get_numpy_array(mELocal)) == NULL) || ((mDLocal = get_numpy_array(mDLocal)) == NULL))
+    if (((radLatOrigin = get_numpy_array((PyObject*)radLatOrigin)) == NULL) || ((radLonOrigin = get_numpy_array((PyObject*)radLonOrigin)) == NULL) || ((mAltOrigin = get_numpy_array((PyObject*)mAltOrigin)) == NULL) || ((mNLocal = get_numpy_array((PyObject*)mNLocal)) == NULL) || ((mELocal = get_numpy_array((PyObject*)mELocal)) == NULL) || ((mDLocal = get_numpy_array((PyObject*)mDLocal)) == NULL))
         return NULL;
     if (check_arrays_same_float_dtype(6, (PyArrayObject *[]){radLatOrigin, radLonOrigin, mAltOrigin, mNLocal, mELocal, mDLocal}) == 0) {
         radLatOrigin = (PyArrayObject *)PyArray_CastToType(radLatOrigin, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -3605,8 +3605,8 @@ NED2ECEFvRolledWrapper(PyObject* self, PyObject* args)
             &rrmLLALocalOrigin,
             &mmmLocal))
         return NULL;
-    rrmLLALocalOrigin = get_numpy_array(rrmLLALocalOrigin);
-    mmmLocal = get_numpy_array(mmmLocal);
+    rrmLLALocalOrigin = get_numpy_array((PyObject*)rrmLLALocalOrigin);
+    mmmLocal = get_numpy_array((PyObject*)mmmLocal);
     PyArrayObject *arrays[] = {rrmLLALocalOrigin, mmmLocal};
     if (check_arrays_same_float_dtype(2, arrays) == 0) {
         mmmLocal = (PyArrayObject *)PyArray_CastToType(mmmLocal, PyArray_DescrFromType(NPY_FLOAT64), 0);
@@ -3670,7 +3670,7 @@ ENU2AERUnrolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "OOO", &mE, &mN, &mU))
         return NULL;
-    if (((mE = get_numpy_array(mE)) == NULL) || ((mN = get_numpy_array(mN)) == NULL) || ((mU = get_numpy_array(mU)) == NULL))
+    if (((mE = get_numpy_array((PyObject*)mE)) == NULL) || ((mN = get_numpy_array((PyObject*)mN)) == NULL) || ((mU = get_numpy_array((PyObject*)mU)) == NULL))
         return NULL;
     PyArrayObject *arrays[] = {mE, mN, mU};
     if (check_arrays_same_size(3, arrays) == 0)
@@ -3733,7 +3733,7 @@ ENU2AERRolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "O", &mmmENU))
         return NULL;
-    mmmENU = get_numpy_array(mmmENU);
+    mmmENU = get_numpy_array((PyObject*)mmmENU);
     if (mmmENU == NULL)
         return NULL;
     if (check_arrays_same_float_dtype(1, (PyArrayObject *[]){mmmENU}) == 0) {
@@ -3788,7 +3788,7 @@ NED2AERUnrolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "OOO", &mN, &mE, &mD))
         return NULL;
-    if (((mN = get_numpy_array(mN)) == NULL) || ((mE = get_numpy_array(mE)) == NULL) || ((mD = get_numpy_array(mD)) == NULL))
+    if (((mN = get_numpy_array((PyObject*)mN)) == NULL) || ((mE = get_numpy_array((PyObject*)mE)) == NULL) || ((mD = get_numpy_array((PyObject*)mD)) == NULL))
         return NULL;
     PyArrayObject *arrays[] = {mN, mE, mD};
     if (check_arrays_same_size(3, arrays) == 0)
@@ -3851,7 +3851,7 @@ NED2AERRolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "O", &mmmNED))
         return NULL;
-    mmmNED = get_numpy_array(mmmNED);
+    mmmNED = get_numpy_array((PyObject*)mmmNED);
     if (mmmNED == NULL)
         return NULL;
     if (check_arrays_same_float_dtype(1, (PyArrayObject *[]){mmmNED}) == 0) {
@@ -3906,7 +3906,7 @@ AER2NEDRolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "O", &rrmAER))
         return NULL;
-    rrmAER = get_numpy_array(rrmAER);
+    rrmAER = get_numpy_array((PyObject*)rrmAER);
     if (rrmAER == NULL)
         return NULL;
     if ((PyArray_SIZE(rrmAER) % NCOORDSIN3D) != 0) {
@@ -3945,7 +3945,7 @@ AER2NEDUnrolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "OOO", &radAz, &radEl, &mRange))
         return NULL;
-    if (((radAz = get_numpy_array(radAz)) == NULL) || ((radEl = get_numpy_array(radEl)) == NULL) || ((mRange = get_numpy_array(mRange)) == NULL)) {
+    if (((radAz = get_numpy_array((PyObject*)radAz)) == NULL) || ((radEl = get_numpy_array((PyObject*)radEl)) == NULL) || ((mRange = get_numpy_array((PyObject*)mRange)) == NULL)) {
         return NULL;
     }
     PyArrayObject *arrays[] = {radAz, radEl, mRange};
@@ -4022,7 +4022,7 @@ AER2ENURolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "O", &rrmAER))
         return NULL;
-    rrmAER = get_numpy_array(rrmAER);
+    rrmAER = get_numpy_array((PyObject*)rrmAER);
     if (rrmAER == NULL)
         return NULL;
     if (check_arrays_same_float_dtype(1, (PyArrayObject *[]){rrmAER}) == 0) {
@@ -4064,7 +4064,7 @@ AER2ENUUnrolledWrapper(PyObject* self, PyObject* args)
     // checks
     if (!PyArg_ParseTuple(args, "OOO", &radAz, &radEl, &mRange))
         return NULL;
-    if (((radAz = get_numpy_array(radAz)) == NULL) || ((radEl = get_numpy_array(radEl)) == NULL) || ((mRange = get_numpy_array(mRange)) == NULL)) {
+    if (((radAz = get_numpy_array((PyObject*)radAz)) == NULL) || ((radEl = get_numpy_array((PyObject*)radEl)) == NULL) || ((mRange = get_numpy_array((PyObject*)mRange)) == NULL)) {
         return NULL;
     }
     PyArrayObject *arrays[] = {radAz, radEl, mRange};
